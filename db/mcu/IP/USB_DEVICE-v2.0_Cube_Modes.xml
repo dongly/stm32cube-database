@@ -26,21 +26,33 @@
 		<Description>Maximum size of string descriptors</Description>
 	</RefParameter>
 	
-	<!-- Tracker 312690 -->
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
-		<Condition Expression="VirtualModeFS=Dfu_FS|VirtualModeHS=Dfu_HS" Diagnostic=""/>
+	<!-- Tracker 312690 and 42620 -->
+	<RefParameter Name="USBD_SUPPORT_USER_STRING_DESC" Comment="USBD_SUPPORT_USER_STRING_DESC (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">		
+		<Condition Expression="(VirtualMode=Dfu) &amp; (STM32L0 | DIE471 | DIE435 | DIE461 |DIE415 |DIE464 | DIE462 | DIE470 | DIE418 | DIE414 | DIE428 | DIE412 | DIE410 | DIE420 |DIE430 | DIE445 | DIE448 |DIE439 | DIE432 | DIE422 | DIE446)" Diagnostic=""/>
 		<PossibleValue Comment="Enabled" Value="1"/>
-		<Description>Enable User string support</Description>
-	</RefParameter>
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
-		<Condition Expression="VirtualModeFS=Custom_Hid_FS | VirtualModeHS=Custom_Hid_HS" Diagnostic=""/>
-		<PossibleValue Comment="Enabled" Value="1"/>
-		<Description>Enable User string support</Description>
-	</RefParameter>
-	<!-- Tracker 42620 -->
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters">		
 		<PossibleValue Comment="Disabled" Value="0"/>
-		<!--<PossibleValue Comment="Enabled" Value="1"/>-->
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
+		<Condition Expression="((VirtualModeFS=Dfu_FS &amp; !DEVICE_HIGH_SPEED) | (VirtualModeHS=Dfu_HS &amp; !DEVICE_FULL_SPEED)) &amp; !(STM32L0 | DIE471 | DIE435 | DIE461 | DIE415 |DIE464 | DIE462 | DIE470 |  DIE418 | DIE414 | DIE428 | DIE412 | DIE410 | DIE420 |DIE430)" Diagnostic=""/>
+		<PossibleValue Comment="Enabled" Value="1"/>
+		<PossibleValue Comment="Disabled" Value="0"/>
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	<!--
+	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters">
+		<Condition Expression="VirtualModeFS=Custom_Hid_FS | VirtualModeHS=Custom_Hid_HS" Diagnostic=""/>				
+		<PossibleValue Comment="Disabled" Value="0"/>
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	-->
+	<!-- Tracker 42620 -->	
+	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters" >		
+		<PossibleValue Comment="Disabled" Value="0"/>		
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	<RefParameter Name="USBD_SUPPORT_USER_STRING_DESC" Comment="USBD_SUPPORT_USER_STRING_DESC (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters">		
+		<PossibleValue Comment="Disabled" Value="0"/>		
 		<Description>Enable User string support</Description>
 	</RefParameter>
 	
@@ -66,7 +78,7 @@
 	<!-- Link Power Management -->
 	<RefParameter Name="USBD_LPM_ENABLED" Comment="USBD_LPM_ENABLED (Link Power Management)" DefaultValue="1" Type="list"  Group="Basic Parameters" Visible="true">		
 		<!-- Tracker 342471 LPM supported for F412-->
-		<Condition Expression="STM32F446 | STM32F469_479 | STM32L4 | STM32F7 | STM32F412" Diagnostic=""/>
+		<Condition Expression="STM32F446 | STM32F469_479 | STM32L4 | STM32F7 | STM32F412 | STM32WB" Diagnostic=""/>
 		<PossibleValue Value="0" Comment="0: Link Power Management not supported"/>
 		<PossibleValue Value="1" Comment="1: Link Power Management supported"/>
 		<Description>The Link Power mmanagement available for STM32F446, STM32F469, STM32F479, STM32F7 and STM32L4 families</Description>	
@@ -437,6 +449,13 @@
 
     <RefParameter Name="MCU_RAM_SIZE" Comment="MCU_RAM_SIZE" DefaultValue="=$RamSize" Type="integer" Visible="false"/>
     <!-- Specific Class Parameters -->
+	<!-- Bug 68511  New #define-->
+	<RefParameter Name="HID_FS_BINTERVAL" Comment="HID_FS_BINTERVAL" DefaultValue="0xA" Max="0xFF" Min="0x1"  Type="hex" Group="Class Parameters" Visible="true">
+	</RefParameter>
+	<RefParameter Name="CUSTOM_HID_FS_BINTERVAL" Comment="CUSTOM_HID_FS_BINTERVAL" DefaultValue="0x5" Max="0xFF" Min="1"  Type="hex" Group="Class Parameters" Visible="true">			
+	</RefParameter>
+	
+
     <RefParameter Name="APP_RX_DATA_SIZE" Comment="USB CDC Rx Buffer Size" DefaultValue="2048"  Min="4" Max="2048" Type="integer" Group="Class Parameters" Unit="Bytes">
         <Condition Expression="VirtualMode = Cdc &amp; MCU_RAM_SIZE&gt;64" Diagnostic=""/>
         <Description>Number of bytes for the receive buffer</Description>
@@ -693,8 +712,10 @@
 	<RefParameter Name="FS_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="FS_Desc"/>	
 	</RefParameter>
-		
-	<!--
+	<!-- Tracker 51382 -->
+	<RefParameter Name="DFU_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
+		<PossibleValue Comment="" Value="DFU_Desc"/>	
+	</RefParameter>	
 	<RefParameter Name="HID_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="HID_Desc"/>	
 	</RefParameter>
@@ -709,14 +730,14 @@
 	</RefParameter>	
 	<RefParameter Name="CCID_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="CCID_Desc"/>	
-	</RefParameter>
-	<RefParameter Name="DFU_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="DFU_Desc"/>	
-	</RefParameter>
+	</RefParameter>	
 	<RefParameter Name="MTP_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="MTP_Desc"/>	
 	</RefParameter>
-	-->
+	<RefParameter Name="CUSTOM_HID_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
+		<PossibleValue Comment="" Value="CUSTOM_HID_Desc"/>	
+	</RefParameter>
+	
 	
 	<!-- For the class -->
 	<RefParameter Name="USBD_CLASS" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
@@ -816,9 +837,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -844,7 +867,7 @@
 		<!-- Parameters for Device Descriptors -->
 		<Parameter Name="PID_AUDIO_FS"/>
 		<Parameter Name="PRODUCT_STRING_AUDIO_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_AUDIO_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_AUDIO_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_AUDIO_FS"/>
 		<Parameter Name="INTERFACE_STRING_AUDIO_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -875,9 +898,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -903,7 +928,7 @@
 		<!-- Parameters for Device Descriptors -->			
 		<Parameter Name="PID_CCID_FS"/>		
 		<Parameter Name="PRODUCT_STRING_CCID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CCID_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_CCID_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_CCID_FS"/>
 		<Parameter Name="INTERFACE_STRING_CCID_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -937,9 +962,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -965,7 +992,7 @@
 		<!-- Parameters for Device Descriptors -->				
 		<Parameter Name="PID_CDC_FS"/>			
 		<Parameter Name="PRODUCT_STRING_CDC_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CDC_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_CDC_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_CDC_FS"/>
 		<Parameter Name="INTERFACE_STRING_CDC_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>					
@@ -1000,10 +1027,14 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
+		<Parameter Name="USBD_SUPPORT_USER_STRING_DESC">			
+			<Condition Expression="((USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)) &amp; (STM32L0 | DIE471 | DIE435 | DIE461 | DIE415 |DIE464 | DIE462 | DIE470 |  DIE418 | DIE414 | DIE428 | DIE412 | DIE410 | DIE420 |DIE430 |DIE445 | DIE448 |DIE439 | DIE432 | DIE422 | DIE446)" Diagnostic=""/>			
 		</Parameter>
+		
+		<Parameter Name="USBD_SUPPORT_USER_STRING">			
+			<Condition Expression="((USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)) &amp; !(STM32L0 | DIE471 | DIE435 | DIE461 | DIE415 |DIE464 | DIE462 | DIE470 |  DIE418 | DIE414 | DIE428 | DIE412 | DIE410 | DIE420 |DIE430 |DIE445 | DIE448 |DIE439 | DIE432 | DIE422 | DIE446)" Diagnostic=""/>			
+		</Parameter>
+		
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -1029,7 +1060,7 @@
 		<!-- Parameters for Device Descriptors -->				
 		<Parameter Name="PID_DFU_FS"/>			
 		<Parameter Name="PRODUCT_STRING_DFU_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_DFU_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_DFU_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_DFU_FS"/>
 		<Parameter Name="INTERFACE_STRING_DFU_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1059,6 +1090,10 @@
 		<Parameter Name="VirtualModeFS">		
 			<PossibleValue>Hid_FS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="HID_FS_BINTERVAL">
+		
+		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
@@ -1069,9 +1104,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -1097,7 +1134,7 @@
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_HID_FS"/>	
 		<Parameter Name="PRODUCT_STRING_HID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_HID_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_HID_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_HID_FS"/>
 		<Parameter Name="INTERFACE_STRING_HID_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1115,6 +1152,10 @@
 		<Parameter Name="VirtualModeFS">		
 			<PossibleValue>Custom_Hid_FS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="CUSTOM_HID_FS_BINTERVAL">
+		
+		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
@@ -1125,10 +1166,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -1154,12 +1196,12 @@
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_CUSTOMHID_FS"/>		
 		<Parameter Name="PRODUCT_STRING_CUSTOMHID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CUSTOMHID_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_CUSTOMHID_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_CUSTOMHID_FS"/>
 		<Parameter Name="INTERFACE_STRING_CUSTOMHID_FS"/>				
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
 		<Parameter Name="CLASS_NAME_FS">
-			<PossibleValue>CUSTOMHID</PossibleValue>
+			<PossibleValue>CUSTOM_HID</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_CUSTOM_HID_REPORT_DESC_SIZE">
 			<Condition Expression="(CUSTOM_HID_FS) &amp; (!CUSTOM_HID_HS)" Diagnostic=""/>
@@ -1188,9 +1230,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -1216,7 +1260,7 @@
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MSC_FS"/>		
 		<Parameter Name="PRODUCT_STRING_MSC_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MSC_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_MSC_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_MSC_FS"/>
 		<Parameter Name="INTERFACE_STRING_MSC_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1226,6 +1270,13 @@
 		<Parameter Name="MSC_MEDIA_PACKET">
 			<Condition Expression="(MSC_FS) &amp; (!MSC_HS)" Diagnostic=""/>
 		</Parameter>
+		
+		<!--
+		<BspDependency Name="BCD Detection" Comment="The GPIO is capable to detect the VBUS presence" BspIpName="GPIO" BspModeName="Input"/>
+		-->	
+		
+		
+		
 	</RefMode>
 	
 	<!-- RefMode for USB DEVICE : Support MTP Class (Media Transport Protocol)-->	
@@ -1247,9 +1298,11 @@
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		<!--
 		<Parameter Name="USBD_SUPPORT_USER_STRING">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
+		-->
 		<Parameter Name="USBD_SELF_POWERED">
 			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
 		</Parameter>
@@ -1275,7 +1328,7 @@
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MTP_FS"/>		
 		<Parameter Name="PRODUCT_STRING_MTP_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MTP_FS"/>
+		<!--<Parameter Name="SERIALNUMBER_STRING_MTP_FS"/>-->
 		<Parameter Name="CONFIGURATION_STRING_MTP_FS"/>
 		<Parameter Name="INTERFACE_STRING_MTP_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1356,7 +1409,7 @@
 			<Semaphore>USB_DEVICE_FS_CLASSES</Semaphore>
 			<!--<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE)&amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode"/>-->
 			<!-- Trqacker 306857 -->
-			<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode"/>			
+			<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE) &amp; (!S_AzureRTOS$context)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode and no AzureRTOS MW activated"/>			
 		</Mode>
 	</ModeLogicOperator>
 	

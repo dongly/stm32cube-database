@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V4.0" IPType="service" IpGroup="System" Name="CRC" Version="integtest1_v2_0" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V4.0" IPType="service" IpGroup="System" Name="CRC" Version="integtest1_v2_2" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd">
     <About>CRC: Cyclic Redundancy Check calculation unit</About>
 	
     <!-- Generic RefParameters for CRC --> 
-    <RefParameter Comment="Instance" DefaultValue="CRC" Name="Instance" Type="" Visible="false"/>
+    <RefParameter Comment="Instance" DefaultValue="CRC" Name="Instance$IpInstance" Type="" Visible="false"/>
 
 	
     <RefParameter Comment="Default Polynomial State" DefaultValue="DEFAULT_POLYNOMIAL_ENABLE" Group="Basic Parameters" Name="DefaultPolynomialUse" Type="list">

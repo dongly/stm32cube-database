@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : ${name?lower_case}.h
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usb_host.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __${name?upper_case}__H__

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Mcu ClockTree="STM32L43" DBVersion="V3.0" Family="STM32L4" HasPowerPad="false" IOType="" Line="STM32L4x1" Package="WLCSP64" RefName="STM32L431R(B-C)Yx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
-	<Core>ARM Cortex-M4</Core>
+	<Core>Arm Cortex-M4</Core>
 	<Frequency>80</Frequency>
 	<Ram>64</Ram>
 	<IONb>52</IONb>
@@ -9,7 +9,7 @@
 	<Flash>256</Flash>
 	<Voltage Max="3.6" Min="1.71"/>
 	<Current Lowest="0.01" Run="80"/>
-	<Temperature Max="85" Min="-40"/>
+	<Temperature Max="125" Min="-40"/>
 	<IP ClockEnableMode="__HAL_RCC_ADC_CLK_ENABLE" ConfigFile="ADC-STM32L4xx" InstanceName="ADC1" Name="ADC" Version="aditf5_v2_0_Cube"/>
 	<IP ClockEnableMode="__HAL_RCC_CAN1_CLK_ENABLE" ConfigFile="CAN-STM32L4xx" InstanceName="CAN1" Name="CAN" Version="bxcan1_v1_1_Cube"/>
 	<IP ClockEnableMode="none" ConfigFile="COMP-STM32L4xx" InstanceName="COMP1" Name="COMP" Version="TSMC90_Cube"/>
@@ -44,7 +44,7 @@
 	<IP ConfigFile="TIM-STM32L4xx" InstanceName="TIM7" Name="TIM6_7L4" Version="gptimer2_v3_x_Cube"/>
 	<IP ConfigFile="TIM-STM32L4xx" InstanceName="TIM15" Name="TIM1_8L4" Version="gptimer2_v3_x_Cube"/>
 	<IP ConfigFile="TIM-STM32L4xx" InstanceName="TIM16" Name="TIM1_8L4" Version="gptimer2_v3_x_Cube"/>
-	<IP ConfigFile="TOUCHSENSING-STM32L4xx" InstanceName="TOUCHSENSING" Name="TOUCHSENSING" Version="v2_2_0_Cube"/>
+	<IP ConfigFile="TOUCHSENSING-STM32L4xx" InstanceName="TOUCHSENSING" Name="TOUCHSENSING" Version="v2_2_4_Cube"/>
 	<IP InstanceName="TSC" Name="TSC" Version="tsc1_v1_0_Cube"/>
 	<IP InstanceName="USART1" Name="USART" Version="sci3_v1_1_Cube"/>
 	<IP InstanceName="USART2" Name="USART" Version="sci3_v1_1_Cube"/>
@@ -53,7 +53,7 @@
 	<IP ConfigFile="GPIO-STM32L4xx" InstanceName="GPIO" Name="GPIO" Version="STM32L43x_gpio_v1_0"/>
 	<IP ConfigFile="DMA-STM32L4xx" InstanceName="DMA" Name="DMA" Version="STM32L4A6_dma_v1_1"/>
 	<IP ConfigFile="NVIC-STM32L4xx" InstanceName="NVIC" Name="NVIC" Version="STM32L433"/>
-	<Pin Name="VDDUSB" Position="A1" Type="Power"/>
+	<Pin Name="VDD" Position="A1" Type="Power"/>
 	<Pin Name="PA15 (JTDI)" Position="A2" Type="I/O">
 		<Signal Name="ADC1_EXTI15"/>
 		<Signal Name="SPI1_NSS"/>

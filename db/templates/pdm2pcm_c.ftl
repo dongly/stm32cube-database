@@ -1,13 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
  ******************************************************************************
   * File Name          : ${name?lower_case}.c
   * Description        : This file provides code for the configuration
   *                      of the ${name?lower_case} instances.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#-- 'UserCode sections' are indexed dynamically --]
 [#assign userCodeIdx = 0]
@@ -50,7 +52,7 @@
         #include "gpio.h"
     [/#if]
     [#if useDma]
-        #include "DMA.h"
+        #include "dma.h"
     [/#if]
 
 /* USER CODE BEGIN ${userCodeIdx} */

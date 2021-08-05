@@ -12,8 +12,8 @@
 		<Condition Diagnostic="" Expression="AutoPrediv = RTC_AUTO_1_SECOND"/>
 		<PossibleValue Comment="Automatic Predivider Calculation Enabled" Value="RTC_AUTO_1_SECOND"/>
 	</RefParameter>
-	<RefParameter Comment="Asynchronous Predivider value" DefaultValue="127" Group="General" Max="127" Min="0" Name="AsynchPrediv" Type="integer"/>
-	<RefParameter Comment="Asynchronous Predivider value" DefaultValue="127" Group="General" Max="127" Min="0" Name="AsynchPrediv" Type="integer" Visible="false"/>
+	<RefParameter Comment="Asynchronous Predivider value" DefaultValue="1048575" Group="General" Max="1048575" Min="0" Name="AsynchPrediv" Type="integer"/>
+	<RefParameter Comment="Asynchronous Predivider value" DefaultValue="1048575" Group="General" Max="1048575" Min="0" Name="AsynchPrediv" Type="integer" Visible="false"/>
 	
 	
 	<!-- Output Signal for Alarm A, Alarm B, WAKEUP -->
@@ -24,7 +24,7 @@
 	</RefParameter>
 	
 	<RefParameter Comment="Output" DefaultValue="RTC_OUTPUTSOURCE_ALARM" Group="General" Name="OutPut" Type="list">
-        <PossibleValue Comment="Alarm pulse signal on the TAMPER pin" Value="RTC_OUTPUTSOURCE_ALARM"/>
+        <PossibleValue Comment="Alarm pulse signal on the TAMPER pin" Value="RTC_OUTPUTSOURCE_ALARM" Semaphore="RTC_ALARM_INTERRUPT"/>
 		<PossibleValue Comment="RTC clock with a frequency divided by 64 on the TAMPER pin" Value="RTC_OUTPUTSOURCE_CALIBCLOCK"/>
 		<PossibleValue Comment="Second pulse signal on the TAMPER pin" Semaphore="RTC_GLOBAL_INTERRUPT_ON" Value="RTC_OUTPUTSOURCE_SECOND"/>
 	</RefParameter>
@@ -36,9 +36,6 @@
     </RefParameter>
     
     <!-- Hours -->
-	<RefParameter Comment="Hours" DefaultValue="1" Group="Calendar Time" Max="12" Min="1" Name="Hours" Type="decimal">
-		<Condition Diagnostic="Hour Format is 12H" Expression="HourFormat=RTC_HOURFORMAT_12"/>
-	</RefParameter>
 	<RefParameter Comment="Hours" DefaultValue="0" Group="Calendar Time" Max="23" Min="0" Name="Hours" Type="decimal"/>
 	<RefParameter Comment="Hours" DefaultValue="+0x+Hours" Group="Calendar Time" Name="HoursARG" Type="string" Visible="false">
 		<Condition Diagnostic="" Expression="Format=RTC_FORMAT_BCD"/>
@@ -318,13 +315,13 @@
                             <Signal Name="No_RTC_Output"/>
                         </SignalLogicalOp>
                         <Semaphore>RTC_noOutput</Semaphore>
-                        <Semaphore>RTC_ALARM_INTERRUPT</Semaphore>
+                        <!--Semaphore>RTC_ALARM_INTERRUPT</Semaphore-->
                     </Mode>               
                     <Mode Name="RTC OUT" UserName="RTC Output on the Tamper pin">
                         <SignalLogicalOp Name="AND">
                             <Signal Name="OUT"/>
                         </SignalLogicalOp>
-                        <Semaphore>RTC_ALARM_INTERRUPT</Semaphore>
+                        <!--Semaphore>RTC_ALARM_INTERRUPT</Semaphore-->
                     </Mode>			
                 </ModeLogicOperator>
             </Mode>

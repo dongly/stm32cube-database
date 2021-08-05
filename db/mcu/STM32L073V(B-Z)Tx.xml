@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Mcu ClockTree="STM32L0" DBVersion="V3.0" Family="STM32L0" HasPowerPad="false" IOType="" Line="STM32L0x3" Package="LQFP100" RefName="STM32L073V(B-Z)Tx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
-	<Core>ARM Cortex-M0+</Core>
+	<Core>Arm Cortex-M0+</Core>
 	<Frequency>32</Frequency>
 	<E2prom>6144</E2prom>
 	<Ram>20</Ram>
@@ -78,7 +78,7 @@
 		<Signal Name="TIM3_CH4"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>
 	</Pin>
-	<Pin Name="VDD" Position="6" Type="Power"/>
+	<Pin Name="VLCD" Position="6" Type="Power"/>
 	<Pin Name="PC13" Position="7" Type="I/O">
 		<Signal Name="RTC_OUT_ALARM"/>
 		<Signal Name="RTC_OUT_CALIB"/>
@@ -280,7 +280,7 @@
 	</Pin>
 	<Pin Name="PB2" Position="37" Type="I/O">
 		<Signal Name="I2C3_SMBA"/>
-		<Signal Name="LCD_VLCD1"/>
+		<Signal Name="LCD_VLCD2"/>
 		<Signal Name="LPTIM1_OUT"/>
 		<Signal Name="TSC_G3_IO4"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>
@@ -313,7 +313,7 @@
 	</Pin>
 	<Pin Name="PE11" Position="42" Type="I/O">
 		<Signal Name="ADC_EXTI11"/>
-		<Signal Name="LCD_VLCD2"/>
+		<Signal Name="LCD_VLCD1"/>
 		<Signal Name="TIM2_CH3"/>
 		<Signal Name="USART5_RX"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>

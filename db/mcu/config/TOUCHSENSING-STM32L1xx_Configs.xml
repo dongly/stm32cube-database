@@ -6,14 +6,14 @@ DBVersion="V4.0"
 IncludeFile="tsl_conf.h,tsl_user.h"
 Name="TOUCHSENSING"
 RootFolder="Middlewares/ST/STM32_TouchSensing_Library/"
-Version=""
+Version="STM32Cube_FW_L1_V1.9.0"
 ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Configs.xsd">
     <RefConfig Comment="" Name="TOUCHSENSING_ENABLE_Init">
         <CallLibMethod Name="tsl_user_Init"/>
         <Component Name="Middleware:TOUCHSENSING"/>
         <ConfigFile Name="TSL_USER_L1_C"/>
         <ConfigFile Name="TSL_USER_L1_H"/>
-        <ConfigFile Name="TLS_CONF"/>
+        <ConfigFile Name="TSL_CONF"/>
         <ConfigFile Name="STMCRITICALSECTION_C"/>
         <ConfigFile Name="STMCRITICALSECTION_H"/>
     </RefConfig>
@@ -55,12 +55,12 @@ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../..
         <File Category="source" Name="src/tsl_linrot.c"/>
         <File Category="source" Name="src/tsl_object.c"/>
         <File Category="source" Name="src/tsl_time.c"/>
-        <File Category="source" Name="src/tsl_time_stm32l1xx.c"/>
+<!--        <File Category="source" Name="src/tsl_time_stm32l1xx.c"/> -->
         <File Category="source" Name="src/tsl_touchkey.c"/>
     </RefComponent>
 
     <RefConfigFile Description="" Name="TSL_USER_L1_C" Template="tsl_user_L1_c.ftl">
-        <File Category="source" Condition="all" Name="tsl_user.c" Version="1.0"/>
+        <File Category="source" Condition="all" Name="App/tsl_user.c" Version="1.0"/>
         <!-- COMMON PARAMETERS-->
         <!-- Number of elements-->
         <Argument Name="TSC_SHIELDIOs" GenericType="Simple" Comment="RAS"/>
@@ -70,6 +70,12 @@ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../..
         <Argument Name="TSLPRM_TOTAL_TOUCHKEYS_B" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
         <Argument Name="TSLPRM_TOTAL_LINROTS" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
         <Argument Name="TSLPRM_TOTAL_LINROTS_B" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
+
+        <Argument Name="TSLPRM_TOTAL_LINS" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
+        <Argument Name="TSLPRM_TOTAL_LINS_B" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
+        <Argument Name="TSLPRM_TOTAL_ROTS" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
+        <Argument Name="TSLPRM_TOTAL_ROTS_B" GenericType="Simple" Comment="0 to 255 (0 by default)"/>
+
         <Argument Name="TSLPRM_TOTAL_OBJECTS" GenericType="Simple" Comment="1 to 255 (2 by default)"/>
         <!-- Optional features -->
         <Argument Name="TSLPRM_USE_MEAS" GenericType="Simple" Comment="0 to 1 (1 by default)"/>
@@ -196,7 +202,7 @@ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../..
         </RefConfigFile>
 
     <RefConfigFile Description="" Name="TSL_USER_L1_H" Template="tsl_user_L1_h.ftl">
-        <File Category="header" Condition="all" Name="tsl_user.h" Version="1.0"/>
+        <File Category="header" Condition="all" Name="App/tsl_user.h" Version="1.0"/>
         <Argument Name="TSC_SHIELDIOs" GenericType="Simple" Comment="RAS"/>
         <Argument Name="TSC_ACTIVE_CHANNELS" GenericType="Simple" Comment="RAS"/>
         <Argument Name="TSLPRM_TOTAL_BANKS" GenericType="Simple" Comment="RAS"/>
@@ -1380,8 +1386,8 @@ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../..
         <Argument Name="IO_TOUCHKEY_B33" GenericType="Simple" Comment="RAS"/>
     </RefConfigFile>
 
-    <RefConfigFile Description="" Name="TLS_CONF" Template="tsl_conf.ftl">
-        <File Category="header" Condition="all" Name="tsl_conf.h" Version="2.2.0"/>
+    <RefConfigFile Description="" Name="TSL_CONF" Template="tsl_conf_L1.ftl">
+        <File Category="header" Condition="all" Name="App/tsl_conf.h" Version="1.0"/>
         <!-- VERSION and MODES-->
         <!-- Modes-->
         <Argument Name="TOUCHSENSING_MODE" GenericType="Simple" Comment="software or hardware (software by default)"/>
@@ -1477,10 +1483,10 @@ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../..
     </RefConfigFile>
 
     <RefConfigFile Description="" Name="STMCRITICALSECTION_C" Template="stmCriticalSection_c.ftl">
-        <File Category="source" Condition="all" Name="stmCriticalSection.c"/>
+        <File Category="source" Condition="all" Name="App/stmCriticalSection.c"/>
     </RefConfigFile>
 
     <RefConfigFile Description="" Name="STMCRITICALSECTION_H" Template="stmCriticalSection_h.ftl">
-        <File Category="header" Condition="all" Name="stmCriticalSection.h"/>
+        <File Category="header" Condition="all" Name="App/stmCriticalSection.h"/>
     </RefConfigFile>
 </IP>

@@ -1,13 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name    tsl_conf.h
   * Description   TSC configuration file.
   ******************************************************************************
   ******************************************************************************
- [@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+ [@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 [#list SWIPdatas as SWIP]
 	[#if SWIP.defines??]
 		[#list SWIP.defines as definition]
@@ -22,6 +24,9 @@
 #ifndef __TSL_CONF_H
 #define __TSL_CONF_H
 [#assign familyName=FamilyName?lower_case]
+
+#include "main.h"
+
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*+++++++++++++++++++++++++++ COMMON PARAMETERS ++++++++++++++++++++++++++++++*/
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
@@ -177,19 +182,6 @@
 	[#if SWIP.defines??]
 		[#list SWIP.defines as definition]
 			[#if definition.name="TSLPRM_USE_PROX"]
-				[#lt]#define ${definition.name} (${definition.value})
-			[/#if]
-		[/#list]
-	[/#if]
-[/#list]
-
-
- /** Zone management usage (0=No, 1=Yes)
-*/
-[#list SWIPdatas as SWIP]
-	[#if SWIP.defines??]
-		[#list SWIP.defines as definition]
-			[#if definition.name="TSLPRM_USE_ZONE"]
 				[#lt]#define ${definition.name} (${definition.value})
 			[/#if]
 		[/#list]
@@ -1001,7 +993,7 @@ be configured to output push-pull low (excepted for Linear sensors).
     [/#if]
 
     [#if touchsensing_mode = "software"]
-    /** Delay for transfering charges from Cx to Cs capacitor and then discharge Cx
+    /** Delay for transferring charges from Cx to Cs capacitor and then discharge Cx
    (range=0..65535)
    - 0: no delay (it takes about 2.8 microseconds for a CT cycle)
    - (1..65535): delay (in  microseconds) = 0.75 * TSLPRM_DELAY_TRANSFER + 1

@@ -13,7 +13,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling"/>
             <MethodArg Name="PrescalerValue" ParameterName="UartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">            
+        <IFCondition Expression="(DIE470|DIE471)">            
             <IFCondition Expression="(UartFIFOMode=UART_FIFOMODE_ENABLE)">          
                 <CallLibMethod Name="LL_USART_EnableFIFO">
                     <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -77,13 +77,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = UART_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = UART_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
@@ -118,7 +118,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling" FValue="LL_USART_OVERSAMPLING_8"/>
             <MethodArg Name="PrescalerValue" ParameterName="UsartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">            
+        <IFCondition Expression="(DIE470|DIE471)">            
             <IFCondition Expression="(UsartFIFOMode=USART_FIFOMODE_ENABLE)">          
             <CallLibMethod Name="LL_USART_EnableFIFO">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -158,6 +158,7 @@
         </IFCondition>
         <CallLibMethod Name="LL_USART_ClockInit">
             <MethodArg Name="USARTx" ParameterName="Instance"/>
+            <MethodArg Name="ClockOutput" FValue="LL_USART_CLOCK_ENABLE"/>
             <MethodArg Name="ClockPolarity" ParameterName="CLKPolarity"/>
             <MethodArg Name="ClockPhase" ParameterName="CLKPhase"/>
             <MethodArg Name="LastBitClockPulse" ParameterName="CLKLastBit"/>
@@ -214,7 +215,7 @@
             <MethodArg Name="TransferDirection" ParameterName="Mode"/>
             <MethodArg Name="PrescalerValue" ParameterName="SmartCardPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">
+        <IFCondition Expression="(DIE470|DIE471)">
             <IFCondition Expression="(SmartCardFIFOMode=SMARTCARD_FIFOMODE_ENABLE)">          
             <CallLibMethod Name="LL_USART_EnableFIFO">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -274,6 +275,7 @@
         <IFCondition Expression="(VirtualClockMode = VM_SMARTCARD)">
             <CallLibMethod Name="LL_USART_ClockInit">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
+                <MethodArg Name="ClockOutput" FValue="LL_USART_CLOCK_ENABLE"/>
                 <MethodArg Name="ClockPolarity" ParameterName="CLKPolarity"/>
                 <MethodArg Name="ClockPhase" ParameterName="CLKPhase"/>
                 <MethodArg Name="LastBitClockPulse" ParameterName="CLKLastBit"/>
@@ -312,13 +314,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = SMARTCARD_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = SMARTCARD_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
@@ -354,7 +356,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling"/>
             <MethodArg Name="PrescalerValue" ParameterName="UartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">
+        <IFCondition Expression="(DIE470|DIE471)">
             <IFCondition Expression="(UartFIFOMode=UART_FIFOMODE_ENABLE)">          
                 <CallLibMethod Name="LL_USART_EnableFIFO">
                     <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -418,13 +420,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = UART_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = UART_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
@@ -475,7 +477,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling"/>
             <MethodArg Name="PrescalerValue" ParameterName="UartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">
+        <IFCondition Expression="(DIE470|DIE471)">
             <IFCondition Expression="(UartFIFOMode=UART_FIFOMODE_ENABLE)">          
                 <CallLibMethod Name="LL_USART_EnableFIFO">
                     <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -541,13 +543,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = UART_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = UART_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
@@ -582,7 +584,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling"/>
             <MethodArg Name="PrescalerValue" ParameterName="UartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">
+        <IFCondition Expression="(DIE470|DIE471)">
             <IFCondition Expression="(UartFIFOMode=UART_FIFOMODE_ENABLE)">          
                 <CallLibMethod Name="LL_USART_EnableFIFO">
                     <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -650,13 +652,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = UART_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = UART_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
@@ -690,7 +692,7 @@
             <MethodArg Name="OverSampling" ParameterName="OverSampling"/>
             <MethodArg Name="PrescalerValue" ParameterName="UartPrescaler"/>
         </CallLibMethod>
-        <IFCondition Expression="(DIE470)">
+        <IFCondition Expression="(DIE470|DIE471)">
             <IFCondition Expression="(UartFIFOMode=UART_FIFOMODE_ENABLE)">          
                 <CallLibMethod Name="LL_USART_EnableFIFO">
                     <MethodArg Name="USARTx" ParameterName="Instance"/>
@@ -760,13 +762,13 @@
         </IFCondition>
 		
         <IFCondition Expression="(OverrunDisableParam = UART_ADVFEATURE_OVERRUN_DISABLE) | (OverrunDisableParam = ADVFEATURE_OVERRUN_DISABLE)">
-            <CallLibMethod Name="LL_USART_EnableOverrunDetect">
+            <CallLibMethod Name="LL_USART_DisableOverrunDetect">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>
 		
         <IFCondition Expression="(DMADisableonRxErrorParam = UART_ADVFEATURE_DMA_DISABLEONRXERROR) | (DMADisableonRxErrorParam = ADVFEATURE_DMA_DISABLEONRXERROR)">
-            <CallLibMethod Name="LL_USART_EnableDMADeactOnRxErr">
+            <CallLibMethod Name="LL_USART_DisableDMADeactOnRxErr">
                 <MethodArg Name="USARTx" ParameterName="Instance"/>
             </CallLibMethod>
         </IFCondition>

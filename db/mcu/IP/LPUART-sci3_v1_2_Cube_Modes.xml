@@ -15,18 +15,18 @@
 	</RefParameter>
 
         <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV1" Group="Advanced Parameters" Name="ClockPrescaler" Type="list">
-            <PossibleValue Comment="clock /1 " Value="UART_PRESCALER_DIV1"/>
-            <PossibleValue Comment="clock /2 " Value="UART_PRESCALER_DIV2"/>
-            <PossibleValue Comment="clock /4 " Value="UART_PRESCALER_DIV4"/>
-            <PossibleValue Comment="clock /6 " Value="UART_PRESCALER_DIV6"/>
-            <PossibleValue Comment="clock /8 " Value="UART_PRESCALER_DIV8"/>
-            <PossibleValue Comment="clock /10 " Value="UART_PRESCALER_DIV10"/>
-            <PossibleValue Comment="clock /12 " Value="UART_PRESCALER_DIV12"/>
-            <PossibleValue Comment="clock /16 " Value="UART_PRESCALER_DIV16"/>
-            <PossibleValue Comment="clock /32 " Value="UART_PRESCALER_DIV32"/>
-            <PossibleValue Comment="clock /64 " Value="UART_PRESCALER_DIV64"/>
-            <PossibleValue Comment="clock /128 " Value="UART_PRESCALER_DIV128"/>
-            <PossibleValue Comment="clock /256 " Value="UART_PRESCALER_DIV256"/>
+            <PossibleValue Comment="1" Value="UART_PRESCALER_DIV1"/>
+            <PossibleValue Comment="2" Value="UART_PRESCALER_DIV2"/>
+            <PossibleValue Comment="4" Value="UART_PRESCALER_DIV4"/>
+            <PossibleValue Comment="6" Value="UART_PRESCALER_DIV6"/>
+            <PossibleValue Comment="8" Value="UART_PRESCALER_DIV8"/>
+            <PossibleValue Comment="10" Value="UART_PRESCALER_DIV10"/>
+            <PossibleValue Comment="12" Value="UART_PRESCALER_DIV12"/>
+            <PossibleValue Comment="16" Value="UART_PRESCALER_DIV16"/>
+            <PossibleValue Comment="32" Value="UART_PRESCALER_DIV32"/>
+            <PossibleValue Comment="64" Value="UART_PRESCALER_DIV64"/>
+            <PossibleValue Comment="128" Value="UART_PRESCALER_DIV128"/>
+            <PossibleValue Comment="256" Value="UART_PRESCALER_DIV256"/>
         </RefParameter>	
 	  <RefParameter Comment="Auto Baudrate Mode arg" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_ENABLE" Group="Advanced Features" Name="AutoBaudRateEnable" Type="list" Visible="false">
             <Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
@@ -37,7 +37,7 @@
 	
 
 	<RefParameter Comment="Auto Baudrate Mode" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_DISABLE" Group="Advanced Features" Name="AutoBaudRateEnableParam" Type="list">
-	<Condition Diagnostic="" Expression="!DIE415 &amp; !DIE425 &amp; !DIE447 &amp; !DIE457"/>
+	<Condition Diagnostic="" Expression="!DIE415 &amp; !DIE425 &amp; !DIE447 &amp; !DIE457 &amp; !DIE460 &amp; !DIE466 &amp; !DIE471"/>
 		<PossibleValue Comment="Disable" Value="UART_ADVFEATURE_AUTOBAUDRATE_DISABLE"/>
 		<PossibleValue Comment="Enable" Semaphore="$IpInstance_UART_AutoBaudRate_Enable" Value="UART_ADVFEATURE_AUTOBAUDRATE_ENABLE"/>
 	</RefParameter>
@@ -51,6 +51,9 @@
 	<RefParameter Comment="Baud Rate" DefaultValue="209700" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s" Visible="false">
 		<Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
 	</RefParameter>
+    <RefParameter Comment="Baud Rate" DefaultValue="921600" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s">
+        <Condition Diagnostic="" Expression="TRACEREMB_$IpInstance"/>
+    </RefParameter>
 	<RefParameter Comment="Baud Rate" DefaultValue="209700" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s"/>
         
         
@@ -127,10 +130,27 @@
 		<PossibleValue Comment="Address Mark" Value="UART_WAKEUPMETHOD_ADDRESSMARK"/>
 	</RefParameter>
 	<!-- Address for MultiProcessor -->
-	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
-		<Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
-	</RefParameter>
-	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="63" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="127" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_8B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="255" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_9B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+
+    <!-- Specifics RefParameters for MultiProcessor Only. Adress length -->
+    <RefParameter Comment="Wake-Up Method" DefaultValue="UART_ADDRESS_DETECT_4B" Group="Advanced Parameters" Name="AddressLength" Type="list">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <PossibleValue Comment="4 Bits" Value="UART_ADDRESS_DETECT_4B"/>
+        <PossibleValue Comment="7 Bits" Value="UART_ADDRESS_DETECT_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Method" DefaultValue="null" Group="Advanced Parameters" Name="AddressLength" Type="list" Visible="false"/>
 	
 	<!-- Advanceds features -->
 	
@@ -358,6 +378,7 @@
 	</RefMode>
 	<!-- RefMode for 'MultiProcessor Communication' UART -->
 	<RefMode HalMode="UART" Name="Multiprocessor_communication">
+            <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_IDLELINE"/>
 		<ConfigForMode>Lpuart_MultiProcessor_Init</ConfigForMode>
 		<!-- Basic Parameters -->
 		<Parameter Name="BaudRate"/>
@@ -369,6 +390,37 @@
 		<Parameter Name="OneBitSampling"/>
 		<Parameter Name="WakeUpMethod"/>
 		<Parameter Name="Address"/>
+                <Parameter Name="AddressLength"/>
+                <Parameter Name="ClockPrescaler"/>
+                <Parameter Name="FifoMode"/>
+                <Parameter Name="TXFIFOThreshold"/>
+                <Parameter Name="RXFIFOThreshold"/>
+		
+		<!-- Advanced Features -->
+		<Parameter Name="AutoBaudRateEnableParam"/>
+	    <Parameter Name="TxPinLevelInvertParam"/>
+		<Parameter Name="RxPinLevelInvertParam"/>
+		<Parameter Name="DataInvertParam"/>
+		<Parameter Name="SwapParam"/>
+		<Parameter Name="OverrunDisableParam"/>
+		<Parameter Name="DMADisableonRxErrorParam"/>
+		<Parameter Name="AutoBaudRateMode"/>
+		<Parameter Name="MSBFirstParam"/>
+	</RefMode>
+        <RefMode HalMode="UART" Name="Multiprocessor_communication">
+            <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+		<ConfigForMode>Lpuart_MultiProcessor_Ex_Init</ConfigForMode>
+		<!-- Basic Parameters -->
+		<Parameter Name="BaudRate"/>
+		<Parameter Name="WordLength"/>
+		<Parameter Name="Parity"/>
+		<Parameter Name="StopBits"/>
+		<!--  Advanced Parameters -->
+		<Parameter Name="Mode"/>
+		<Parameter Name="OneBitSampling"/>
+		<Parameter Name="WakeUpMethod"/>
+		<Parameter Name="Address"/>
+                <Parameter Name="AddressLength"/>
                 <Parameter Name="ClockPrescaler"/>
                 <Parameter Name="FifoMode"/>
                 <Parameter Name="TXFIFOThreshold"/>

@@ -1,17 +1,23 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /*
  ******************************************************************************
   * File Name          : ${name}.h
   * Description        : Touch-Sensing user configuration.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
 */
+/* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __TSL_USER_H
 #define __TSL_USER_H
 
 #include "tsl.h"
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
 [#-- ************************************************************** --]
 [#-- list of includes platform dependent --]
 [#if isHalSupported?? && isHALUsed?? ]
@@ -38,7 +44,6 @@ typedef enum
   TSL_USER_STATUS_OK_ECS_ON  = 2, /**< The bank acquisition is ok, ECS finished */
   TSL_USER_STATUS_OK_ECS_OFF = 3  /**< The bank acquisition is ok, ECS not executed */
 } tsl_user_status_t;
-
 
 [#-- ************************************************************** --]
 [#-- list of channels IOs --]
@@ -106,6 +111,9 @@ typedef enum
 [#list SWIPdatas as SWIP]
     [#if SWIP.defines??]
         [#list SWIP.defines as define]
+            [#if define.name == "TSC_SHIELDIOs"]
+                [#assign shield_io = define.value]
+            [/#if]
             [#assign bankNb = 0]
             [#assign i = 0]
             [#assign j = 0]
@@ -156,7 +164,11 @@ typedef enum
                             [/#list]
                             [#assign counter = nbrofbankitemnbr + 1]
                             [#assign bankNbInt = bankNbInt + 1]
-                            [#assign ChannelsIOMSK = ChannelsIOMSK + ")"]
+                            [#if shield_io?contains("+TSC:ShieldIOs")]
+                                [#assign ChannelsIOMSK = ChannelsIOMSK + ")"]
+                            [#else]
+                                [#assign ChannelsIOMSK = ChannelsIOMSK + " | SHIELD_IO_MSK)"]
+                            [/#if]
                             [#assign ChannelsGRPMSK = ChannelsGRPMSK + ")"]
                             [#lt]${ChannelsIOMSK}
                             [#lt]${ChannelsGRPMSK}
@@ -178,16 +190,26 @@ extern CONST TSL_Bank_T MyBanks[];
     [#if SWIP.defines??]
         [#list SWIP.defines as define]
 [#-- if touchkey --]
-            [#if define.name == "TSLPRM_TOTAL_ALL_TOUCHKEYS"]
+            [#if define.name == "TSLPRM_TOTAL_TOUCHKEYS"]
                 [#if define.value != "0"]
                     [#lt]extern CONST TSL_TouchKey_T MyTKeys[];
                 [/#if]
             [/#if]
+            [#if define.name == "TSLPRM_TOTAL_TOUCHKEYS_B"]
+                [#if define.value != "0"]
+                    [#lt]extern CONST TSL_TouchKeyB_T MyTKeysB[];
+                [/#if]
+            [/#if]
 [#-- *************end of touchkey user parameter******************* --]
 [#-- if lin/rot --]
-            [#if define.name == "TSLPRM_TOTAL_LINROTS + TSLPRM_TOTAL_LINROTS_B"]
+            [#if define.name == "TSLPRM_TOTAL_LINROTS"]
                 [#if define.value != "0"]
                     [#lt]extern CONST TSL_LinRot_T MyLinRots[];
+                [/#if]
+            [/#if]
+            [#if define.name == "TSLPRM_TOTAL_LINROTS_B"]
+                [#if define.value != "0"]
+                    [#lt]extern CONST TSL_LinRotB_T MyLinRotsB[];
                 [/#if]
             [/#if]
 [#-- *************end of lin/rot user parameter******************** --]
@@ -200,6 +222,7 @@ extern TSL_ObjectGroup_T MyObjGroup;
 
 void tsl_user_Init(void);
 tsl_user_status_t tsl_user_Exec(void);
+tsl_user_status_t tsl_user_Exec_IT(void);
 void tsl_user_SetThresholds(void);
 
 #endif /* __TSL_USER_H */

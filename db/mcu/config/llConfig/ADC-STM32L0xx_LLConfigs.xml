@@ -31,7 +31,7 @@
             <MethodArg Name="TriggerSource" ParameterName="ExternalTrigConv" />
             <MethodArg Name="SequencerDiscont" ParameterName="DiscontinuousConvMode" />
             <MethodArg Name="ContinuousMode" ParameterName="ContinuousConvMode" />
-            <MethodArg Name="DMATransfer" ParameterName="DMAContinuousRequests" />
+            <MethodArg Name="DMATransfer" ParameterName="DMAContinuousRequestsForConfigFile" />
             <MethodArg Name="Overrun" ParameterName="Overrun" />
         </CallLibMethod>
           <IFCondition Expression="!(ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1) &amp; !(ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2)  &amp; !(ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4) ">
@@ -76,7 +76,10 @@
             <MethodArg Name="ADCx" ParameterName="Instance" />
             <MethodArg Name="OverSamplingDiscont" ParameterName="TriggeredMode" />
         </CallLibMethod>
-        
+         <CallLibMethod Name="LL_ADC_REG_SetSequencerScanDirection">
+            <MethodArg Name="ADCx" ParameterName="Instance" />
+            <MethodArg Name="ScanDirection" ParameterName="ScanConvMode" />
+        </CallLibMethod>
         <CallLibMethod Name="LL_ADC_SetCommonFrequencyMode">
             <MethodArg Name="ADCxy_COMMON">
                 <CallLibMethod Name="__LL_ADC_COMMON_INSTANCE">
@@ -87,23 +90,48 @@
         </CallLibMethod>
 
         <!-- parameter EOCSelection -->
-        <IFCondition Expression="(EOCSelection = ADC_EOC_SINGLE_CONV)">
-            <CallLibMethod Name="LL_ADC_EnableIT_EOC">
+        <!--IFCondition Expression="(EOCSelection = ADC_EOC_SINGLE_CONV)"-->
+            <CallLibMethod Name="LL_ADC_DisableIT_EOC">
                 <MethodArg Name="ADCx" ParameterName="Instance" />
             </CallLibMethod>
             <CallLibMethod Name="LL_ADC_DisableIT_EOS">
                 <MethodArg Name="ADCx" ParameterName="Instance" />
             </CallLibMethod>
+             <IFCondition Expression="$Index=1">
+           <CallLibMethod Name="" Type="HardCode"> 
+             <HardCode Text="
+  
+  #n#t/* Enable ADC internal voltage regulator */
+  #n#tLL_ADC_EnableInternalRegulator(ADC1);
+    
+  #n#t/* Delay for ADC internal voltage regulator stabilization.                */
+  #n#t/* Compute number of CPU cycles to wait for, from delay in us.            */
+  #n#t/* Note: Variable divided by 2 to compensate partially                    */
+  #n#t/*       CPU processing cycles (depends on compilation optimization).     */
+  #n#t/* Note: If system core clock frequency is below 200kHz, wait time        */
+  #n#t/*       is only a few CPU processing cycles.                             */
+  #n#tuint32_t wait_loop_index;                  
+  #n#twait_loop_index = ((LL_ADC_DELAY_INTERNAL_REGUL_STAB_US * (SystemCoreClock / (100000 * 2))) / 10);
+  #n#twhile(wait_loop_index != 0)
+  #n#t{
+  #n#t#twait_loop_index--;
+  #n#t}"
+                />
+	</CallLibMethod>
         </IFCondition>
+        
+        
+        
+        <!--/IFCondition-->
 
-        <IFCondition Expression="(EOCSelection = ADC_EOC_SINGLE_SEQ_CONV)">
+        <!--IFCondition Expression="(EOCSelection = ADC_EOC_SINGLE_SEQ_CONV)">
             <CallLibMethod Name="LL_ADC_EnableIT_EOS">
                 <MethodArg Name="ADCx" ParameterName="Instance" />
             </CallLibMethod>
             <CallLibMethod Name="LL_ADC_DisableIT_EOC">
                 <MethodArg Name="ADCx" ParameterName="Instance" />
             </CallLibMethod>
-        </IFCondition>
+        </IFCondition-->
 
     </RefConfig>
 
@@ -242,6 +270,11 @@
                           TypeName="ADC_Common_TypeDef" />
         <Argument AddressOf="false" GenericType="simple" Name="Resolution"
                           OptimizationCondition="equal" />
+    </LibMethod>
+    <LibMethod Comment="" Name="LL_ADC_EnableInternalRegulator">
+        <Argument AddressOf="false" GenericType="baseaddress" Name="ADCx"
+                  TypeName="ADC_TypeDef" />
+		
     </LibMethod>
     <LibMethod Comment="" Name="LL_ADC_SetCommonClock">
         <Argument AddressOf="false" GenericType="baseaddress" Name="ADCxy_COMMON"

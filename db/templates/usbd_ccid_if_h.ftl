@@ -1,13 +1,15 @@
-
+[#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbd_ccid_if.h
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usbd_ccid_if.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CCID_IF_H__

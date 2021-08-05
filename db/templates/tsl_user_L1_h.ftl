@@ -1,17 +1,24 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /*
  ******************************************************************************
   * File Name          : ${name}.h
   * Description        : Touch-Sensing user configuration.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
 */
+/* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __TSL_USER_H
 #define __TSL_USER_H
 
 #include "tsl.h"
+
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
 [#-- ************************************************************** --]
 [#-- list of includes platform dependent --]
 [#if isHalSupported?? && isHALUsed?? ]
@@ -63,7 +70,7 @@ typedef enum
                                 [#assign GxIOyName = define2.name]
                                 [#assign GxIOyValue = define2.value]
                                 [#if GxIOyName?contains ("IO_")]
-                                    [#if j > k]
+                                    [#if j gt k]
                                         [#if GxIOyValue != "valueNotSetted"]
                                             [#lt]#define CHANNEL_${i}_SRC       ((uint32_t) (GR${GxIOyValue?substring(1,GxIOyValue?last_index_of("_"))}))
                                             [#lt]#define CHANNEL_${i}_DEST      (${i})
@@ -92,10 +99,8 @@ typedef enum
                             [/#list]
                         [/#if]
                     [/#list]
-
                 [/#list]
-
-                [/#if]
+            [/#if]
         [/#list]
     [/#if]
 [/#list]

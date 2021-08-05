@@ -48,11 +48,11 @@
 			<MethodArg Name="CounterMode" 		ParameterName="CounterSource"/>
 		</CallLibMethod>	
 
-		 <IFCondition Expression="(ClockSource=LPTIM_CLOCKSOURCE_ULPTIM)">
+		 <IFCondition Expression="(ClockSource=LPTIM_CLOCKSOURCE_ULPTIM)|(CounterSource=LPTIM_COUNTERSOURCE_EXTERNAL)">
 			<CallLibMethod Name="LL_LPTIM_ConfigClock">
 				<MethodArg Name="LPTIMx" 		ParameterName="Instance"/>
 				<MethodArg Name="ClockFilter" 	ParameterName="ULPClockSampleTime"/>
-				<MethodArg Name="ClockPolarity" ParameterName="ULPClockPolarity"/>				
+				<MethodArg Name="ClockPolarity" ParameterName="ULPClockPolarity"/>
 			</CallLibMethod>
 		</IFCondition>
 		
@@ -362,5 +362,7 @@
     <RefComponent Cclass="LL" Cgroup="LPTIM" Cversion="1.6.0RC2">
         <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_lptim.h"/>
         <File Category="source" Name="Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_lptim.c"/>
+        <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_rcc.h"/>
+        <File Category="source" Name="Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_rcc.c"/>
     </RefComponent>
 </IP>

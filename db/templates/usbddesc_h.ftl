@@ -1,17 +1,19 @@
 [#ftl]
+/* USER CODE BEGIN Header */
+[#assign s = name]
+[#assign titi = s?replace("App/","")]
+[#assign toto = titi?replace(".","__")]
 /**
   ******************************************************************************
-  * @file           : ${name}
+  * @file           : ${titi}
   * @version        : ${version}
 [#--  * @packageVersion : ${fwVersion} --]
-  * @brief          : Header for usbd_desc.c file.
+  * @brief          : Header for usbd_conf.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
-
-[#assign s = name]
-[#assign toto = s?replace(".","__")]
+/* USER CODE END Header */  
 [#assign inclusion_protection = toto?upper_case]
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __${inclusion_protection}__
@@ -40,6 +42,24 @@
 /** @defgroup USBD_DESC USBD_DESC
   * @brief Usb device descriptors module.
   * @{
+  */
+  
+/** @defgroup USBD_DESC_Exported_Constants USBD_DESC_Exported_Constants
+  * @brief Constants.
+  * @{
+  */
+#define         DEVICE_ID1          (UID_BASE)
+#define         DEVICE_ID2          (UID_BASE + 0x4)
+#define         DEVICE_ID3          (UID_BASE + 0x8)
+
+#define  USB_SIZ_STRING_SERIAL       0x1A
+
+/* USER CODE BEGIN EXPORTED_CONSTANTS */
+
+/* USER CODE END EXPORTED_CONSTANTS */
+
+/**
+  * @}
   */
 
 

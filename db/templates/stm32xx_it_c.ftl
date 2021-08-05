@@ -1,51 +1,72 @@
 [#ftl]
+[#assign contextFolder=""]
+[#if cpucore!=""]    
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file    ${FamilyName?lower_case}xx_it.c
   * @brief   Interrupt Service Routines.
   ******************************************************************************
-  *
-  * COPYRIGHT(c) ${year} STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
+#n
 [#compress]
 /* Includes ------------------------------------------------------------------*/
-[#if isHalSupported?? && isHALUsed??]
-#include "${FamilyName?lower_case}xx_hal.h"
-[/#if]
-#include "${FamilyName?lower_case}xx.h"
+#include "${main_h}"
 #include "${FamilyName?lower_case}xx_it.h"
-[#if FREERTOS??] [#-- If FreeRtos is used --]
-#include "cmsis_os.h"
+[#if cpucore!="" && cpucore?replace("ARM_CORTEX_","")=="M4"]
+    [#if  timeBaseSource_M4??]
+        [#assign timeBaseSource = timeBaseSource_M4]
+        [#assign timeBaseHandlerType = timeBaseHandlerType_M4]
+        [#assign timeBaseHandler = timeBaseHandler_M4]
+    [/#if]
 [/#if]
+[#if cpucore!="" &&cpucore?replace("ARM_CORTEX_","")=="M7"]
+    [#if  timeBaseSource_M7??]
+        [#assign timeBaseSource = timeBaseSource_M7]
+        [#assign timeBaseHandlerType = timeBaseHandlerType_M7]
+        [#assign timeBaseHandler = timeBaseHandler_M7]
+    [/#if]
+[/#if]
+[#if cpucore!="" &&cpucore?replace("ARM_CORTEX_","")=="M0+"]
+    [#if  timeBaseSource_M0PLUS??]
+        [#assign timeBaseSource = timeBaseSource_M0PLUS]
+        [#assign timeBaseHandlerType = timeBaseHandlerType_M0PLUS]
+        [#assign timeBaseHandler = timeBaseHandler_M0PLUS]
+    [/#if]
+[/#if]
+[#if FREERTOS?? && (Secure == "false" || Secure == "-1")] [#-- If FreeRtos is used --]
+[#-- [@common.optinclude name=contextFolder+mxTmpFolder+"/rtos_inc.tmp"/] --] [#--include freertos includes --]
+[#-- cf BZ 64089 --]
+[#if timeBaseSource?? && timeBaseSource=="SysTick"] [#-- BZ 74529 --]
+#include "FreeRTOS.h"
+#include "task.h"
+[/#if]
+[/#if]
+[#if TOUCHSENSING??] [#-- If TouchSensing is used --]
+#include "tsl_time.h"
+[/#if]
+[#if USBPD??] [#-- If USBPD is used --]
+#include "usbpd.h"
+[/#if]
+[#if TRACER_EMB??] [#-- If TRACER_EMB is used --]
+#include "tracer_emb.h"
+[/#if]
+[#if GUI_INTERFACE?? && timeBaseSource=="SysTick"] [#-- If GUI_INTERFACE is used and timebase source is SysTick --]
+#include "gui_api.h"
+[/#if]
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 
+/* USER CODE END Includes */
 [#assign noUsbWakeUpInterruptHalHandler = missingUsbWakeUpInterruptHalHandler()]
 [#if noUsbWakeUpInterruptHalHandler]
   [#assign requireSystemClockConfig = false]
-  [#list nvic as vector]
+  [#list nvic as vector] [#-- nvic is a list of NvicVector, given by the code generator --]
     [#assign requireSystemClockConfig = usbWakeUpVector(vector.name)]
     [#if requireSystemClockConfig]
       [#break]
@@ -60,71 +81,120 @@ void SystemClock_Config(void);
 [/#compress]
 
 [#assign CortexName = "Cortex"]
-[#if FamilyName=="STM32F7"]
+[#if FamilyName=="STM32F7"]  [#-- FamilyName is in reality series name --]
   [#assign CortexName = "Cortex-M7"]
-[#elseif FamilyName=="STM32F4" || FamilyName=="STM32F3" || FamilyName=="STM32L4"]
+[#elseif FamilyName=="STM32F4" || FamilyName=="STM32F3" || FamilyName=="STM32L4" || FamilyName=="STM32G4" ||  FamilyName=="STM32MP1" ]
   [#assign CortexName = "Cortex-M4"]
 [#elseif FamilyName=="STM32F1" || FamilyName=="STM32F2" || FamilyName=="STM32L1"]
   [#assign CortexName = "Cortex-M3"]
 [#elseif FamilyName=="STM32F0"]
   [#assign CortexName = "Cortex-M0"]
-[#elseif FamilyName=="STM32L0"]
+[#elseif FamilyName=="STM32L0" ||  FamilyName=="STM32G0" ]
   [#assign CortexName = "Cortex-M0+"]
 [/#if]
 
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN TD */
+
+/* USER CODE END TD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+ 
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
 
-[#compress]
+
 /* External variables --------------------------------------------------------*/
+[#compress]
 [#assign handleList = ""]
-[#list handlers as handler]
-  [#list handler.entrySet() as entry]
-    [#list entry.value as ipHandler]
-        [#if ipHandler.useNvic && !(handleList?contains("(" + ipHandler.handler + ")")) && ipHandler.handlerType!="DFSDM_Channel_HandleTypeDef"]
+[#list handlers as handler] [#-- handlers is a list of ipHandlers (hashmap)  --] 
+  [#list handler.entrySet() as entry]  [#-- handler is a set of handles --]
+    [#list entry.value as ipHandler]  [#-- entry.value is a list of IpHandler --] 
+        [#if ipHandler.useNvic && ipHandler.declareExtenalVariable && !(handleList?contains("(" + ipHandler.handler + ")")) && ipHandler.handlerType!="DFSDM_Channel_HandleTypeDef"]
+[#if !context?? || (context?? && context==ipHandler.contextName)]
 extern ${ipHandler.handlerType} ${ipHandler.handler};
+[#assign handleList = handleList + "(" + ipHandler.handler + ")"]
+[/#if]
         [/#if]
-        [#assign handleList = handleList + "(" + ipHandler.handler + ")"]
+        
     [/#list]
   [/#list]
 [/#list]
-#n
+[#list services as service]
+  [#if service.bspExtihandles??]
+    [#list service.bspExtihandles as ipHandle]
+extern ${ipHandle.type} ${ipHandle.name};
+    [/#list]
+  [/#if]
+[/#list]
 [#-- If Time Base Source is different to Systick--]
-[#if timeBaseSource?? && timeBaseSource!="SysTick"]
+[#if timeBaseSource?? && timeBaseSource!="SysTick" && timeBaseSource!="None"]
 extern ${timeBaseHandlerType} ${timeBaseHandler};
 #n
 [/#if]
-[#if USE_Embedded_Wizard_STACK??]
-extern void GRAPHICS_IncTick(void);
-#n
-[/#if]
-[#if !FREERTOS?? && (USE_STemWin_STACK??||USE_Touch_GFX_STACK??)]
-extern void GRAPHICS_IncTick(void);
-#n
-[/#if]
-[/#compress]
-/******************************************************************************/
-/*            ${CortexName} Processor Interruption and Exception Handlers         */ 
-/******************************************************************************/
 
+
+[/#compress]
+
+/* USER CODE BEGIN EV */
+
+/* USER CODE END EV */
+
+/******************************************************************************/
+/*           ${CortexName} Processor Interruption and Exception Handlers          */ 
+/******************************************************************************/
 [#compress]
 [#list nvic as vector]
 [#if vector.systemHandler && vector.irqHandlerGenerated]
 /**
-  * @brief  This function handles ${vector.comment}.  
-  */
+#t* @brief  This function handles ${vector.comment}.   
+#t*/
 void ${vector.irqHandler}(void)
 {
 #t/* USER CODE BEGIN ${vector.name} 0 */
 
 #n#t/* USER CODE END ${vector.name} 0 */
-[#if vector.halHandler != "NONE"]
+[#if vector.halHandler != "NONE" && vector.halHandlerNeeded || vector.operation == "W1"] [#-- "&& timeBaseSource!="None"" is handled in NvicVector.java --]
       #t${vector.halHandler}
 [/#if]
+[#--[#if vector.name != "HardFault_IRQn"]--]
+[#--[#if vector.name != "MemoryManagement_IRQn"]--]
+[#--[#if vector.name != "BusFault_IRQn"]--]
+[#--[#if vector.name != "UsageFault_IRQn"] --]
+[#if vector.operation != "W1"]
 #t/* USER CODE BEGIN ${vector.name} 1 */
-
-#n#t/* USER CODE END ${vector.name} 1 */
+[#if vector.name == "NonMaskableInt_IRQn"]
+#twhile (1)
+#t{
+#t}
+[#else]
+#n
+[/#if]
+#t/* USER CODE END ${vector.name} 1 */
+[#--[/#if]--]
+[#--[/#if]--]
+[#--[/#if]--]
+[/#if]
 }#n
 [/#if]
 [/#list]
@@ -189,25 +259,29 @@ void ${vector.irqHandler}(void)
 
 [#list nvic as vector]
 
-[#if !vector.systemHandler && vector.irqHandlerGenerated]
+[#if vector?? && !vector.systemHandler && vector.irqHandlerGenerated]
 /**
-  * @brief  This function handles ${vector.comment}.  
-  */
+#t* @brief  This function handles ${vector.comment}.  
+#t*/
 void ${vector.irqHandler}(void)
 {
 #t/* USER CODE BEGIN ${vector.name} 0 */
 
 #n#t/* USER CODE END ${vector.name} 0 */
 
-[#if vector.halHandler == "NONE"]
+[#if vector.halHandler?? && (vector.halHandler == "NONE" || !vector.halHandlerNeeded)]
 [#elseif vector.ipName=="" || vector.irregular=="true"]
   #t${vector.halHandler}
 [#elseif vector.name=="FMC_IRQn" || vector.name=="FSMC_IRQn" || vector.name=="HASH_RNG_IRQn" || vector.name=="TIM6_DAC_IRQn"]
   #t${vector.halHandler}
 [#elseif vector.ipHandle != "" && vector.halUsed]
-  #t${vector.halHandler}(&${vector.ipHandle});
+  #t${vector.halHandler}[#if timeBaseSource==vector.ipName && FamilyName=="STM32MP1"][#else](&${vector.ipHandle});[/#if]
 [#elseif vector.halUsed]
   #t${vector.halHandler}();
+[/#if]
+[#assign extraHandler = vector.extraHandler]
+[#if extraHandler != ""]
+  #t${extraHandler}
 [/#if]
 
 #t/* USER CODE BEGIN ${vector.name} 1 */

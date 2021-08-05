@@ -5,7 +5,7 @@
   * Description        : This file provides initialization code for LWIP
   *                      middleWare.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
 [#compress][#--- Macro START ---]
@@ -20,6 +20,7 @@
 	[#assign lwip_ipv4 = 0]
 	[#assign lwip_ipv6 = 0]
 	[#assign lwip_ipv6_autoconfig = 0]
+	[#assign cmsis_version = "n/a"]
 	[#assign methodList = configModel.libMethod]
 	[#list methodList as method]
 		[#list method.arguments as argument]
@@ -44,6 +45,14 @@
             [#if (argument.name == "LWIP_IPV6_AUTOCONFIG") && (argument.value == "1")]
                 [#assign lwip_ipv6_autoconfig = 1]
             [/#if]
+            [#if (argument.name == "CMSIS_VERSION") && (with_rtos == 1)]
+                [#if argument.value == "0"]
+                    [#assign cmsis_version = "v1"]
+                [/#if]
+                [#if argument.value == "1"]
+                    [#assign cmsis_version = "v2"]
+                [/#if]
+            [/#if][#-- CMSIS_VERSION --]
 		[/#list]
 	[/#list]
 [/#macro]
@@ -76,6 +85,11 @@
 [#if netif_callback == 1] 
 #include "ethernetif.h"
 [/#if][#-- endif netif_callback --]
+[#if with_rtos == 1]
+[#if cmsis_version = "v2"]
+#include <string.h>
+[/#if][#-- endif cmsis_version --]
+[/#if][#-- endif with_rtos --]
 
 /* USER CODE BEGIN 0 */
 
@@ -88,7 +102,7 @@ static void Ethernet_Link_Periodic_Handle(struct netif *netif);
 [/#if][#-- endif with_rtos --]
 [/#if][#-- endif series && netif_callback --] 
 /* ETH Variables initialization ----------------------------------------------*/
-[#include sourceDir+"Src/eth_vars.tmp"]
+[#include mxTmpFolder+"/eth_vars.tmp"]
 
 [#compress][#if lwip_dhcp == 1]
 [#if with_rtos == 0]
@@ -183,127 +197,128 @@ uint32_t DHCPcoarseTimer = 0;
 	[#list methodList as method]
 		[#assign args = ""]
 		[#if method.callBackMethod=="false"]	
-		[#if (method.status=="OK") || (method.status=="OK")]			
+		[#if (method.status=="OK") || (method.status=="WARNING")]	
             [#if method.arguments??]		
                 [#list method.arguments as fargument]
-				[#if fargument.returnValue=="false"]								
-					[#assign return = ""]
-					[#compress]
-					[#if fargument.addressOf] 
-						[#assign adr = "&"]
-					[#else]
-						[#assign adr = ""]
-					[/#if]
-					[/#compress]
-					[#if fargument.genericType == "simple"]			
-					[/#if]
-					[#if fargument.genericType == "Array"]
-						[#assign valList = fargument.value?split(fargument.arraySeparator)]     
-                        [#assign i = 0]                                  
-						[#list valList as val] 
-							#t${fargument.name}[${i}] = ${val};
-							[#assign i = i+1]
-						[/#list]
-                    [#assign argValue="&"+fargument.name]
-					[/#if]
-					[#if fargument.genericType == "struct"]				 
-						[#if fargument.context??]
-							[#if fargument.context=="global"]						
-								[#if configModel.ipName=="DMA"]
-									[#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
-								[#else]
-									[#assign instanceIndex = inst?replace(name,"")]
-								[/#if]
-							[/#if]
-						[/#if]                     
-						[#if instanceIndex??&&fargument.context=="global"]
-							[#assign arg = "" + adr + fargument.name + instanceIndex]
+                  [#if fargument.status=="OK"]
+					[#if fargument.returnValue=="false"]
+						[#assign return = ""]
+						[#compress]
+						[#if fargument.addressOf] 
+							[#assign adr = "&"]
 						[#else]
-							[#assign arg = "" + adr + fargument.name]							
+							[#assign adr = ""]
 						[/#if]
-						[#-- [#assign arg = "" + adr + fargument.name] --]
-						[#--if (!method.name?contains("Init")&&fargument.context=="global")--]
-						[#if (fargument.init=="false")][#-- MZA add the field init for Argument object, if init is false the intialization of this argument is not done --]				
-							[#-- do Nothing --]
-						[#else]
-							[#list fargument.argument as argument]									
-								[#compress]
-									[#if argument.addressOf] 
-										[#assign AdrMza = ""]
+						[/#compress]
+						[#if fargument.genericType == "simple"]			
+						[/#if]
+						[#if fargument.genericType == "Array"]
+							[#assign valList = fargument.value?split(fargument.arraySeparator)]
+	                        [#assign i = 0]                                  
+							[#list valList as val] 
+								#t${fargument.name}[${i}] = ${val};
+								[#assign i = i+1]
+							[/#list]
+	                    [#assign argValue="&"+fargument.name]
+						[/#if]
+						[#if fargument.genericType == "struct"]				 
+							[#if fargument.context??]
+								[#if fargument.context=="global"]						
+									[#if configModel.ipName=="DMA"]
+										[#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
 									[#else]
-										[#assign AdrMza = ""]
+										[#assign instanceIndex = inst?replace(name,"")]
 									[/#if]
-								[/#compress]								
-								[#if argument.genericType != "struct"]	
-									[#if argument.mandatory]								
-										[#if instanceIndex??&&fargument.context=="global"]
-											[#assign argValue=argument.value?replace("$Index",instanceIndex)]
-										[#else]
-											[#assign argValue=argument.value]
-										[/#if]
-										[#if argument.genericType=="Array"][#-- if genericType=Array --]																					
-											[#assign valList = argument.value?split(argument.arraySeparator)]     
-                                            [#assign i = 0]                                  
-											[#list valList as val] 											
-												#t${argument.name}[${i}] = ${val};
-												[#assign i = i+1]
-											[/#list]
-                                        [#assign argValue="&"+argument.name]
-										[/#if][#-- if genericType=Array --]
-										[#if nTab==2]#t#t[#else]#t[/#if][#--[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};--]
-										[#else]	
-											[#if argument.genericType=="fpointer"] 											
-												[#local Function = inst + "_" + argument.name]
-                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};
-											[#else]
-                                                [#if argument.value??]
-													[#local Function = argument.value]
-													[#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};
-                                                [/#if]
-											[/#if]									
-										[#--[#if argument.name=="Instance"]--]
-											[#-- [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};--]
-										[#--[/#if]--]
-									[/#if]                                
-								[#else]
-								[#list argument.argument as argument1]								
-									[#if argument1.mandatory]
-										[#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
-										[#if argument1.genericType=="Array"][#-- if genericType=Array --] 										
-											[#assign valList = argument1.value?split(":")]     
-											[#assign i = 0]                                  
-											[#list valList as val] 											
-												#t${argument1.name}[${i}] = ${val};
-												[#assign i = i+1]
-											[/#list]
-											[#assign argValue="&"+argument1.name+"[0]"]
-										[/#if][#-- if genericType=Array --]
-									[#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
-									[/#if]
-								[/#list]
 								[/#if]
-							[/#list][#-- list  fargument.argument as argument--]
-						[/#if]	
-					[#elseif fargument.genericType == "simple"][#-- MZA if argument is simple we pass the name of the argument and not the value --]
-						[#if fargument.context=="global"]
-							[#assign arg = "" + adr + fargument.name + myInst]
+							[/#if]                     
+							[#if instanceIndex??&&fargument.context=="global"]
+								[#assign arg = "" + adr + fargument.name + instanceIndex]
+							[#else]
+								[#assign arg = "" + adr + fargument.name]							
+							[/#if]
+							[#-- [#assign arg = "" + adr + fargument.name] --]
+							[#--if (!method.name?contains("Init")&&fargument.context=="global")--]
+							[#if (fargument.init=="false")][#-- MZA add the field init for Argument object, if init is false the initialization of this argument is not done --]				
+								[#-- do Nothing --]
+							[#else]
+								[#list fargument.argument as argument]									
+									[#compress]
+										[#if argument.addressOf] 
+											[#assign AdrMza = ""]
+										[#else]
+											[#assign AdrMza = ""]
+										[/#if]
+									[/#compress]								
+									[#if argument.genericType != "struct"]	
+										[#if argument.mandatory]								
+											[#if instanceIndex??&&fargument.context=="global"]
+												[#assign argValue=argument.value?replace("$Index",instanceIndex)]
+											[#else]
+												[#assign argValue=argument.value]
+											[/#if]
+											[#if argument.genericType=="Array"][#-- if genericType=Array --]																					
+												[#assign valList = argument.value?split(argument.arraySeparator)]     
+	                                            [#assign i = 0]                                  
+												[#list valList as val] 											
+													#t${argument.name}[${i}] = ${val};
+													[#assign i = i+1]
+												[/#list]
+	                                        [#assign argValue="&"+argument.name]
+											[/#if][#-- if genericType=Array --]
+											[#if nTab==2]#t#t[#else]#t[/#if][#--[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};--]
+											[#else]	
+												[#if argument.genericType=="fpointer"] 											
+													[#local Function = inst + "_" + argument.name]
+	                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};
+												[#else]
+	                                                [#if argument.value??]
+														[#local Function = argument.value]
+														[#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};
+	                                                [/#if]
+												[/#if]									
+											[#--[#if argument.name=="Instance"]--]
+												[#-- [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${AdrMza}${Function};--]
+											[#--[/#if]--]
+										[/#if]                                
+									[#else]
+									[#list argument.argument as argument1]								
+										[#if argument1.mandatory]
+											[#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
+											[#if argument1.genericType=="Array"][#-- if genericType=Array --] 										
+												[#assign valList = argument1.value?split(":")]     
+												[#assign i = 0]                                  
+												[#list valList as val] 											
+													#t${argument1.name}[${i}] = ${val};
+													[#assign i = i+1]
+												[/#list]
+												[#assign argValue="&"+argument1.name+"[0]"]
+											[/#if][#-- if genericType=Array --]
+										[#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
+										[/#if]
+									[/#list]
+									[/#if]
+								[/#list][#-- list  fargument.argument as argument--]
+							[/#if]	
+						[#elseif fargument.genericType == "simple"][#-- MZA if argument is simple we pass the name of the argument and not the value --]
+							[#if fargument.context=="global"]
+								[#assign arg = "" + adr + fargument.name + myInst]
+							[#else]
+								[#assign arg = "" + adr + fargument.name]
+							[/#if]	
+						[#else][#-- if struct --]
+							[#assign arg = "" + adr + fargument.value]
+						[/#if]
+						[#if args == ""]
+							[#assign args = args + arg ]
 						[#else]
-							[#assign arg = "" + adr + fargument.name]
-						[/#if]	
-					[#else][#-- if struct --]
-						[#assign arg = "" + adr + fargument.value]
+							[#assign args = args + ', ' + arg]
+						[/#if]
+					[#else][#-- here we have an Argument as Return Value --]					
+						[#if fargument.context=="global"] [#assign return = fargument.name + myInst + " = "]
+						[#else] [#assign return = fargument.name + " = "]
+						[/#if]
 					[/#if]
-					[#if args == ""]
-						[#assign args = args + arg ]
-					[#else]
-						[#assign args = args + ', ' + arg]
-					[/#if]
-				[#else][#-- here we have an Argument as Return Value --]					
-					[#if fargument.context=="global"] [#assign return = fargument.name + myInst + " = "]
-					[#else] [#assign return = fargument.name + " = "]
-					[/#if]
-				[/#if]
-				
+				  [/#if] [#-- endif fargument.status --]
                 [/#list]
 				[#if nTab==2]#t#t[#else]#t[/#if][#--${return}${method.name}(${args});#n--]
 				[#else]
@@ -312,7 +327,7 @@ uint32_t DHCPcoarseTimer = 0;
 		[/#if]
 		[#if method.status=="KO"]
 		#n [#if nTab==2]#t#t[#else]#t[/#if]//!!! ${method.name} is commented because some parameters are missing
-		[#if method.arguments??]			[#-- here we comment all variables intialization --]
+		[#if method.arguments??]			[#-- here we comment all variables initialization --]
 				[#list method.arguments as fargument]
 					[#if fargument.addressOf] 
 						[#assign adr = "&"]
@@ -389,7 +404,7 @@ uint32_t DHCPcoarseTimer = 0;
 osSemaphoreId Netif_LinkSemaphore = NULL;
 /* Ethernet link thread Argument */
 struct link_str link_arg;
-  [/#if][#-- endif netif_callback && with_rtos --]
+[/#if][#-- endif netif_callback && with_rtos --]
 [#else][#-- else series --]
 [#if (netif_callback == 1) && (with_rtos == 0)]
 uint32_t EthernetLinkTimer;
@@ -425,6 +440,15 @@ uint32_t EthernetLinkTimer;
 ip6_addr_t ip6addr;
 [/#if]
 
+[#if with_rtos == 1]
+[#if (cmsis_version = "v2") && (netif_callback == 1)]
+/* USER CODE BEGIN OS_THREAD_ATTR_CMSIS_RTOS_V2 */
+#define INTERFACE_THREAD_STACK_SIZE            ( 1024 )
+osThreadAttr_t attributes;
+/* USER CODE END OS_THREAD_ATTR_CMSIS_RTOS_V2 */
+[/#if][#-- endif cmsis_version and netif_callback --]
+[/#if][#-- endif with_rtos --]
+
 [#-- Global variables --]
 [/#compress]
 
@@ -437,15 +461,12 @@ ip6_addr_t ip6addr;
    [#assign instName = instanceData.instanceName]   
    [#assign halMode= instanceData.halMode]
    [#assign ipName = instanceData.ipName]
-   
 #n
 /**   
 #t* LwIP initialization function 
 #t*/				        
 void MX_LWIP_Init(void)
 {
-  [#-- MZA je dois remplir la liste des configs, pour l'instant j'utilise la liste des methods --]
-  [#-- assign ipInstanceIndex = instName?replace(name,"")--]
   [#assign args = ""]
   [#assign listOfLocalVariables =""]
   [#assign resultList =""]
@@ -454,24 +475,25 @@ void MX_LWIP_Init(void)
     [#assign listOfLocalVariables =resultList]
   [/#list]
 [#if (lwip_dhcp == 0) && (lwip_ipv4 == 1)]
-  [#list instanceData.configs as config]
-  [#--- Generation of IP @ initialization ex. IP_ADDRESS[0] = 000; ---]
+  [#list instanceData.configs as config] [#--- Generation of IP @ initialization ex. IP_ADDRESS[0] = 000; ---]
 #t/* IP addresses initialization */
   [@generateConfigModelCode configModel=config inst=instName  nTab=1/]
   [/#list]
+#n
+/* USER CODE BEGIN IP_ADDRESSES */
+/* USER CODE END IP_ADDRESSES */#n#n
 [/#if][#-- endif lwip_dhcp --] 
 [/#list]
 [/#compress]
 [/#list]
-
 [#compress]
 [#if with_rtos == 0]
-#t/* Initilialize the LwIP stack without RTOS */
+#n#t/* Initilialize the LwIP stack without RTOS */
 #tlwip_init();
 [/#if][#-- endif with_rtos --]
 [#if with_rtos == 1]
-#t/* Initilialize the LwIP stack with RTOS */
-#ttcpip_init( NULL, NULL );	
+#n#t/* Initilialize the LwIP stack with RTOS */
+#ttcpip_init( NULL, NULL );
 [/#if][#-- endif with_rtos --]
 #n
 [/#compress]
@@ -547,19 +569,47 @@ void MX_LWIP_Init(void)
 #n 
 [#if (series != "stm32h7") && (with_rtos == 1)]
 #t/* create a binary semaphore used for informing ethernetif of frame reception */
+[#if cmsis_version = "v2"]
+#tNetif_LinkSemaphore = osSemaphoreNew(1, 1, NULL);
+[#else][#-- else cmsis_version --]
 #tosSemaphoreDef(Netif_SEM);
 #tNetif_LinkSemaphore = osSemaphoreCreate(osSemaphore(Netif_SEM) , 1 );
+[/#if][#-- endif cmsis_version --]
 #n  
 #tlink_arg.netif = &gnetif;
 #tlink_arg.semaphore = Netif_LinkSemaphore;
 #t/* Create the Ethernet link handler thread */
-#tosThreadDef(LinkThr, ethernetif_set_link, osPriorityNormal, 0, configMINIMAL_STACK_SIZE * 2);
+[#if cmsis_version = "v2"]
+/* USER CODE BEGIN OS_THREAD_NEW_CMSIS_RTOS_V2 */
+#tmemset(&attributes, 0x0, sizeof(osThreadAttr_t));
+#tattributes.name = "LinkThr";
+#tattributes.stack_size = INTERFACE_THREAD_STACK_SIZE;
+#tattributes.priority = osPriorityBelowNormal;
+#tosThreadNew(ethernetif_set_link, &link_arg, &attributes);
+/* USER CODE END OS_THREAD_NEW_CMSIS_RTOS_V2 */
+[#else][#-- else cmsis_version --]
+/* USER CODE BEGIN OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+#tosThreadDef(LinkThr, ethernetif_set_link, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE * 2);
 #tosThreadCreate (osThread(LinkThr), &link_arg);
-[#else][#-- case series == "stm32h7" --] 
+/* USER CODE END OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+[/#if][#-- endif cmsis_version --]
+[#else][#-- case series == "stm32h7" --]
 #t/* Create the Ethernet link handler thread */
 [#if with_rtos == 1]
-#tosThreadDef(EthLink, ethernet_link_thread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE *2); 
+[#if cmsis_version = "v2"]
+/* USER CODE BEGIN H7_OS_THREAD_NEW_CMSIS_RTOS_V2 */
+#tmemset(&attributes, 0x0, sizeof(osThreadAttr_t));
+#tattributes.name = "EthLink";
+#tattributes.stack_size = INTERFACE_THREAD_STACK_SIZE;
+#tattributes.priority = osPriorityBelowNormal;
+#tosThreadNew(ethernet_link_thread, &gnetif, &attributes);
+/* USER CODE END H7_OS_THREAD_NEW_CMSIS_RTOS_V2 */
+[#else][#-- else cmsis_version --]
+/* USER CODE BEGIN H7_OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+#tosThreadDef(EthLink, ethernet_link_thread, osPriorityBelowNormal, 0, configMINIMAL_STACK_SIZE *2); 
 #tosThreadCreate (osThread(EthLink), &gnetif);
+/* USER CODE END H7_OS_THREAD_DEF_CREATE_CMSIS_RTOS_V1 */
+[/#if][#-- endif cmsis_version --]
 [/#if][#-- endif with_rtos --]
 [/#if][#-- endif series --]
 [/#if][#-- endif netif_callback --]

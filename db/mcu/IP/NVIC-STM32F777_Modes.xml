@@ -153,10 +153,10 @@
 		<PossibleValue Comment="I2C4 error interrupt" Value="I2C4_ER_IRQn:Y,1H:I2C4:I2C_ER,SMBUS_ER:"/>
 		<PossibleValue Comment="SPDIF-RX global interrupt" Value="SPDIF_RX_IRQn:Y:SPDIFRX:HAL_SPDIFRX_IRQHandler:"/>
 		<PossibleValue Comment="DSI global interrupt" Value="DSI_IRQn:Y:DSIHOST:HAL_DSI_IRQHandler:"/>
-		<PossibleValue Comment="DFSDM1 filter0 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL0_Enable" Diagnostic="" Value="DFSDM1_FLT0_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter0"/>
-		<PossibleValue Comment="DFSDM1 filter1 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL1_Enable" Diagnostic="" Value="DFSDM1_FLT1_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter1"/>
-		<PossibleValue Comment="DFSDM1 filter2 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL2_Enable" Diagnostic="" Value="DFSDM1_FLT2_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter2"/>
-		<PossibleValue Comment="DFSDM1 filter3 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL3_Enable" Diagnostic="" Value="DFSDM1_FLT3_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter3"/>
+		<PossibleValue Comment="DFSDM1 filter0 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL0_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter0 is not configured" Value="DFSDM1_FLT0_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter0"/>
+		<PossibleValue Comment="DFSDM1 filter1 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL1_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter1 is not configured" Value="DFSDM1_FLT1_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter1"/>
+		<PossibleValue Comment="DFSDM1 filter2 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL2_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter2 is not configured" Value="DFSDM1_FLT2_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter2"/>
+		<PossibleValue Comment="DFSDM1 filter3 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL3_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter3 is not configured" Value="DFSDM1_FLT3_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter3"/>
 		<PossibleValue Comment="SDMMC2 global interrupt" Value="SDMMC2_IRQn:Y:SDMMC2::"/>
 		<PossibleValue Comment="CAN3 TX interrupt" Value="CAN3_TX_IRQn:Y:CAN3:HAL_CAN_IRQHandler:"/>
 		<PossibleValue Comment="CAN3 RX0 interrupt" Value="CAN3_RX0_IRQn:Y:CAN3:HAL_CAN_IRQHandler:"/>

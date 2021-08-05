@@ -1,14 +1,27 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
  ******************************************************************************
   * File Name          : ${name}.c
   * Description        : User configuration file for TOUCHSENSING
   *                      middleWare.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
- [#assign channelnbr = 0]
+/* USER CODE END Header */
+
+[#--
+[#list SWIPdatas as SWIP]  
+    [#if SWIP.defines??]
+        [#list SWIP.defines as define]
+            define.name : ${define.name}
+            define.value : ${define.value}
+            [/#list]
+    [/#if]
+[/#list]
+--]
+[#assign channelnbr = 0]
 [#list SWIPdatas as SWIP]  
     [#if SWIP.defines??]
         [#list SWIP.defines as define]
@@ -50,6 +63,21 @@
             [#if define.name == "TSLPRM_TOTAL_LINROTS_B"]
                 [#assign  total_linrots_b = define.value]
             [/#if]
+
+            [#if define.name == "TSLPRM_TOTAL_LINS"]
+                [#assign  total_lins = define.value]
+            [/#if]
+            [#if define.name == "TSLPRM_TOTAL_LINS_B"]
+                [#assign  total_lins_b = define.value]
+            [/#if]
+
+            [#if define.name == "TSLPRM_TOTAL_ROTS"]
+                [#assign  total_rots = define.value]
+            [/#if]
+            [#if define.name == "TSLPRM_TOTAL_ROTS_B"]
+                [#assign  total_rots_b = define.value]
+            [/#if]
+
             [#if define.name == "TSLPRM_TOTAL_CHANNELS"]
                 [#assign total_channels = define.value]
             [/#if]
@@ -218,11 +246,7 @@
             [#if define.name == "TSLPRM_USE_6CH_ROT_M_B_NBR"]
                 [#assign total_6ch_linrots_rot_M_B_NBR = define.value]
             [/#if]
-[#--
-            define.name : ${define.name}
-            define.value : ${define.value}
---]
-            [/#list]
+        [/#list]
     [/#if]
 [/#list]
 
@@ -232,6 +256,12 @@
 [#assign total_all_linrots_nb = total_linrots?number + total_linrots_b?number ]
 [#assign total_linrots_nb = total_linrots?number ]
 [#assign total_linrots_b_nb = total_linrots_b?number ]
+
+[#assign total_lins_nb = total_lins?number ]
+[#assign total_lins_b_nb = total_lins_b?number ]
+[#assign total_rots_nb = total_rots?number ]
+[#assign total_rots_b_nb = total_rots_b?number ]
+
 [#assign total_touchkeys_nb = total_touchkeys?number ]
 [#assign total_touchkeys_b_nb = total_touchkeys_b?number ]
 [#assign total_objects_nb = total_objects?number ]
@@ -289,6 +319,10 @@
 [#assign total_6ch_linrots_rot_M_B_NBR_nb = total_6ch_linrots_rot_M_B_NBR?number ]
 
 #include "tsl_user.h"
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
 
 /*============================================================================*/
 /* Channels                                                                   */
@@ -1380,7 +1414,8 @@ CONST TSL_Object_T MyObjects[TSLPRM_TOTAL_OBJECTS] =
 [#-- ************************************************************************************************** --]
 [#-- list of objects  1 per key, 1 per linear/rot --]
 [#-- if touchkey --]
-  { TSL_OBJ_TOUCHKEY, (TSL_TouchKey_T *)&MyTKeys[${i}] }[#if i!=(total_channels_nb-1)],[/#if]
+  { TSL_OBJ_TOUCHKEY, (TSL_TouchKey_T *)&MyTKeys[${i}] }[#if i!=(total_objects_nb - 1)],[/#if]
+        [#assign index1 = index1 +1]
     [/#list]
 [/#if]
 [#if total_touchkeys_b_nb != 0]
@@ -1388,24 +1423,45 @@ CONST TSL_Object_T MyObjects[TSLPRM_TOTAL_OBJECTS] =
 [#-- ************************************************************************************************** --]
 [#-- list of objects  1 per key, 1 per linear/rot --]
 [#-- if touchkey --]
-  { TSL_OBJ_TOUCHKEY, (TSL_TouchKeyB_T *)&MyTKeysB[${i}] }[#if i!=(total_channels_nb-1)],[/#if]
+  { TSL_OBJ_TOUCHKEYB, (TSL_TouchKeyB_T *)&MyTKeysB[${i}] }[#if i!=(total_objects_nb - 1)],[/#if]
+        [#assign index1 = index1 +1]
     [/#list]
 [/#if]
+[#-- ************************************************************************************************** --]
 [#if total_linrots_nb != 0]
-    [#list 0..(total_linrots_nb -1) as i]
-[#-- if linrot --]
-  { TSL_OBJ_LINEAR, (TSL_LinRot_T *)&MyLinRots[${i}] }[#if index1!=(total_objects_nb-1)],[/#if]
-[#-- ************************************************************************************************** --]
+[#-- if linrots --]
+[#if total_lins_nb != 0]
+[#-- if lins --]
+    [#list 0..(total_lins_nb -1) as i]
+  { TSL_OBJ_LINEAR, (TSL_LinRot_T *)&MyLinRots[${i}] }[#if index1!=(total_objects_nb - 1)],[/#if]
         [#assign index1 = index1 +1]
     [/#list]
 [/#if]
-[#if total_linrots_b_nb != 0]
-    [#list 0..(total_linrots_b_nb -1) as i]
-[#-- if linrot --]
-  { TSL_OBJ_LINEAR, (TSL_LinRotB_T *)&MyLinRotsB[${i}] }[#if index1!=(total_objects_nb-1)],[/#if]
-[#-- ************************************************************************************************** --]
+[#if total_rots_nb != 0]
+[#-- if rots --]
+    [#list total_lins_nb..(total_linrots_nb - 1) as i]
+  { TSL_OBJ_ROTARY, (TSL_LinRot_T *)&MyLinRots[${i}] }[#if index1!=(total_objects_nb - 1)],[/#if]
         [#assign index1 = index1 +1]
     [/#list]
+[/#if]
+[/#if]
+[#-- ************************************************************************************************** --]
+[#if total_linrots_b_nb != 0]
+[#-- if linsrot_b --]
+[#if total_lins_b_nb != 0]
+[#-- if lins_b --]
+    [#list 0..(total_lins_b_nb -1) as i]
+  { TSL_OBJ_LINEARB, (TSL_LinRotB_T *)&MyLinRotsB[${i}] }[#if index1!=(total_objects_nb - 1)],[/#if]
+        [#assign index1 = index1 +1]
+    [/#list]
+[/#if]
+[#if total_rots_b_nb != 0]
+[#-- if rots_b --]
+    [#list total_lins_b_nb..(total_linrots_b_nb- 1) as i]
+  { TSL_OBJ_ROTARYB, (TSL_LinRotB_T *)&MyLinRotsB[${i}] }[#if index1!=(total_objects_nb - 1)],[/#if]
+        [#assign index1 = index1 +1]
+    [/#list]
+[/#if]
 [/#if]
 };
 
@@ -1521,8 +1577,8 @@ tsl_user_status_t tsl_user_Exec(void)
     /* DxS processing (if TSLPRM_USE_DXS option is set) */
     TSL_dxs_FirstObj(&MyObjGroup);
     
-    /* ECS every 100ms */
-    if (TSL_tim_CheckDelay_ms(100, &ECSLastTick) == TSL_STATUS_OK)
+    /* ECS every TSLPRM_ECS_DELAY (in ms) */
+    if (TSL_tim_CheckDelay_ms(TSLPRM_ECS_DELAY, &ECSLastTick) == TSL_STATUS_OK)
     {
       if (TSL_ecs_Process(&MyObjGroup) == TSL_STATUS_OK)
       {
@@ -1576,7 +1632,9 @@ void tsl_user_SetThresholds(void)
 [#-- If touchkey(s) is(are) enabled --]
   void MyTKeys_ErrorStateProcess(void)
 {
+/* USER CODE BEGIN total_all_touchkey_nb */
   /* Add here your own processing when a sensor is in Error state */
+/* USER CODE END total_all_touchkey_nb */
 }
 [#-- ************************************************************************************************** --]
 [/#if]
@@ -1584,7 +1642,9 @@ void tsl_user_SetThresholds(void)
 [#-- If linrot(s) is(are) enabled --]
 void MyLinRots_ErrorStateProcess(void)
 {
+/* USER CODE BEGIN MyLinRots_ErrorStateProcess */
   /* Add here your own processing when a sensor is in Error state */
+/* USER CODE END MyLinRots_ErrorStateProcess */
 }
 [#-- ************************************************************************************************** --]
 [/#if]
@@ -1599,7 +1659,9 @@ void MyLinRots_ErrorStateProcess(void)
 [#-- If touchkey(s) is(are) enabled --]
 void MyTKeys_OffStateProcess(void)
 {
+/* USER CODE BEGIN MyTKeys_OffStateProcess */
   /* Add here your own processing when a sensor is in Off state */
+/* USER CODE END MyTKeys_OffStateProcess */
 }
 
 [/#if]
@@ -1607,7 +1669,9 @@ void MyTKeys_OffStateProcess(void)
 [#-- If linrot(s) is(are) enabled --]
 void MyLinRots_OffStateProcess(void)
 {
+/* USER CODE BEGIN MyLinRots_OffStateProcess */
   /* Add here your own processing when a sensor is in Off state */
+/* USER CODE END MyLinRots_OffStateProcess */
 }
 [#-- ************************************************************************************************** --]
 [/#if]

@@ -1,19 +1,25 @@
 [#ftl]
 /**
   ******************************************************************************
-  * File Name          : gpio.c
-  * Description        : This file provides code for the configuration
-  *                      of all used GPIO pins.
+  * @file    ${name?lower_case}.c
+  * @brief   This file provides code for the configuration
+  *          of all used GPIO pins.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
 
   [#compress]
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
 
 [/#compress]
+
 
 /* USER CODE BEGIN 0 */
 
@@ -35,13 +41,18 @@
 [/#if]
 void MX_GPIO_Init(void) 
 {
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+data.ipName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
 #n
         [#assign v = ""]
         [#list data.variables as variable]				
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
         	[#assign v = v + " "+ variable.name/]	
             [/#if]	
         [/#list]
@@ -70,7 +81,7 @@ void MX_${data.ipName}_GPIO_Init(void)
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
                 [#assign v = v + " "+ variable.name/]	
             [/#if]	
         [/#list]
@@ -78,15 +89,20 @@ void MX_${data.ipName}_GPIO_Init(void)
 
 
 [#if data.methods??] [#-- if the pin configuration contains a list of LibMethods--]
+[#if data.ipName=="gpio"]
 	[#list data.methods as method][#assign args = ""]	
 		[#if method.status=="OK"]	
                 [#-- --]                
                 [#if method.name == "HAL_GPIO_Init"]
                     [#assign pin = ""]
                     [#assign port = ""]
+                    [#assign isLPGPIO = "false"]
                     [#list method.arguments as fargument]
                     [#if fargument.name =="GPIOx"]							
                        [#assign port = port + " " + fargument.value]
+[#if fargument.value?contains("LPGPIO")]
+[#assign isLPGPIO = "true"]
+[/#if]
                         [#assign i =port?length-1]
                         [#assign j =port?length]
                        [#assign port = "P"+port?substring(i,j)]
@@ -100,7 +116,11 @@ void MX_${data.ipName}_GPIO_Init(void)
                     [/#if]
                     [/#list]
                     [#compress]
-                    #n#t/*Configure GPIO [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#assign i =x?split("_")] [#assign j =i?last]${port}${j} [/#list] */[/#compress]
+[#if isLPGPIO == "false"]
+                    #n#t/*Configure GPIO [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#assign i =x?split("_")] [#assign j =i?last]${port}${j} [/#list] */
+[#else]
+#n#t/*Configure LPGPIO  [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#if x?contains("GPIO_PIN")][#assign i =x?split("_")] [#assign j =i?last]Pin${j}[#else]${x} [/#if] [/#list] */
+[/#if][/#compress]
                 [#else]
                 [#if method.comment??]#n#t/*[#compress]${method.comment} */[/#compress][/#if]			
                 [/#if]    
@@ -183,6 +203,7 @@ void MX_${data.ipName}_GPIO_Init(void)
 [/#compress]
 [/#if]
 #n
+[/#if]
 }
 #n
 [/#if] [#-- else there is no LibMethod to call--]
@@ -195,13 +216,5 @@ void MX_${data.ipName}_GPIO_Init(void)
 /* USER CODE BEGIN 2 */
 
 /* USER CODE END 2 */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

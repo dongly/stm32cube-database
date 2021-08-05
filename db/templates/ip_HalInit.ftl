@@ -32,7 +32,7 @@
 [#if useGpio]
 [/#if]
 [#if useDma]
-[#-- include "DMA.h" --]
+[#-- include "dma.h" --]
 [/#if]
 [#-- End Define includes --]
 
@@ -90,13 +90,13 @@
                         [/#if]
                     [/#list]
                     [#if !exist]  [#-- if exist --]                  
-                    #t${argument.typeName} ${argument.name};                        
+                    #t${argument.typeName} ${argument.name} = {0};                        
                       [#assign myListOfLocalVariables = myListOfLocalVariables + " "+ argument.name]
                       [#assign resultList = myListOfLocalVariables]
                     [/#if][#-- if exist --]
                     [/#if][#-- if global --]
                 [#else][#-- if context?? --]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
             [/#if][#-- if argument.context?? --]
 
             [#-- Array type --]
@@ -126,7 +126,6 @@
 [#if configModel.methods??] [#-- if the pin configuration contains a list of LibMethods--]
     [#assign methodList = configModel.methods]
 [#else] [#assign methodList = configModel.libMethod]
-
 [/#if]
 [#assign writeConfigComments=false]
 [#list methodList as method]
@@ -136,20 +135,25 @@
 [#-- [#if configModel.comments??] #t/**${configModel.comments} #n#t*/[/#if] --]
 [/#if]
 	[#list methodList as method][#assign args = ""]	  
+[#assign handler = ""]
             [#if method.hardCode??] [#-- Hard code --]              
-                ${method.hardCode.text} 
+                ${method.hardCode.text?replace("$IpInstance",inst)} 
             [#else]
                 [#if method.type == "Template"] [#-- Template code --]  
                     [#list method.name?split("/") as n]
                         [#assign tplName = n]
                     [/#list]
-                    [@optinclude name=sourceDir+"Src/${tplName?replace('ftl','tmp')}" /] 
+                    [@optinclude name=mxTmpFolder+"/${tplName?replace('ftl','tmp')}" /] 
                 [/#if]
             [/#if]
             [#if method.status=="OK" && method.type != "Template" && method.type != "HardCode"]                           		
              	[#if method.arguments??]
                     [#list method.arguments as fargument][#compress]
-                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
+[#if inst=="USB"]
+[#assign handler = fargument.name]
+[/#if]
+                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if][/#compress] 
                     [#if fargument.genericType == "struct"]
                         [#if fargument.context??]
                             [#if fargument.context=="global"]
@@ -305,6 +309,21 @@
 				[#assign retval=argument.name]
 			[/#if]
 		    [/#list]
+                    [#-- add Register Callbacks for USB STM32WB Start --]
+                    [#if (FamilyName=="STM32WB" | FamilyName=="STM32G4" ) && inst == "USB" && handler!=""]                    
+                    [#if handler?contains("pcd")]
+                    [#assign USBmodule = "PCD"]
+                    [#else]
+                    [#assign USBmodule = "HCD"]
+                    [/#if]
+                        #n#t#if (USE_HAL_${USBmodule}_REGISTER_CALLBACKS == 1U)
+                        #t/* register Msp Callbacks (before the Init) */
+                        #tHAL_${USBmodule}_RegisterCallback(&${handler}, HAL_${USBmodule}_MSPINIT_CB_ID, ${USBmodule}_MspInit);
+                        #tHAL_${USBmodule}_RegisterCallback(&${handler}, HAL_${USBmodule}_MSPDEINIT_CB_ID, ${USBmodule}_MspDeInit);
+                        #t#endif /* USE_HAL_${USBmodule}_REGISTER_CALLBACKS */#n
+                    
+                    [#-- add Register Callbacks for USB STM32WB End --]
+                    [/#if]
 		    [#if retval??&& retval!=""]
 			[#if nTab==2]#t#t[#else]#t[/#if]${retval} = ${method.name}(${args});
 		    [#else]
@@ -315,7 +334,7 @@
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n
 		    [/#if]
@@ -327,7 +346,7 @@
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n
                 [/#if]			
@@ -337,6 +356,7 @@
 			[#if method.arguments??]			
 				[#list method.arguments as fargument]
 					[#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
+                                        [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
 					[#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
                                         [#if fargument.context??]                   
                                             [#if fargument.context=="global"]
@@ -392,7 +412,7 @@
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n                                
                         [/#if]
@@ -566,13 +586,16 @@
 [#-- Section1: Create the void mx_<IpInstance>_<HalMode>_init() function for each ip instance --]
 [#compress]
 [#list IP.configModelList as instanceData]
-[#if instanceData.isMWUsed=="true" && instanceData.instanceName==name]
+[#if (instanceData.isMWUsed=="true" ||instanceData.isBSPUsed=="true" )&& instanceData.instanceName==name]
      [#assign instName = instanceData.instanceName] 
         [#assign halMode= instanceData.halMode]
-      [#--  /* ${instName} init function */ --]
-      [#--  [#if halMode!=realIpName]void MX_${instName}_${halMode}_Init(void)[#else]void MX_${instName}_Init(void)[/#if] --]
-[#-- { --]
-        [#-- assign ipInstanceIndex = instName?replace(name,"")--]
+[#if instanceData.isBSPUsed=="true" ][#-- added for periph used by BSP --]
+[#-- added for periph used by BSP --]
+/* ${instName} init function */ [#-- added for periph used by BSP --]
+        [#if halMode!=instanceData.realIpName&&!instanceData.ipName?contains("TIM")&&!instanceData.ipName?contains("CEC")]#HAL_StatusTypeDef MX_${instName}_${halMode}_Init(${instanceData.instancehandler})[#else]HAL_StatusTypeDef MX_${instName}_Init(${instanceData.instancehandler})[/#if][#-- added for periph used by BSP --]
+{[#-- added for periph used by BSP --]
+#tHAL_StatusTypeDef ret = HAL_OK;
+[/#if]
         [#assign args = ""]
         [#assign listOfLocalVariables =""]
         [#assign resultList =""]
@@ -595,7 +618,11 @@
             [#if instanceData.instIndex??][@common.generateConfigModelListCode configModel=instanceData inst=instName  nTab=1 index=instanceData.instIndex/][#else][@common.generateConfigModelListCode configModel=instanceData inst=instName  nTab=1 index=""/][/#if]
                 [/#if]
 
-#n[#-- } --]
+#n
+[#if instanceData.isBSPUsed=="true" ][#-- added for periph used by BSP --]
+#treturn ret;
+} [#-- added for periph used by BSP --]
+[/#if]
 [/#if]
   
 [/#list]

@@ -1,11 +1,11 @@
 [#ftl]
 /**
   ******************************************************************************
-  * File Name          : ${name}.c
-  * Description        : This file provides code for the configuration
-  *                      of the ${name} instances.
+  * @file    ${name?lower_case}.c
+  * @brief   This file provides code for the configuration
+  *          of the ${name} instances.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
 
@@ -17,10 +17,11 @@
   [/#list]
   [#return false]
 [/#function]
-[#list IPdatas as IP]  
+[#list IPdatas as IP]
 [#assign ipvar = IP]
 /* Includes ------------------------------------------------------------------*/
 #include "${name?lower_case}.h"
+
 [#assign useGpio = false]
 [#assign useBdma = false]
 [#assign useDma = false]
@@ -66,7 +67,7 @@
     [/#if]
     [#if instanceData.initServices.dma??]
         [#list instanceData.initServices.dma as configModel]
-          [#if configModel.ipName=="BDMA"]
+          [#if configModel.ipName?starts_with("BDMA")]
             [#assign useBdma = true]
           [/#if]
           [#if configModel.ipName=="DMA"]
@@ -83,18 +84,7 @@
   [/#if]
 [/#list]
 
-[#if useGpio]
-#include "gpio.h"
-[/#if]
-[#if useBdma]
-#include "bdma.h"
-[/#if]
-[#if useDma]
-#include "dma.h"
-[/#if]
-[#if useMdma]
-#include "mdma.h"
-[/#if]
+
 [#-- End Define includes --]
 [#-- Tracker 276386 -- GetHandle Start --]
 #n
@@ -196,10 +186,34 @@ ETH_TxPacketConfig TxConfig;
     [/#list]
 [/#function]
 [#-- End Function getDmaServiceType --]
-
+[#function getLocalVariableCLK configModel1]
+[#if configModel1.methods??]
+    [#assign methodList1 = configModel1.methods]
+[#else]
+    [#assign methodList1 = configModel1.libMethod]
+[/#if]
+[#assign clkVariables = ""]
+    [#list methodList1 as method][#-- list methodList1 --]
+        [#list method.arguments as argument][#-- list method.arguments --]
+            [#if argument.genericType == "struct"]
+                [#if argument.context??]
+                    [#if argument.context!="global"&&argument.status!="WARNING"&&argument.status!="NULL"] [#-- if !global --]
+                        [#if clkVariables==""]
+                            [#assign clkVariables = argument.typeName + " "+ argument.name]
+                        [#else]
+                            [#assign clkVariables = clkVariables+"/"+ argument.typeName + " "+ argument.name]
+                        [/#if]
+                    [/#if]
+                [/#if]
+            [/#if]
+        [/#list][#-- list method.arguments --]
+    [/#list][#-- list methodList1 --]
+[#return clkVariables]
+[/#function]
+[#-- Function getLocalVariableCLK of a config End--]
 [#-- macro getLocalVariable of a config Start--]
 [#macro getLocalVariable configModel1 listOfLocalVariables resultList]
-    [#if configModel1.methods??] 
+    [#if configModel1.methods??]
         [#assign methodList1 = configModel1.methods]
     [#else] [#assign methodList1 = configModel1.libMethod]
     [/#if]
@@ -209,7 +223,7 @@ ETH_TxPacketConfig TxConfig;
             [#if argument.genericType == "struct"][#-- if struct --]
                 [#if argument.context??][#-- if argument.context?? --]
                     [#if argument.context!="global"&&argument.status!="WARNING"&&argument.status!="NULL"] [#-- if !global --]
-                    [#assign varName= " "+argument.name]                    
+                    [#assign varName= " "+argument.name]
                     [#assign ll= myListOfLocalVariables?split(" ")]
                     [#assign exist=false]
                     [#list ll as var  ]
@@ -217,8 +231,8 @@ ETH_TxPacketConfig TxConfig;
                             [#assign exist=true]
                         [/#if]
                     [/#list]
-                    [#if !exist]  [#-- if exist --]                  
-                    #t${argument.typeName} ${argument.name};                        
+                    [#if !exist]  [#-- if exist --]
+                    #t${argument.typeName} ${argument.name};
                       [#assign myListOfLocalVariables = myListOfLocalVariables + " "+ argument.name]
                       [#assign resultList = myListOfLocalVariables]
                     [/#if][#-- if exist --]
@@ -230,16 +244,16 @@ ETH_TxPacketConfig TxConfig;
             [#-- Array type --]
             [#list argument.argument as subArg] [#-- list subArg --]
                 [#if subArg.genericType=="Array"] [#-- if genericType == "Array" --]
-                    ${subArg.typeName} ${subArg.name}[${subArg.arraySize}] ; 
+                    ${subArg.typeName} ${subArg.name}[${subArg.arraySize}];
                 [/#if] [#-- if genericType == "Array" --]
                 [#if subArg.genericType =="struct"]
                     [#list subArg.argument as subArg1] [#-- list subArg1 --]
                         [#if subArg1.genericType=="Array"] [#-- if genericType == "Array" --]
-                           #t ${subArg1.typeName} ${subArg1.name}[${subArg1.arraySize}] ; 
+                           #t ${subArg1.typeName} ${subArg1.name}[${subArg1.arraySize}];
                         [/#if] [#-- if genericType == "Array" --]
                     [/#list]
                 [/#if]
-            [/#list] [#-- list subArg --]            
+            [/#list] [#-- list subArg --]
             [/#if][#-- if struct --]
         [/#list][#-- list method.arguments --]
     [/#list][#-- list methodList1 --]
@@ -267,17 +281,17 @@ ETH_TxPacketConfig TxConfig;
         [/#if]
         [#if entry.key=="gpio"]
         [#assign gpioExist = true]
-        [/#if]            
+        [/#if]
     [/#list]
-    [/#if]    
-   
-      
-    [#if serviceType=="Init"] 
+    [/#if]
+
+
+    [#if serviceType=="Init"]
         [#if dmaExist]
         #t[@generateConfigCode ipName=ipName type=serviceType serviceName="dma" instHandler=instHandler tabN=tabN/]
-        [/#if] 
+        [/#if]
     [#else] [#-- if Deinit DMA --]
-    [#assign service = getInitServiceMode(ipName)] 
+    [#assign service = getInitServiceMode(ipName)]
         [#if dmaExist]
             [#assign dmaservice =service.dma]
             [#if dmaservice??]#n#t#t/* ${ipName} ${getDmaServiceType(dmaservice)} DeInit */
@@ -288,7 +302,7 @@ ETH_TxPacketConfig TxConfig;
                    [#else]
                         [#assign dmaCurrentRequest = dmaconfig.dmaRequestName?lower_case]
                    [/#if]
-                   [#assign prefixList = dmaCurrentRequest?split("_")] 
+                   [#assign prefixList = dmaCurrentRequest?split("_")]
             [#assign ind=""]
 [#if dmaCurrentRequest?contains("dfsdm")]
     [#assign ind=dmaconfig.dmaRequestName?substring(dmaconfig.dmaRequestName?length-1)]
@@ -297,30 +311,36 @@ ETH_TxPacketConfig TxConfig;
                    [#list prefixList as p][#assign prefix= p][/#list]
                         [#assign ipdmahandler1 = "hdma" + prefix]
                         [#-- [#if getDmaHandler(ipName)!=""][#assign ipdmahandler = getDmaHandler(ipName)][#else][#assign ipdmahandler = ipdmahandler1][/#if]--]
-                        [#if dmaconfig.dmaHandel??][#assign ipdmahandler = dmaconfig.dmaHandel][#else][#assign ipdmahandler = ipdmahandler1][/#if]                     
+                        [#if dmaconfig.dmaHandel??][#assign ipdmahandler = dmaconfig.dmaHandel][#else][#assign ipdmahandler = ipdmahandler1][/#if]
                             [#list dmaconfig.dmaHandel as dmaH]
                                 #t#tHAL_${getDmaType(dmaconfig)}_DeInit(${instHandler}->${dmaH});
                             [/#list]
 [#if dmaCurrentRequest?contains("dfsdm")]
 [#-- #t} --]
 #n
-[/#if]                        
+[/#if]
                     [#-- /#list (Not necessary for DFSDM: applicable for all handler) --] [#-- list dmaService as dmaconfig --]
-             [/#if]    
+             [/#if]
         [/#if]
-    [/#if]   
+    [/#if]
 [/#macro]
 
 [#-- End macro add service code --]
 [#--------------DMA DFSDM --]
 [#-- macro generateConfigModelCode --]
 
-[#macro generateConfigModelCode configModel inst nTab index]
+[#macro generateConfigModelCode configModel inst nTab index mode]
+[#if configModel.clockEnableMacro?? && mode=="Init"] [#-- Enable Port clock --]
+    [#list configModel.clockEnableMacro as clkmacroList]
+            [#if nTab==2]#t#t[#else]#t[/#if]${clkmacroList}[#if !clkmacroList?contains("(")]()[/#if];
+    [/#list]
+[/#if]
 [#if configModel.methods??] [#-- if the pin configuration contains a list of LibMethods--]
     [#assign methodList = configModel.methods]
 [#else] [#assign methodList = configModel.libMethod]
 
 [/#if]
+[#assign listofDeclaration = ""]
 [#assign writeConfigComments=false]
 [#list methodList as method]
     [#if method.status=="OK"][#assign writeConfigComments=true][/#if]
@@ -328,15 +348,19 @@ ETH_TxPacketConfig TxConfig;
 [#if writeConfigComments]
 [#if configModel.comments??] #t#t/**${configModel.comments?replace("#t","#t#t")} #n#t#t*/[/#if]
 [/#if]
-	[#list methodList as method][#assign args = ""]	      
+	[#list methodList as method][#assign args = ""]
 		[#if method.status=="OK"]
              	[#if method.arguments??]
                     [#list method.arguments as fargument][#compress]
-                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
+                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if][/#compress]
                     [#if fargument.genericType == "struct"]
-                        [#if fargument.context??]
+                        [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name]
+                        [/#if]
+                        [#if fargument.context?? && fargument.optional!="output"]
                             [#if fargument.context=="global"]
-                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || configModel.ipName=="MDMA"]
+                                [#if configModel.ipName=="DMA" || configModel.ipName?starts_with("BDMA") || configModel.ipName=="MDMA"]
                                     [#if configModel.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
                                         [#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
                                     [#else]
@@ -347,8 +371,8 @@ ETH_TxPacketConfig TxConfig;
                                    [#if index??][#assign instanceIndex = index][#else][#assign instanceIndex = inst?replace(name,"")][/#if]
                                 [/#if]
                             [/#if]
-                        [/#if]                     
-                        [#if instanceIndex??&&fargument.context=="global"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
+                        [/#if]
+                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
                         [#-- [#assign arg = "" + adr + fargument.name] --]
                         [#if ((!method.name?contains("Init")&&fargument.context=="global")||fargument.optional=="output")]
                         [#else]
@@ -356,15 +380,15 @@ ETH_TxPacketConfig TxConfig;
                             [#if argument.genericType != "struct"]
                                 [#if argument.mandatory]
                                 [#if argument.value??]
-                                    [#if instanceIndex??&&fargument.context=="global"]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]
                                         [#assign argValue=argument.value?replace("$Index",instanceIndex)]
                                     [#else]
                                         [#assign argValue=argument.value]
                                     [/#if][#-- if global --]
                                     [#if argument.genericType=="Array"][#-- if genericType=Array --]
-                                    [#assign valList = argument1.value?split(argument1.arraySeparator)]     
-                                            [#assign i = 0]                                  
-                                        [#list valList as val] 
+                                    [#assign valList = argument1.value?split(argument1.arraySeparator)]
+                                            [#assign i = 0]
+                                        [#list valList as val]
                                             [#if argument1.typeName == "10"]
                                                 #t${argument1.name}[${i}] = ${val};
                                             [#else]
@@ -378,7 +402,7 @@ ETH_TxPacketConfig TxConfig;
                                     [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
                                     [#else]
                                     [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
-                                    [/#if]                                                                     
+                                    [/#if]
                                     [/#if]
                                     [#else] [#-- else argument.mandatory--]
                                       [#if fargument.name!="GPIO_InitStruct" && fargument.name!="GPIO_Init"]
@@ -392,13 +416,24 @@ ETH_TxPacketConfig TxConfig;
                                                 [/#if]
                                           [#else]
                                               [#if argument.status=="KO"]
-                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
+                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};
                                               [/#if]
-                                              [#if argument.value??]
-                                                   [#if argument.value!="N/A"][#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};  [/#if]
-                                              [/#if]                                    
-                                          [/#if][#-- if argument=Instance--]                                
-                                      [/#if]    
+                                              [#if argument.value??]                                              
+                                                    [#if argument.value!="N/A"]
+                                                        [#assign argValue=argument.value]
+                                                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign varName=fargument.name +"." +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                                                        
+                                                        [#assign indicator = varName+"."+argument.name+" = "+argValue+" "]
+                                                        [#assign indicatorName = varName+"."+argument.name]
+                                                        [#if !listofDeclaration?contains(indicator)][#-- if not repeted --]  
+                                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#assign varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};
+                                                            [#assign listofDeclaration = listofDeclaration?replace(indicatorName+" =","")]
+                                                            [#assign listofDeclaration = listofDeclaration +", "+ varName+"."+argument.name+" = "+argValue+" "]                                                                                 
+                                                        [/#if]
+                                                    [/#if]
+                                              [/#if]
+                                          [/#if][#-- if argument=Instance--]
+                                      [/#if]
                                 [/#if][#-- if argument.mandatory--]
                                 
                             [#else]
@@ -407,11 +442,11 @@ ETH_TxPacketConfig TxConfig;
                                 [#if argument2.value??][#assign argValue=argument2.value][#else] [#assign argValue=""][/#if]
                                 [#if argument2.mandatory]
                                     [#if argument2.value??]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
-                                    [#if argument2.genericType=="Array"][#-- if genericType=Array --] 
-                                        [#assign valList = argument2.value?split(":")]     
-                                            [#assign i = 0]                                  
-                                        [#list valList as val] 
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
+                                    [#if argument2.genericType=="Array"][#-- if genericType=Array --]
+                                        [#assign valList = argument2.value?split(":")]
+                                            [#assign i = 0]
+                                        [#list valList as val]
                                             [#if argument2.typeName == "10"]
                                                 #t${argument2.name}[${i}] = ${val};
                                             [#else]
@@ -421,7 +456,7 @@ ETH_TxPacketConfig TxConfig;
                                         [/#list]
                                         [#assign argValue="&"+argument2.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument2.status=="KO"]
@@ -436,24 +471,24 @@ ETH_TxPacketConfig TxConfig;
  [#if argument3.value??][#assign argValue=argument3.value][#else] [#assign argValue=""][/#if]
                                 [#if argument3.mandatory]
                                     [#if argument3.value??]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
-                                    [#if argument3.genericType=="Array"][#-- if genericType=Array --] 
-                                        [#assign valList = argument3.value?split(":")]     
-                                            [#assign i = 0]                                  
-                                        [#list valList as val] 
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
+                                    [#if argument3.genericType=="Array"][#-- if genericType=Array --]
+                                        [#assign valList = argument3.value?split(":")]
+                                            [#assign i = 0]
+                                        [#list valList as val]
                                             #t${argument3.name}[${i}] = ${val};
                                             [#assign i = i+1]
                                         [/#list]
                                         [#assign argValue="&"+argument3.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};                                    
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument3.status=="KO"]
-                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
                                     [/#if]
                                     [#if argument3.status=="OK"]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
                                     [/#if]
                                 [/#if][#-- if argument.mandatory --]
 [/#list]
@@ -465,49 +500,56 @@ ETH_TxPacketConfig TxConfig;
                     [#else][#-- if struct --]
                     [#assign arg = ""]
                         [#if fargument.status=="OK" && fargument.value??]
-                            [#assign argIndex = inst?replace(name,"")]  
+                            [#assign argIndex = inst?replace(name,"")]
                                             [#if argIndex??]
                                                 [#assign argValue=fargument.value?replace("$Index",argIndex)]
                                                 [#assign arg = "" + adr + argValue]
                                             [#else]
-                                                [#assign arg = "" + adr + fargument.value]                                                
+                                                [#assign arg = "" + adr + fargument.value]
                                             [/#if]
                         [/#if]
                     [/#if]
                     [#if args == "" && arg!=""][#assign args = args + arg ][#else][#if arg!=""][#assign args = args + ', ' + arg][/#if][/#if]
                     [/#list]
                     [#--[#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n--]
+                    [#if !(method.callMethod)][#else]
                             [#if method.returnHAL=="false"]
                                 [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});
                             [#else]
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
-                            [/#if]#n                                    
+                            [/#if]#n
+                    [/#if]        
 		[#else]
-                    [#--[#if nTab==2]#t#t[#else]#t[/#if]${method.name}();#n--]
+                    [#if !(method.callMethod)][#else]
                             [#if method.returnHAL=="false"]
                                 [#if nTab==2]#t#t[#else]#t[/#if]${method.name}();
                             [#else]
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
-                            [/#if]#n                            
-                [/#if]			
+                            [/#if]#n
+                    [/#if]            
+                [/#if]
 		[/#if]
 		[#if method.status=="KO"]
 		#n [#if nTab==2]#t#t[#else]#t[/#if]//!!! ${method.name} is commented because some parameters are missing
-			[#if method.arguments??]			
+			[#if method.arguments??]
 				[#list method.arguments as fargument]
 					[#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
+                                        [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
 					[#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
-                                        [#if fargument.context??]                   
-                                            [#if fargument.context=="global"]
-                                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || configModel.ipName=="MDMA"]
+                                            [#if fargument.optional == "output"]
+                                                [#assign arg = "" + adr + fargument.name]
+                                            [/#if]
+                                            [#if fargument.context?? && fargument.optional!="output"]                 
+                                              [#if fargument.context=="global"]
+                                                [#if configModel.ipName=="DMA" || configModel.ipName?starts_with("BDMA") || configModel.ipName=="MDMA"]
                                                 [#if configModel.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
                                                        [#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
                                                 [#else]
@@ -517,7 +559,7 @@ ETH_TxPacketConfig TxConfig;
                                                 [#assign instanceIndex = inst?replace(name,"")]
                                                 [/#if]
                                             [/#if]
-                                        [/#if]              
+                                        [/#if]
                         [#if instanceIndex??&&fargument.context=="global"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "" + adr + fargument.name][/#if]
                         [#if (!method.name?contains("Init")&&fargument.context=="global")]
                         [#else]
@@ -529,7 +571,7 @@ ETH_TxPacketConfig TxConfig;
                                  [#else]
                                     [#if argument.name=="Instance"]
                                         [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${inst};
-                                    [/#if]                                
+                                    [/#if]
                                 [/#if]
                             [#else]
                             [#list argument.argument as argument1]
@@ -542,12 +584,12 @@ ETH_TxPacketConfig TxConfig;
                             [/#list]
 [/#if]
                                         [#else] [#-- if argument != struct --]
-                                            [#assign argIndex = inst?replace(name,"")] 
+                                            [#assign argIndex = inst?replace(name,"")]
                                             [#if argIndex??]
                                                 [#assign argValue=fargument.value?replace("$Index",argIndex)]
                                                 [#assign arg = "" + adr + argValue]
                                             [#else]
-                                                [#assign arg = "" + adr + fargument.value]                                                
+                                                [#assign arg = "" + adr + fargument.value]
                                             [/#if]
                                         [/#if]
 					[#if args == ""][#assign args = args + arg ]
@@ -563,9 +605,9 @@ ETH_TxPacketConfig TxConfig;
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
-                            [/#if]#n                                
+                            [/#if]#n
                         [/#if]
                 [/#if]
         [/#list]
@@ -576,7 +618,7 @@ ETH_TxPacketConfig TxConfig;
 [#-- End macro generateConfigModelCode --]
 
 [#-- macro generateConfigCode --]
-[#macro generateConfigCode ipName type serviceName instHandler tabN]
+[#macro generateConfigCode ipName type serviceName instHandler tabN ]
 [#if type=="Init"]
  [#assign service = getInitServiceMode(ipName)]
 [#else]
@@ -596,20 +638,20 @@ ETH_TxPacketConfig TxConfig;
 #n#t#t/* ${ipName} ${getDmaServiceType(dmaService)} Init */
 [/#if]
 [/#if]
-   
+
 [#if serviceName=="gpio"]
  [#assign instanceIndex =""]
-    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [#if serviceName=="gpioOut"]
  [#assign instanceIndex =""]
 [#if gpioOutService!="empty"]
-    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [/#if]
 [#if serviceName=="dma" && dmaService??]
  [#assign instanceIndex =""]
-    [#list dmaService as dmaconfig] 
+    [#list dmaService as dmaconfig]
 [#if dmaconfig.dmaRequestName=""]
             [#assign dmaCurrentRequest = dmaconfig.instanceName?lower_case]
         [#else]
@@ -619,48 +661,50 @@ ETH_TxPacketConfig TxConfig;
 [#--workAround DFSDM--]
  [#assign ind="" ]
 [#if dmaCurrentRequest?contains("dfsdm")]
-    [#assign ind=dmaconfig.dmaRequestName?substring(dmaconfig.dmaRequestName?length-1)]
+    [#assign reqName  = dmaconfig.dmaRequestName?replace("_ON_BDMA1","")]
+    [#assign ind=reqName?substring(reqName?length-1)]
 #tif(${instHandler}->Instance == ${ipName}_Filter${ind}){
 [/#if]
-     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode=type/]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
-        
-            [#-- #t__HAL_LINKDMA(${instHandler},[#if dmaconfig.dmaHandel??]${dmaconfig.dmaHandel}[#else]hdma${prefix}[/#if],${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});#n --]
-            [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
-                [#assign channel="channel"]
-                [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
-                  [#assign channel="stream"]
+            [#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
+                [#-- #t__HAL_LINKDMA(${instHandler},[#if dmaconfig.dmaHandel??]${dmaconfig.dmaHandel}[#else]hdma${prefix}[/#if],${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});#n --]
+                [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
+                    [#assign channel="channel"]
+                    [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
+                      [#assign channel="stream"]
+                    [/#if]
+                    #t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
+                    #t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
+                    [#assign one_sdio_request=false]
+                    [#if (FamilyName=="STM32F1" || FamilyName=="STM32F2" || FamilyName=="STM32F4") && dmaconfig.dmaRequestName=="SDIO"]
+                      [#assign one_sdio_request=true]
+                    [/#if]
+                    [#if FamilyName=="STM32L1" && dmaconfig.dmaRequestName=="SD_MMC"]
+                      [#assign one_sdio_request=true]
+                    [/#if]
+                    [#if (FamilyName=="STM32F7" || FamilyName=="STM32L4") && dmaconfig.dmaRequestName=="SDMMC1"]
+                      [#assign one_sdio_request=true]
+                    [/#if]
+                    [#if one_sdio_request]
+                    #t#t/* Be sure to change transfer direction before calling
+                    #t#t   HAL_SD_ReadBlocks_DMA or HAL_SD_WriteBlocks_DMA. */
+                    [/#if]
+                [/#if]   [#-- if more than one dma handler--]
+                [#list dmaconfig.dmaHandel as dmaH]
+                    [#if dmaconfig.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
+                        #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});
+                    [#else]
+            [#--workAround DFSDM--]
+                [#assign ind=""]
+                [#if dmaconfig.dmaRequestName?contains("DFSDM")]
+                    [#assign ind=dmaconfig.dmaRequestName?replace("DFSDM","")]
                 [/#if]
-                #t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
-                #t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
-                [#assign one_sdio_request=false]
-                [#if (FamilyName=="STM32F1" || FamilyName=="STM32F2" || FamilyName=="STM32F4") && dmaconfig.dmaRequestName=="SDIO"]
-                  [#assign one_sdio_request=true]
-                [/#if]
-                [#if FamilyName=="STM32L1" && dmaconfig.dmaRequestName=="SD_MMC"]
-                  [#assign one_sdio_request=true]
-                [/#if]
-                [#if (FamilyName=="STM32F7" || FamilyName=="STM32L4") && dmaconfig.dmaRequestName=="SDMMC1"]
-                  [#assign one_sdio_request=true]
-                [/#if]
-                [#if one_sdio_request]
-                #t#t/* Be sure to change transfer direction before calling
-                #t#t   HAL_SD_ReadBlocks_DMA or HAL_SD_WriteBlocks_DMA. */
-                [/#if]
-            [/#if]   [#-- if more than one dma handler--]  
-            [#list dmaconfig.dmaHandel as dmaH]
-                [#if dmaconfig.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
-                    #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});
-                [#else]
-        [#--workAround DFSDM--]
-            [#assign ind=""]
-            [#if dmaconfig.dmaRequestName?contains("DFSDM")]
-                [#assign ind=dmaconfig.dmaRequestName?replace("DFSDM","")]
+                        #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.dmaRequestName?lower_case});
+                    [/#if]
+                [/#list]
             [/#if]
-                    #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.dmaRequestName?lower_case});
-                [/#if]
-            [/#list]
             [#-- #t#t__HAL_LINKDMA(${instHandler},[#if dmaconfig.dmaHandel??]${dmaconfig.dmaHandel}[#else]hdma${prefix}[/#if],${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});#n --]
 [#if dmaCurrentRequest?contains("dfsdm")]
     #t}
@@ -695,8 +739,8 @@ ETH_TxPacketConfig TxConfig;
         [#if instanceData.instanceName==currentipname]
             [#if instanceData.dmaHandel??] [#assign result=instanceData.dmaHandel][/#if]
         [/#if]
-    [/#list] 
-    [#return result]   
+    [/#list]
+    [#return result]
 [/#function]
 [#-- End function: getDmaHandler(currentipname) --]
 
@@ -720,10 +764,19 @@ ETH_TxPacketConfig TxConfig;
             [/#if]
             [#if entry.key=="gpio"]
             [#assign gpioExist = true]
-            [/#if]            
+            [/#if]
         [/#list]
-        [/#if]    
-    [#if serviceType=="Init"] 
+        [/#if]
+[#assign usedDriverFlag = ""]
+[#list ipvar.configModelList as instanceData]
+    [#if instanceData.usedDriver?? && instanceData.usedDriver == "LL"]
+        [#assign usedDriverFlag = usedDriverFlag+" LL"]
+    [#else]
+        [#assign usedDriverFlag = usedDriverFlag+" HAL"]
+    [/#if]
+    
+[/#list]
+    [#if serviceType=="Init"]
         [#if !ipName?contains("I2C")&& !ipName?contains("USB")] [#-- if not I2C --]
             [#if initService.clock??]
                 [#if initService.clock!="none"]
@@ -731,7 +784,7 @@ ETH_TxPacketConfig TxConfig;
                         [#if usedDriverFlag?? && !usedDriverFlag?contains("LL")]
                         #t#tHAL_PWR_EnableBkUpAccess();
                         #t#t/* Enable BKP CLK enable for backup registers */
-                        #t#t__HAL_RCC_BKP_CLK_ENABLE();    
+                        #t#t__HAL_RCC_BKP_CLK_ENABLE();
                         [#else]
                         #t#tLL_PWR_EnableBkUpAccess();
                         #t#t/* Enable BKP CLK enable for backup registers */
@@ -739,13 +792,13 @@ ETH_TxPacketConfig TxConfig;
                         [/#if]
                     [/#if]
                         #t#t/* ${ipName} clock enable */
-                    [#list initService.clock?split(';') as clock]    
+                    [#list initService.clock?split(';') as clock]
                         [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED++;
-                            #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){          
-                            #t#t#t${clock?trim}();
-                            [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]  
+                            #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){
+                            #t#t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
+                            [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]
                         [#else]
-                           #t#t${clock?trim}();
+                           #t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
                         [/#if]
                     [/#list]
                 [/#if]
@@ -754,26 +807,26 @@ ETH_TxPacketConfig TxConfig;
                 #t#t__HAL_RCC_${ipName}_CLK_ENABLE(); 
             [/#if]
         [/#if] [#-- if not I2C --]
-    [#else]  [#-- serviceType = deInit --]     
+    [#else]  [#-- serviceType = deInit --]
         [#if initService.clock??]
             [#if initService.clock!="none"]
                #t#t/* Peripheral clock disable */
-               [#list initService.clock?split(';') as clock]     
+               [#list initService.clock?split(';') as clock]
                     [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]
                         [#if (ipvar.usedDriver == "HAL")]
                             #t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED--;
-                            #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==0){                                    
+                            #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==0){
                   #t#t#t${clock?replace("ENABLE","DISABLE")?trim}(); 
-                            [#if (ipvar.usedDriver == "HAL") && ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]          
+                            [#if (ipvar.usedDriver == "HAL") && ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]
                             [#else]
                              #t#t/* Be sure that all peripheral instances that share the same clock need to be disabled */
                              #t#t/**#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED--;
-                             #t#t*#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==0){                                    
-                             #t#t*#t#t${clock?replace("ENABLE","DISABLE")?trim}(); 
+                             #t#t*#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==0){
+                             #t#t*#t#t${clock?replace("ENABLE","DISABLE")?trim}[#if !clock?contains('(')]()[/#if]; 
                              #t#t**/
                         [/#if]
                     [#else]
-    #t#t${clock?replace("ENABLE","DISABLE")?trim}();
+    #t#t${clock?replace("ENABLE","DISABLE")?trim}[#if !clock?contains('(')]()[/#if];
                     [/#if]
                [/#list]
             [/#if]
@@ -787,21 +840,27 @@ ETH_TxPacketConfig TxConfig;
          [/#if]
     [/#if]
     [#if gpioExist]
+        [#if FamilyName=="STM32MP1"]
+            [#-- if defined (CONFIG_MASTER_MODE) --]
+        [/#if]
         #t[@generateConfigCode ipName=ipName type=serviceType serviceName="gpio" instHandler=instHandler tabN=tabN/]
+[#if FamilyName=="STM32MP1"]
+       [#-- #endif --]
+    [/#if]
     [/#if]
 [#-- if I2C clk_enable should be after GPIO Init Begin --]
-    [#if serviceType=="Init" && (ipName?contains("I2C")||ipName?contains("USB"))] 
+    [#if serviceType=="Init" && (ipName?contains("I2C")||ipName?contains("USB"))]
            [#if initService.clock??]
             [#if initService.clock!="none"]
                #t#t/* ${ipName} clock enable */
                 [#list initService.clock?split(';') as clock]
                     [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED++;
-                    #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){          
+                    #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){
                         #t#t#t${clock?trim}();
-                    [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]  
+                    [#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]
                     [#else]
-                        #t#t${clock?trim}();
-                    [/#if]        
+                        #t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
+                    [/#if]
                 [/#list]
             [/#if]
             [#else]
@@ -809,13 +868,13 @@ ETH_TxPacketConfig TxConfig;
                  #t#t__HAL_RCC_${ipName}_CLK_ENABLE(); 
            [/#if]
 [/#if]
-[#-- if I2C clk_enable should be after GPIO Init End --]    
-[#if serviceType=="Init"] 
+[#-- if I2C clk_enable should be after GPIO Init End --]
+[#if serviceType=="Init"]
     [#if dmaExist]
 #t[@generateConfigCode ipName=ipName type=serviceType serviceName="dma" instHandler=instHandler tabN=tabN/]
     [/#if]
 [#-- bug 322189 Init--]
-[#if ipName?contains("OTG_FS")&&FamilyName=="STM32L4"]
+[#if ipName?contains("OTG_FS")&&(FamilyName=="STM32L4"|FamilyName=="STM32U5") || Line.equals("STM32G0x1") && ipName?contains("USB_DRD_FS")]
 #n#t#t/* Enable VDDUSB */
   #t#tif(__HAL_RCC_PWR_IS_CLK_DISABLED())
   #t#t{
@@ -859,7 +918,7 @@ ETH_TxPacketConfig TxConfig;
                 [/#list]
                 [#assign lowPower = "no"]
                 [#list initService.nvic as initVector]
-                   [#if (instHandler=="pcdHandle") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")) && USB_INTERRUPT_WAKEUP??))]
+                   [#if (instHandler=="pcdHandle") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")||(initVector.vector == "USB_LP_IRQn")) && USB_INTERRUPT_WAKEUP??))]
                       [#assign lowPower = "yes"]
                    [/#if]
                 [/#list]
@@ -937,12 +996,12 @@ ETH_TxPacketConfig TxConfig;
                                 #t#tHAL_${getDmaType(dmaconfig)}_DeInit(${instHandler}->${dmaH});
                             [/#list]
     [/#list] [#-- list dmaService as dmaconfig --]
-[/#if]    
+[/#if]
     [/#if] [#-- if DMA exist --]
 [#-- DeInit NVIC if DeInit --]
     [#if service??&&service.nvic??&&nvicExist&&service.nvic?size>0]#n#t#t/* ${ipName} interrupt Deinit */[#--#n#t#tHAL_NVIC_DisableIRQ([#if service.nvic.vector??]${service.nvic.vector}[/#if]);--]
-[#list service.nvic as initVector]                
-               [#if initVector.shared=="false"]             
+[#list service.nvic as initVector]
+               [#if initVector.shared=="false"]
                 #t#tHAL_NVIC_DisableIRQ(${initVector.vector});
                 [#else]
 #t/* USER CODE BEGIN ${ipName}:${initVector.vector} disable */
@@ -988,21 +1047,33 @@ ${variable.value} ${variable.name};
 [@common.generateCecRxBuffer configModelList=IP.configModelList methodName="HAL_CEC_Init" argumentName="RxBuffer" bufferType="uint8_t" bufferSize="16"/]
 [#-- Global variables --]#n
 [#list IP.configModelList as instanceData]
-[#if instanceData.isMWUsed=="false"]
+[#if instanceData.isMWUsed=="false" && instanceData.isBusDriverUSed=="false"]
      [#assign instName = instanceData.instanceName]
         [#assign halMode= instanceData.halMode]
         /* ${instName} init function */
         [#if halMode!=instanceData.realIpName&&!instanceData.ipName?contains("TIM")&&!instanceData.ipName?contains("CEC")]#nvoid MX_${instName}_${halMode}_Init(void)[#else]void MX_${instName}_Init(void)[/#if]
 {
+
+#n
+#t/* USER CODE BEGIN ${instName}_Init 0 */
+#n
+#t/* USER CODE END ${instName}_Init 0 */    
+#n
+
         [#-- assign ipInstanceIndex = instName?replace(name,"")--]
         [#assign args = ""]
         [#assign listOfLocalVariables =""]
-        [#assign resultList =""] 	
-[@common.getLocalVariableList instanceData=instanceData/]      
-#n      
+        [#assign resultList =""]
+[@common.getLocalVariableList instanceData=instanceData/]
+#n
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name="Src/resmgrutility_"+instName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
 [#-- if used Driver is LL --]
 [#if instanceData.usedDriver?? && instanceData.usedDriver!="HAL"][#--Check if LL driver is used. instanceData:ConfigModel --]
-    [#-- varaible declaration --]
+    [#-- variable declaration --]
     [#assign v = ""]
     [#if instanceData.initServices?? && instanceData.initServices.gpio?? ]
         [#assign service=instanceData.initServices.gpio]
@@ -1010,11 +1081,57 @@ ${variable.value} ${variable.name};
                [#if v?contains(variable.name)]
                [#-- no matches--]
                [#else]
-   #t${variable.value} ${variable.name};
-                   [#assign v = v + " "+ variable.name/]	
-               [/#if]	
-           [/#list]  
+                    #t${variable.value} ${variable.name} = {0};
+                   [#assign v = v + " "+ variable.name/]
+               [/#if]
+           [/#list]
     [/#if]
+    [#if  !(instName?starts_with("GPDMA")) && !(instName?starts_with("LPDMA")) && instanceData.initServices?? && instanceData.initServices.dma?? && FamilyName=="STM32U5"]
+        [#assign service=instanceData.initServices.dma]
+           [#list service as dmaConfig]
+                [#list dmaConfig.variables as variable] [#-- variables declaration --]
+                    [#if v?contains(variable.name)]
+                    [#-- no matches--]
+                    [#else]
+                        #t${variable.value} ${variable.name} = {0};
+                        [#assign v = v + " "+ variable.name/]	
+                    [/#if]	
+                [/#list]
+           [/#list]
+
+    [/#if]
+[#assign listOfLocalVariables =""]
+    [#assign resultList =""]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+        [#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+        [#list pclockConfig.configs as config] [#--list1--]
+            [@common.getLocalVariable configModel1=config listOfLocalVariables=listOfLocalVariables resultList=resultList/]
+            [#assign listOfLocalVariables =resultList]
+        [/#list]
+    [/#if]
+[/#if]
+#n
+[#assign clockInst=""]
+
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[#assign nTab=2]
+[#else]
+[#assign nTab=1]
+[/#if]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=""  nTab=nTab index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+#n
+    [/#if]
+[/#if]
+
     [#-- if used with LL and MspPost init is required using gpioOut service --]
     [#if instanceData.initServices?? && instanceData.initServices.gpioOut?? ]
            [#assign service=instanceData.initServices.gpioOut]
@@ -1022,17 +1139,27 @@ ${variable.value} ${variable.name};
                [#if v?contains(variable.name)]
                [#-- no matches--]
                [#else]
-   #t${variable.value} ${variable.name};
-                   [#assign v = v + " "+ variable.name/]	
-               [/#if]	
-           [/#list]  
+   #t${variable.value} ${variable.name} = {0};
+                   [#assign v = v + " "+ variable.name/]
+               [/#if]
+           [/#list]
     [/#if]
     [#-- Generate service code --]
-    [@common.generateServiceCode ipName=instName serviceType="Init" modeName="mode" instHandler=instName tabN=1 IPData=instanceData/] 
+    [@common.generateServiceCode ipName=instName serviceType="Init" modeName="mode" instHandler=instName tabN=1 IPData=instanceData/]
 [/#if]
+
+#t/* USER CODE BEGIN ${instName}_Init 1 */
+#n
+#t/* USER CODE END ${instName}_Init 1 */
+
         [#--list instanceData.configs as config--]
             [#if instanceData.instIndex??][@common.generateConfigModelListCode configModel=instanceData inst=instName  nTab=1 index=instanceData.instIndex/][#else][@common.generateConfigModelListCode configModel=instanceData inst=instName  nTab=1 index=""/][/#if]
         [#--/#list--]
+
+#t/* USER CODE BEGIN ${instName}_Init 2 */
+#n
+#t/* USER CODE END ${instName}_Init 2 */
+
 [#-- MspPostInit callBack if needed for output gpio config --]
 [#if instanceData.initServices??]
     [#if instanceData.initServices.gpioOut??]
@@ -1081,7 +1208,7 @@ static uint32_t ${entry.value}=0;
     [/#list]
 [#assign DFSDM_var = "true"]
 [/#if]
-[#-- #nvoid HAL_${mode}_MspInit(${mode}_HandleTypeDef* h${mode?lower_case}){--] 
+[#-- #nvoid HAL_${mode}_MspInit(${mode}_HandleTypeDef* h${mode?lower_case}){--]
 [#if name !="TIM"]
 #nvoid ${entry.key}(${mode}_HandleTypeDef* ${mode?lower_case}Handle)
 {#n
@@ -1090,13 +1217,13 @@ static uint32_t ${entry.value}=0;
 {
 #n
 [/#if]
-[#--Check if the Msp init will be empty start--] 
-    [#assign mspIsEmpty="yes"] 
+[#--Check if the Msp init will be empty start--]
+    [#assign mspIsEmpty="yes"]
     [#list instanceList as inst]
      [#if getInitServiceMode(inst)??]
         [#assign services = getInitServiceMode(inst)]
         [#if (services.gpio??)||!services.clock??||(services.clock??&&services.clock!="none")||(services.nvic??&&services.nvic?size>0)||(services.dma??)]
-            [#assign mspIsEmpty="no"] 
+            [#assign mspIsEmpty="no"]
             [#break]
         [/#if]
      [/#if]
@@ -1107,10 +1234,10 @@ static uint32_t ${entry.value}=0;
 
      [#assign services = getInitServiceMode(inst)]
 [#if services.dma??]
-     [#assign dmaService=services.dma]   
+     [#assign dmaService=services.dma]
     [#if dmaService?? && dmaService?size!=0]
     [#list dmaService as dmaRequest]
-        [#list dmaRequest.methods as method]	
+        [#list dmaRequest.methods as method]
 		[#if method.status=="OK" && method.arguments??]
                     [#list method.arguments as fargument]
                         [#if fargument.genericType == "struct" && fargument.context??]
@@ -1130,17 +1257,17 @@ static uint32_t ${entry.value}=0;
 [#assign words = instanceList]
 [#-- declare Variable GPIO_InitTypeDef once --]
        [#assign v = ""]
-[#list words as inst] [#-- loop on ip instances datas --] 
+[#list words as inst] [#-- loop on ip instances datas --]
  [#assign services = getInitServiceMode(inst)]
  [#if services.gpio??][#assign service=services.gpio]
         [#list service.variables as variable] [#-- variables declaration --]
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
                 [#assign v = v + " "+ variable.name/]	
-            [/#if]	
-        [/#list]  
+            [/#if]
+        [/#list]
 [/#if]
 [/#list]
 [#-- add local variables for HAL_DMAEx_ConfigMuxSync --]
@@ -1156,7 +1283,7 @@ static uint32_t ${entry.value}=0;
             [#if func_argument.genericType == "struct" && func_argument.context != "global"]
               [#if !list_contains(local_dma_variables, func_argument.name)]
                 [#assign local_dma_variables = local_dma_variables + " " + func_argument.name]
-#t${func_argument.typeName} ${func_argument.name};
+#t${func_argument.typeName} ${func_argument.name}= {0};
               [/#if]
             [/#if]
           [/#list]
@@ -1167,26 +1294,94 @@ static uint32_t ${entry.value}=0;
 [/#if]
 [#-- --]
 [#if mspIsEmpty=="no"]
+[#if IP.ipName==ipvar.ipName]
+
+    [#assign listOfLocalVariables = ""]
+    [#assign  resultList  = ""]
+    [#list IP.configModelList as instanceData]
+[#assign  halMode  = getHalMode(IP.ipName)]
+        [#if instanceData.initServices??  && halMode==instanceData.halMode]
+            [#if instanceData.initServices.pclockConfig??]
+
+                [#list instanceData.initServices.pclockConfig.configs as config] [#--list1--]
+                    [#assign listOfLocalVariables = getLocalVariableCLK(config)]
+[#if listOfLocalVariables !="" ]
+                    [#if resultList == ""]
+                        [#list  listOfLocalVariables?split("/") as variable]
+                            #t${variable} = {0};
+                            [#if resultList == ""]
+                                [#assign resultList = variable]
+                            [#else]
+                                [#assign resultList = resultList + ":"+ variable]
+                            [/#if]
+                        [/#list]
+                    [#else]
+                        [#list  listOfLocalVariables?split("/") as variable]
+                            [#assign  dup  = ""]
+                            [#list  resultList?split(":") as v]
+                                [#if v == variable]
+                                    [#assign  dup  = "yes"]
+                                [/#if]
+                            [/#list]
+                            [#if dup != "yes"]
+                                #t${variable} = {0};
+                                [#assign resultList = resultList + ":"+ variable]
+                            [/#if]
+                        [/#list]
+                    [/#if]
+[/#if]
+                [/#list]
+            [/#if]
+        [/#if]
+    [/#list]
+
+[/#if]
     [#if  words[0]?contains("DFSDM")]
-        [#assign word0 = words[0]]  
-        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
-            #tif(${words[0]}_Init == 0)             
+        [#assign word0 = words[0]]
+        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
+            #tif(${words[0]}_Init == 0)
         [#else]
             #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if](${words[0]}_Init == 0)) 
         [/#if]
         #t{
    [#else]
-        [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]
-        #tif(${mode?lower_case}Handle->Instance==${words[0]?replace("I2S","SPI")})
-        #t{
-    [/#if]
+        [#assign word0 = words[0]]
+        [#if  word0.contains("ADF")||word0.contains("MDF")]              
+            #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if]
+            #t{
+        [#else]
+            [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]
+            #tif(${mode?lower_case}Handle->Instance==${words[0]?replace("I2S","SPI")})
+            #t{
+            [/#if]
+        [/#if]
     [/#if]
 
-[#if words?size > 1] [#-- Check if there is more than one ip instance--]        
+[#if words?size > 1] [#-- Check if there is more than one ip instance--]
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 0 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 0 */
-    [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/] 
+
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[0]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[0]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
+    [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
     [#if words[0]?contains("DFSDM")]
     [@generateServiceCodeDFSDM ipName=words[0] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
     [/#if]
@@ -1196,26 +1391,51 @@ static uint32_t ${entry.value}=0;
 [#if  words[0]?contains("DFSDM")]
 #t${words[0]}_Init++;
 [/#if]
-#t} 
+#t}
 
     [#assign i = 0]
     [#list words as inst]
-    [#if i>0] 
+    [#if i>0]
     [#if  words[i]?contains("DFSDM")]
-[#assign word0 = words[i]]  
-        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
-            #tif(${words[0]}_Init == 0)             
+        [#assign word0 = words[i]]
+        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
+            #tif(${words[0]}_Init == 0)
         [#else]
             #telse if([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if](${words[i]}_Init == 0))
         [/#if]
     [#else]
+        [#assign word0 = words[i]]
+        [#if  word0.contains("ADF")||word0.contains("MDF")]              
+            #telse if[#if word0.contains("ADF")](IS_ADF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if]
+        [#else]
         #telse if(${mode?lower_case}Handle->Instance==${words[i]?replace("I2S","SPI")}) [#-- if I2S instance should be SPI--]
+        [/#if]
     [/#if]
     #t{
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspInit 0 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspInit 0 */
-        [@generateServiceCode ipName=words[i] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/] 
+
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[i]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[i]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
+        [@generateServiceCode ipName=words[i] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspInit 1 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspInit 1 */
@@ -1231,7 +1451,27 @@ static uint32_t ${entry.value}=0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 0 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 0 */
-    [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/] 
+
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[0]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[0]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
+    [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 1 */
@@ -1266,16 +1506,16 @@ static uint32_t ${entry.value}=0;
 [#assign usedDriverFlag = ""]
 [#list ipvar.configModelList as instanceData]
     [#if instanceData.usedDriver?? && instanceData.usedDriver == "LL"]
-        [#assign usedDriverFlag = usedDriverFlag+" LL"]    
+        [#assign usedDriverFlag = usedDriverFlag+" LL"]
     [#else]
-        [#assign usedDriverFlag = usedDriverFlag+" HAL"]     
+        [#assign usedDriverFlag = usedDriverFlag+" HAL"]
     [/#if]
-    
+
 [/#list]
-       
+
 [#assign ipHandler = "h" + mode?lower_case]
 [#--Check if the Msp init will be empty start--] 
-    [#assign mspIsEmpty1="yes"] 
+    [#assign mspIsEmpty1="yes"]
     [#list instanceList as inst]
      [#if getInitServiceMode(inst)??]
         [#assign services = getInitServiceMode(inst)]
@@ -1291,7 +1531,7 @@ uint32_t DFSDM1_Init = 0;
 [#assign DFSDM_var = "true"]
 [/#if]
 
-[#-- #nvoid HAL_${mode}_MspInit(${mode}_HandleTypeDef* h${mode?lower_case}){--] 
+[#-- #nvoid HAL_${mode}_MspInit(${mode}_HandleTypeDef* h${mode?lower_case}){--]
 [#if (mspIsEmpty1=="no")&&(mode!="TIM")]
     #n#nvoid HAL_${mode}_MspPostInit(${mode}_HandleTypeDef* ${mode?lower_case}Handle)
     {
@@ -1310,58 +1550,64 @@ uint32_t DFSDM1_Init = 0;
     [#-- declare Variable GPIO_InitTypeDef once --]
            [#assign v = ""]
     [#assign mspExist="false"]
-    [#list words as inst] [#-- loop on ip instances datas --] 
+    [#list words as inst] [#-- loop on ip instances datas --]
         [#assign services = getInitServiceMode(inst)]
         [#if services?? && services!="" && services.gpioOut??][#assign service=services.gpioOut]
                [#list service.variables as variable] [#-- variables declaration --]
                    [#if v?contains(variable.name)]
                    [#-- no matches--]
                    [#else]
-       #t${variable.value} ${variable.name};
-                       [#assign v = v + " "+ variable.name/]	
-                   [/#if]	
-               [/#list]  
+       #t${variable.value} ${variable.name} = {0};
+                       [#assign v = v + " "+ variable.name/]
+                   [/#if]
+               [/#list]
        [/#if]
     [/#list]
 [/#if]
 [#-- --]
 [#if mspIsEmpty1=="no"]
 [#if  words[0]?contains("DFSDM")]
-[#assign word0 = words[0]]  
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
-        #tif(${words[0]}_Init == 0)             
+[#assign word0 = words[0]]
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
+        #tif(${words[0]}_Init == 0)
     [#else]
         #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))&&[/#if](${words[0]}_Init == 0))
     [/#if]
         #t{
 [#else]
-    [#if ipvar.instanceNbre >  1 ] [#-- IF number of IP instances greater than 0--]
- #tif(${mode?lower_case}Handle->Instance==${words[0]?replace("I2S","SPI")})
+    [#assign word0 = words[0]]
+    [#if  word0.contains("ADF")||word0.contains("MDF")]              
+        #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if]
         #t{
+    [#else]
+        [#if ipvar.instanceNbre >  1 ] [#-- IF number of IP instances greater than 0--]
+            #tif(${mode?lower_case}Handle->Instance==${words[0]?replace("I2S","SPI")})
+            #t{
+        [/#if]
     [/#if]
 [/#if]
 
-[#if words?size > 1] [#-- Check if there is more than one ip instance--]    
+[#if words?size > 1] [#-- Check if there is more than one ip instance--]
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspPostInit 0 */
 
-#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 0 */    
-        [@generateConfigCode ipName=words[0] type="Init" serviceName="gpioOut" instHandler=mode?lower_case+"Handle" tabN=2/]  
+#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 0 */
+        [@generateConfigCode ipName=words[0] type="Init" serviceName="gpioOut" instHandler=mode?lower_case+"Handle" tabN=2/]
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */
 
-#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */   
-    #t} 
+#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */
+    #t}
     [#assign i = 0]
     [#list words as inst]
-    [#if i>0]    
+    [#if i>0]
     #telse if(${mode?lower_case}Handle->Instance==${words[i]?replace("I2S","SPI")})
     #t{
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspPostInit 0 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspPostInit 0 */
-       #t[@generateConfigCode ipName=words[i] type="Init" serviceName="gpioOut" instHandler=mode?lower_case+"Handle" tabN=2/] 
+       #t[@generateConfigCode ipName=words[i] type="Init" serviceName="gpioOut" instHandler=mode?lower_case+"Handle" tabN=2/]
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspPostInit 1 */
 
-#n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspPostInit 1 */    
+#n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspPostInit 1 */
 #t}
         [/#if]
         [#assign i = i + 1]
@@ -1377,7 +1623,7 @@ uint32_t DFSDM1_Init = 0;
 
     #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */
     [/#if]
-    [#if ipvar.instanceNbre >  1 || words[0]?contains("DFSDM")] [#-- IF number of IP instances greater than 0--]    
+    [#if ipvar.instanceNbre >  1 || words[0]?contains("DFSDM")] [#-- IF number of IP instances greater than 0--]
         #t}
     [/#if]
 [/#if]
@@ -1408,30 +1654,36 @@ uint32_t DFSDM1_Init = 0;
 [#if mspIsEmpty=="no"]
 [#assign words = instanceList]
 [#if words[0]?contains("DFSDM")]
-[#assign word0 = words[0]] 
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+[#assign word0 = words[0]]
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
         #t${words[0]}_Init-- ;
-        #tif(${words[0]}_Init == 0)           
+        #tif(${words[0]}_Init == 0)
     [#else]
         #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if])
         #t{    
         #t#t${words[0]}_Init-- ;
         #t#tif((${words[0]}_Init == 0))
     [/#if]
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE500" || FamilyName == "STM32L4"]
     [#else]
         
     [/#if]
     #t#t{
 [#else]
+    [#assign word0 = words[0]]
+    [#if  word0.contains("ADF")||word0.contains("MDF")]
+        #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if]
+        #t{
+    [#else]
         [#if ipvar.instanceNbre >  1 ] [#-- IF number of IP instances greater than 0--]
             #tif(${mode?lower_case}Handle->Instance==${words[0]?replace("I2S","SPI")})
             #t{
         [/#if]
+    [/#if]
 [/#if]
 
 [#if words?size > 1] [#-- Check if there is more than one ip instance--]
- [#assign deInitService = getDeInitServiceMode(words[0])]    
+ [#assign deInitService = getDeInitServiceMode(words[0])]
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 0 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 0 */
@@ -1439,7 +1691,7 @@ uint32_t DFSDM1_Init = 0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[0]?contains("DFSDM") &&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && FamilyName != "STM32L4" )]
+[#if words[0]?contains("DFSDM") &&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && DIE != "DIE483" && DIE != "DIE500" && DIE != "DIE472" && FamilyName != "STM32L4" )]
 #t#t}
 [/#if]
 #t}
@@ -1447,16 +1699,21 @@ uint32_t DFSDM1_Init = 0;
     [#list words as inst]
         [#if i>0]
 [#if words[i]?contains("DFSDM")]
-[#assign word0 = words[i]]  
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]        
-    [#else]        
-        #telse if([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if])
-        #t{
-    [/#if] 
-#t#t${words[i]}_Init-- ;
-#t#tif((${words[i]}_Init == 0))
+    [#assign word0 = words[i]]
+        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
+        [#else]
+            #telse if([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(${mode?lower_case}Handle->Instance))[/#if])
+            #t{
+        [/#if]
+    #t#t${words[i]}_Init-- ;
+    #t#tif((${words[i]}_Init == 0))
 [#else]
-#telse if(${mode?lower_case}Handle->Instance==${words[i]?replace("I2S","SPI")})
+    [#assign word0 = words[i]]
+    [#if  word0.contains("ADF")||word0.contains("MDF")]              
+        #telse if[#if word0.contains("ADF")](IS_ADF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(${mode?lower_case}Handle->Instance))[/#if]        
+    [#else]
+    #telse if(${mode?lower_case}Handle->Instance==${words[i]?replace("I2S","SPI")})
+    [/#if]
 [/#if]
 [#if words[i]?contains("DFSDM")]
 #t#t{
@@ -1465,15 +1722,15 @@ uint32_t DFSDM1_Init = 0;
 [/#if]
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspDeInit 0 */
 
-#n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspDeInit 0 */    
-[@generateServiceCode ipName=words[i] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/] 
+#n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspDeInit 0 */
+[@generateServiceCode ipName=words[i] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
 [#if words[i]?contains("DFSDM")]
 [@generateServiceCodeDFSDM ipName=words[i] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
 [/#if]
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[i]?contains("DFSDM") &&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && FamilyName != "STM32L4" )]
+[#if words[i]?contains("DFSDM") &&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && DIE != "DIE483" && DIE != "DIE500" && DIE != "DIE472" && FamilyName != "STM32L4" )]
 #t#t}
 [/#if]
 #t}
@@ -1486,7 +1743,7 @@ uint32_t DFSDM1_Init = 0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 0 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 0 */
-[@generateServiceCode ipName=words[0] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/] 
+[@generateServiceCode ipName=words[0] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
 
 [#if words[0]?contains("DFSDM")]
 [@generateServiceCodeDFSDM ipName=words[0] serviceType="DeInit" modeName=mode instHandler=mode?lower_case+"Handle" tabN=2/]
@@ -1497,7 +1754,7 @@ uint32_t DFSDM1_Init = 0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[0]?contains("DFSDM")&&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && FamilyName!="STM32L4")]
+[#if words[0]?contains("DFSDM")&&(DIE != "DIE451" && DIE != "DIE449" && DIE != "DIE441" && DIE != "DIE450" && DIE != "DIE483" && DIE != "DIE500" && DIE != "DIE472" && FamilyName!="STM32L4")]
 #t#t}
 [/#if]
 [/#if]
@@ -1520,13 +1777,5 @@ uint32_t DFSDM1_Init = 0;
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

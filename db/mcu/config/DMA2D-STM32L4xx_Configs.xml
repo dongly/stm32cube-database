@@ -11,7 +11,7 @@
             <MethodArg Name="hdma2d.LayerCfg[1].InputOffset"     ParameterName="InputOffsetForeground"/>
             <MethodArg Name="hdma2d.LayerCfg[1].InputColorMode"  ParameterName="InputColorModeForeground"/>
             <MethodArg Name="hdma2d.LayerCfg[1].AlphaMode"       ParameterName="AlphaModeForeground"/>
-            <MethodArg Name="hdma2d.LayerCfg[1].InputAlpha"      ParameterName="InputAlphaForeground"/>
+            <MethodArg Name="hdma2d.LayerCfg[1].InputAlpha"      ParameterName="InputAlphaForeground"/> 
             <MethodArg Name="hdma2d.LayerCfg[1].AlphaInverted"   ParameterName="AlphaInvertedForeground"/>
             <MethodArg Name="hdma2d.LayerCfg[1].RedBlueSwap"     ParameterName="RedBlueSwapForeground"/>
 			
@@ -19,6 +19,7 @@
 		
         <ImplementCallBack Name="HAL_DMA2D_MspInit"/>
         <ImplementCallBack Name="HAL_DMA2D_MspDeInit"/>
+        
     </RefConfig>  
 
     <RefConfig Name="DMA2D_ConfigLayerForeground">
@@ -588,6 +589,10 @@
             <Argument AddressOf="false" GenericType="simple" Name="ErrorCode" OptimizationCondition="equal"/>
         </Argument>
     </LibMethod>
+    
+    
+    
+
     <RefComponent Cclass="HAL" Cgroup="DMA2D" Cversion="0.8.0">
         <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_dma2d.h"/>
         <File Category="source" Name="Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_dma2d.c"/>

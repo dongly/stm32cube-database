@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbd_cdc_if.h
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usbd_cdc_if.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_CDC_IF_H__
@@ -33,6 +35,25 @@
 [#-- Global variables --]
 [/#compress]
 [/#list]
+
+[#--  BZ 74391 REJECTED --]
+[#assign RX_DATA_SIZE = 4]
+[#assign TX_DATA_SIZE = 4]
+[#list SWIPdatas as SWIP]
+[#compress]
+[#if SWIP.defines??]
+	[#list SWIP.defines as definition]		
+    [#if definition.name?contains("APP_RX_DATA_SIZE")]	    
+[#assign RX_DATA_SIZE = definition.value]
+    [/#if]
+	[#if definition.name?contains("APP_TX_DATA_SIZE")]
+[#assign TX_DATA_SIZE = definition.value]
+    [/#if]
+	[/#list]
+[/#if]
+[/#compress]
+[/#list]
+
 
 #ifdef __cplusplus
  extern "C" {
@@ -59,6 +80,12 @@
   * @brief Defines.
   * @{
   */
+[#-- BZ 102389 Generate RX, TX Buffer size  out of user code section --]
+[#--  BZ 74391 --]
+/* Define size for the receive and transmit buffer over CDC */
+[#--  /* It's up to user to redefine and/or remove those define */ --]
+#define APP_RX_DATA_SIZE  ${RX_DATA_SIZE}
+#define APP_TX_DATA_SIZE  ${TX_DATA_SIZE}
 /* USER CODE BEGIN EXPORTED_DEFINES */
 
 /* USER CODE END EXPORTED_DEFINES */

@@ -1,36 +1,57 @@
 [#ftl]
 
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+
 [#compress]
 [#list datas as data]
     [#if data.ipName=="gpio"]
-[#if data.comments??]
-#n/** ${data.comments}
-*/
-[/#if]
+/**
+#t* @brief  GPIO Initialization Function
+#t* @param  None
+#t* @retval None
+#t*/
+[#list voids as void]
+    [#assign fctname = "MX_GPIO_Init"]
+        [#if void.functionName == fctname]
+            [#if void.isStatic]
 static void MX_GPIO_Init(void) 
+            [#else]
+void MX_GPIO_Init(void) 
+            [/#if]
+        [/#if]
+[/#list] 
 {
-#n
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+data.ipName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
         [#assign v = ""]
+[#if data.ipName=="gpio"][#-- Actually we don't need to generate code for gpio modes not associated to any peripheral --]
         [#list data.variables as variable]				
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
         	[#assign v = v + " "+ variable.name/]	
             [/#if]	
         [/#list]
+[/#if]
 [#if isHalSupported=="true"]
     [#if clock?size >0 ]#n#t/* GPIO Ports Clock Enable */[/#if]
-    [#list clock as clockMacro]
-        [#if clockMacro!=""] 
-            [#if clockMacro?contains("(")]
-                #t${clockMacro};
-            [#else]
-                #t${clockMacro}();
+        [#list clock as clockMacro]
+            [#if clockMacro!=""] 
+                [#if clockMacro?contains("(")]
+                    #t${clockMacro};
+                [#else]
+                    #t${clockMacro}();
+                [/#if]
             [/#if]
-        [/#if]
-    [/#list] 
-[/#if]
+        [/#list] 
+    [/#if]
 
 [#else] [#-- peripheral gpio init function --]
 [#if data.comments??]
@@ -39,29 +60,35 @@ static void MX_GPIO_Init(void)
 [/#if]
 static void MX_${data.ipName}_GPIO_Init(void) 
 {
+
 #n
         [#assign v = ""]
         [#list data.variables as variable] [#-- variables declaration --]
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
                 [#assign v = v + " "+ variable.name/]	
             [/#if]	
         [/#list]
-    [/#if]
-
+[/#if]
 
 [#if data.methods??] [#-- if the pin configuration contains a list of LibMethods--]
+[#if data.ipName=="gpio"][#-- Actually we don't need to generate code for gpio modes not associated to any peripheral --]
+
 	[#list data.methods as method][#assign args = ""]	
 		[#if method.status=="OK"]	
                 [#-- --]                
                 [#if method.name == "HAL_GPIO_Init"]
                     [#assign pin = ""]
                     [#assign port = ""]
+                    [#assign isLPGPIO = "false"]
                     [#list method.arguments as fargument]
                     [#if fargument.name =="GPIOx"]							
                        [#assign port = port + " " + fargument.value]
+[#if fargument.value?contains("LPGPIO")]
+[#assign isLPGPIO = "true"]
+[/#if]
                         [#assign i =port?length-1]
                         [#assign j =port?length]
                        [#assign port = "P"+port?substring(i,j)]
@@ -74,8 +101,16 @@ static void MX_${data.ipName}_GPIO_Init(void)
                         [/#list]
                     [/#if]
                     [/#list]
+
                     [#compress]
-  [#--comment of GPIO configuration--]  #n#t/*Configure GPIO [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#if x?contains("GPIO_PIN")][#assign i =x?split("_")] [#assign j =i?last]${port}${j}[#else]${x} [/#if] [/#list] */[/#compress]
+[#if isLPGPIO == "false"]
+  [#--comment of GPIO configuration--]  #n#t/*Configure GPIO [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#if x?contains("GPIO_PIN")][#assign i =x?split("_")] [#assign j =i?last]${port}${j}[#else]${x} [/#if] [/#list] */
+[#else]
+#n#t/*Configure LPGPIO  [#if pin?split("|")?size>1]pins[#else]pin[/#if] : [#list pin?split("|") as x][#if x?contains("GPIO_PIN")][#assign i =x?split("_")] [#assign j =i?last]Pin${j}[#else]${x} [/#if] [/#list] */
+[/#if]
+[/#compress]
+
+
                 [#else]
                 [#if method.comment??]#n#t/*[#compress]${method.comment} */[/#compress][/#if]			
                 [/#if]    
@@ -159,9 +194,11 @@ static void MX_${data.ipName}_GPIO_Init(void)
 [/#compress]
 [/#if]
 #n
+[/#if]
 }
 
 #n
+
 [/#if] [#-- else there is no LibMethod to call--]
 
 

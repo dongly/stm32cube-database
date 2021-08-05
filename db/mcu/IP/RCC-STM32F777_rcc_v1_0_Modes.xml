@@ -523,7 +523,7 @@
     <RefParameter Visible="false" Comment="VCO Clock"       Name="PLLDSIVCOFreq_Value" DefaultValue="500000000" Type="double" Display="value/1000000" Unit="MHz" Min="500000000" Max="1000000000"/>
 		
     <!--Source frequency-->
-    <RefParameter Visible="false" Comment="LSI Source"  Name="LSI_VALUE"    DefaultValue="32000" Max="32000"   Min="32000" Type="double" Display="value/1000" Unit="KHz"/>
+    <RefParameter Visible="false" Comment="LSI RC"  Name="LSI_VALUE"    DefaultValue="32000" Max="47000"   Min="17000" Type="double" Display="value/1000" Unit="KHz"/>
     <RefParameter Visible="false" Comment="HSI Source"  Name="HSI_VALUE"    DefaultValue="16000000"   Type="double"  Display="value/1000000" Unit="MHz" />
     
     <RefParameter Visible="false" Comment="LSE OSC"     Name="LSE_VALUE" DefaultValue="32768"    Max="32768"    Min="32768"    Type="double" Display="value/1000"    Unit="KHz">
@@ -600,7 +600,7 @@
 	
   
     <RefParameter Visible="false" Comment="APB1 Timers"     Name="APB1TimFreq_Value"    DefaultValue="16000000"   Type="double"  IP="TIMER2,TIMER3,TIMER4,TIMER5,TIMER12,TIMER13,TIMER14,TIMER6,TIMER7" Display="value/1000000" Unit="MHz" />
-    <RefParameter Visible="false" Comment="APB2 Timers"     Name="APB2TimFreq_Value"    DefaultValue="16000000"   Type="double"  IP="TIMER9,TIMER10,TIMER11" Display="value/1000000" Unit="MHz" />
+    <RefParameter Visible="false" Comment="APB2 Timers"     Name="APB2TimFreq_Value"    DefaultValue="16000000"   Type="double"  IP="TIMER1,TIMER8,TIMER9,TIMER10,TIMER11" Display="value/1000000" Unit="MHz" />
     
     <RefParameter Visible="false" Comment="FCLK Cortex"         Name="FCLKCortexFreq_Value"   DefaultValue="16000000"   Type="double"  Display="value/1000000" Unit="MHz" />
     <RefParameter Visible="false" Comment="Cortex System Timer" Name="CortexFreq_Value"       DefaultValue="16000000"   Type="double"  Display="value/1000000" Unit="MHz" />
@@ -1137,14 +1137,14 @@
     <RefParameter Visible="false" Comment="LSI used flag" DefaultValue="0" Name="LSIUsed" Type="integer" Min="0" Max="0"/>
    
     <!-- LSI state to codGen -->
-    <RefParameter Visible="false" Comment="Lsi State" DefaultValue="RCC_LSI_OFF" Name="LSIState" Type="list">
+    <!--RefParameter Visible="false" Comment="Lsi State" DefaultValue="RCC_LSI_OFF" Name="LSIState" Type="list">
         <Condition Expression="LSIUsed=0" Diagnostic=""/>
         <PossibleValue Comment="Lsi Off" Value="RCC_LSI_OFF"/>
     </RefParameter>
 	
     <RefParameter Visible="false" Comment="Lsi State" DefaultValue="RCC_LSI_ON" Name="LSIState" Type="list">
         <PossibleValue Comment="Lsi ON" Value="RCC_LSI_ON"/>
-    </RefParameter>
+    </RefParameter-->
 	
 	
 	
@@ -1594,7 +1594,7 @@
 	
 	
     <!--params for LSI-->
-    <RefParameter Visible="false" Comment="LSI StateARG" DefaultValue="+LSIState" Name="LSIStateARG" Type="list">
+    <RefParameter Visible="false" Comment="LSI StateARG" DefaultValue="RCC_LSI_ON" Name="LSIStateARG" Type="list">
         <Condition Diagnostic="LSI used" Expression="LSIUsed=1"/>
     </RefParameter>
 	
@@ -1762,6 +1762,9 @@
 	
 	
     <!--params for MSI and HSI calibration-->
+    <RefParameter Visible="false" Comment="HSICalibrationValueARG" DefaultValue="RCC_HSICALIBRATION_DEFAULT" Name="HSICalibrationValueARG" Type="list">
+        <Condition Diagnostic="HSI used" Expression="HSIUsed=1 &amp; HSICalibrationValue=16"/>
+    </RefParameter>
     <RefParameter Visible="false" Comment="HSICalibrationValueARG" DefaultValue="+HSICalibrationValue" Name="HSICalibrationValueARG" Type="list">
         <Condition Diagnostic="HSI used" Expression="HSIUsed=1"/>
     </RefParameter>
@@ -1911,30 +1914,30 @@
     <RefParameter Visible="false" Name="TIMPresSelectionARG" Comment="TIMPresSelectionARG" Type="list" DefaultValue="null"/>
 	
 	
-    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulatror Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
+    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulator Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
         <Condition Diagnostic="" Expression="((HCLKFreq_Value &gt; 180000000))"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE1" Comment="Power Regulator Voltage Scale 1"/>
     </RefParameter>
-    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulatror Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
+    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulator Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
         <Condition Diagnostic="" Expression="((PWREXT_OverDrive=PWREXT_OverDrive_DESACTIVATED)&amp;((HCLKFreq_Value &gt; 168000000)))"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE1" Comment="Power Regulator Voltage Scale 1"/>
 		
 
     </RefParameter>
-	   <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulatror Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
+	   <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulator Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE1" Group="Power Parameters">
         <Condition Diagnostic="" Expression="((PWREXT_OverDrive=PWREXT_OverDrive_ACTIVATED)&amp;((HCLKFreq_Value &gt; 168000000)))"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE1" Comment="Power Regulator Voltage Scale 1"/>
 		  <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE2" Comment="Power Regulator Voltage Scale 2"/>
 		
 
     </RefParameter>
-    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulatror Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE2" Group="Power Parameters">
+    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulator Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE2" Group="Power Parameters">
         <Condition Diagnostic="" Expression="(HCLKFreq_Value &gt; 144000000)"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE2" Comment="Power Regulator Voltage Scale 2"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE1" Comment="Power Regulator Voltage Scale 1"/>
 
     </RefParameter>
-    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulatror Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE3" Group="Power Parameters">
+    <RefParameter Name="PWR_Regulator_Voltage_Scale" Comment="Power Regulator Voltage Scale" Type="list" DefaultValue="PWR_REGULATOR_VOLTAGE_SCALE3" Group="Power Parameters">
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE3" Comment="Power Regulator Voltage Scale 3"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE2" Comment="Power Regulator Voltage Scale 2"/>
         <PossibleValue Value="PWR_REGULATOR_VOLTAGE_SCALE1" Comment="Power Regulator Voltage Scale 1"/>
@@ -2055,6 +2058,14 @@
         </RefParameter>
 
         <RefParameter Visible="false" Comment="Main PLL is Used" DefaultValue="0" Name="PLLSAIUsedForLTDC" Min="0" Max="0" Type="integer"/>
+
+        <RefParameter Visible="false" Comment="LSIRC is Internal osc" DefaultValue="true" Name="LSIRCisInternal" Type="list">
+            <PossibleValue Comment="LSIRC is Internal osc" Value="true"/>
+        </RefParameter>
+        
+        <RefParameter Visible="false" Comment="LSIEnable" DefaultValue="true" Name="LSIEnable" Type="list">
+            <PossibleValue Comment="LSIEnable" Value="true"/>
+        </RefParameter>
     <RefMode Name="ClockTree">
         <ConfigForMode>RCC_PLL_PLLM_CONFIG</ConfigForMode>
         <ConfigForMode>RCC_PLL_PLLSOURCE_CONFIG</ConfigForMode>
@@ -2202,7 +2213,7 @@
         <Parameter Name="LSEState"/>
         <Parameter Name="OscillatorTypeLSI"/>
         <Parameter Name="LSIUsed"/>
-        <Parameter Name="LSIState"/>
+        <!--Parameter Name="LSIState"/-->
         <Parameter Name="OscillatorTypeHSI"/>
         <Parameter Name="HSIUsed"/>
         <Parameter Name="HSIState"/>

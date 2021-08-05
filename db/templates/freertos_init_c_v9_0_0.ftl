@@ -1,6 +1,6 @@
 [#ftl]
 [#compress]
-
+[#assign threadControlBlock = "NULL"]
 [#assign nbThreads = 0]
 [#assign nbM = 0]
 [#assign nbRM = 0]
@@ -17,10 +17,10 @@
 
 [#list SWIPdatas as SWIP]
   [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
-	  [#if variable.name=="Mutexes"]       
+        [#list SWIP.variables as variable]
+          [#if variable.name=="Mutexes"]
         [#assign s = variable.valueList]
-	    [#assign index = 0]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 0] 
             [#assign mutexName = i]
@@ -36,7 +36,7 @@
         [#if mutexName != "0"]
           [#assign nbM = nbM + 1]
           [#if nbM == 1]
-            #n#t/* Create the mutex(es) */
+            #t/* Create the mutex(es) */
           [/#if]
             #t/* definition and creation of ${mutexName} */
           [#if mutexAllocation == "Dynamic"]
@@ -45,19 +45,19 @@
             #tosMutexStaticDef(${mutexName}, &${mutexControl});
           [/#if]
           #t${mutexName}Handle = osMutexCreate(osMutex(${mutexName}));
-          #n       
+          #n
         [/#if]
       [/#if] 	
-	[/#list]
+    [/#list]
   [/#if] 
 [/#list]
 
 [#list SWIPdatas as SWIP]
   [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
-	  [#if variable.name=="RecursiveMutexes"]       
+    [#list SWIP.variables as variable]
+      [#if variable.name=="RecursiveMutexes"]
         [#assign s = variable.valueList]
-	    [#assign index = 0]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 0] 
             [#assign mutexName = i]
@@ -82,10 +82,10 @@
             #tosMutexStaticDef(${mutexName}, &${mutexControl});
           [/#if]
           #t${mutexName}Handle = osRecursiveMutexCreate(osMutex(${mutexName}));
-          #n       
+          #n
         [/#if]
       [/#if] 	
-	[/#list]
+    [/#list]
   [/#if] 
 [/#list]
 
@@ -96,10 +96,10 @@
 
 [#list SWIPdatas as SWIP]
   [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
-	  [#if variable.name=="BinarySemaphores"]       
+    [#list SWIP.variables as variable]
+      [#if variable.name=="BinarySemaphores"]
         [#assign s = variable.valueList]
-	    [#assign index = 0]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 0] 
             [#assign semaphoreName = i]
@@ -127,7 +127,7 @@
           #n
         [/#if]
       [/#if]
-	[/#list]
+    [/#list]
   [/#if]
 [/#list]
 
@@ -157,7 +157,7 @@
           [#if nbSemaphores == 1]
             #n#t/* Create the semaphores(s) */
           [/#if]
-          #t/* definition and creation of ${semaphoreName} */        
+          #t/* definition and creation of ${semaphoreName} */
           [#if semaphoreAllocation == "Dynamic"]
             #tosSemaphoreDef(${semaphoreName});
           [#else]
@@ -167,7 +167,7 @@
           #n 
         [/#if]
       [/#if]
-	[/#list]
+    [/#list]
   [/#if]
 [/#list]
 
@@ -180,8 +180,8 @@
   [#if SWIP.variables??]
     [#list SWIP.variables as variable]
       [#if variable.name=="Timers"]
-	    [#assign s = variable.valueList]
-	    [#assign index = 0]
+        [#assign s = variable.valueList]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 0]
             [#assign timerName = i]
@@ -220,7 +220,7 @@
           [#else]
           #tosTimerStaticDef(${timerName}, ${timerCallback}, &${timerControlBlock});
           [/#if]
-          #t${timerName}Handle = osTimerCreate(osTimer(${timerName}), ${timerType}, NULL); 
+          #t${timerName}Handle = osTimerCreate(osTimer(${timerName}), ${timerType}, ${timerParameters}); 
           #n
         [/#if]
       [/#if]
@@ -230,15 +230,70 @@
 
 #n
 #t/* USER CODE BEGIN RTOS_TIMERS */
-#t/* start timers, add new ones, ... */          
+#t/* start timers, add new ones, ... */
 #t/* USER CODE END RTOS_TIMERS */
 
 [#list SWIPdatas as SWIP]
   [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
+    [#list SWIP.variables as variable]
+      [#if variable.name=="Queues"]
+        [#assign s = variable.valueList]
+        [#assign index = 0]
+        [#list s as i]
+          [#if index == 0]
+            [#assign queueName = i]
+          [/#if]
+          [#if index == 1]
+            [#assign queueSize = i]
+          [/#if]
+          [#if index == 2]
+            [#assign queueElementType = i]
+          [/#if]
+          [#if index == 3]
+            [#assign queueIsIntegerType = i]
+          [/#if]
+          [#if index == 4]
+            [#assign queueAllocation = i]
+          [/#if]
+          [#if index == 5]
+            [#assign queueBuffer = i]
+          [/#if]
+          [#if index == 6]
+            [#assign queueControlBlock = i]
+          [/#if]
+          [#assign index = index + 1]
+        [/#list]
+        [#if queueName != "0"]       
+          [#assign nbQueues = nbQueues + 1]
+          [#if nbQueues == 1]
+            #n#t/* Create the queue(s) */
+          [/#if]
+          #t/* definition and creation of ${queueName} */
+          [#if queueAllocation == "Dynamic"]
+            [#-- what about the sizeof here??? cd native code  --]
+            #tosMessageQDef(${queueName}, ${queueSize}, ${queueElementType});
+          [#else]
+            #tosMessageQStaticDef(${queueName}, ${queueSize}, ${queueElementType}, ${queueBuffer}, &${queueControlBlock});
+          [/#if]
+          #t${queueName}Handle = osMessageCreate(osMessageQ(${queueName}), ${queueThreadId});
+          #n
+        [/#if]
+      [/#if]
+	[/#list]
+  [/#if]
+[/#list]
+      
+#n
+#t/* USER CODE BEGIN RTOS_QUEUES */
+#t/* add queues, ... */          
+#t/* USER CODE END RTOS_QUEUES */
+
+[#list SWIPdatas as SWIP]
+  [#if SWIP.variables??]
+    [#list SWIP.variables as variable]
       [#if variable.name=="Threads"]
-	    [#assign s = variable.valueList]
-	    [#assign index = 0]
+        [#assign s = variable.valueList]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 0]
             [#assign threadName = i]
@@ -269,7 +324,7 @@
           [/#if]
           [#if index == 9]
             [#assign threadControlBlock = i]
-          [/#if]      
+          [/#if]
           [#assign index = index + 1]
         [/#list]
         [#assign nbThreads = nbThreads + 1]
@@ -294,59 +349,5 @@
 #t/* add threads, ... */          
 #t/* USER CODE END RTOS_THREADS */
 #n
-
-[#list SWIPdatas as SWIP]
-  [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
-      [#if variable.name=="Queues"]
-	    [#assign s = variable.valueList]
-	    [#assign index = 0]
-        [#list s as i]
-          [#if index == 0]
-            [#assign queueName = i]
-          [/#if]
-          [#if index == 1]
-            [#assign queueSize = i]
-          [/#if]
-          [#if index == 2]
-            [#assign queueElementType = i]
-          [/#if]
-          [#if index == 3]
-            [#assign queueIsIntegerType = i]
-          [/#if]
-          [#if index == 4]
-            [#assign queueAllocation = i]
-          [/#if]
-          [#if index == 5]
-            [#assign queueBuffer = i]
-          [/#if]
-          [#if index == 6]
-            [#assign queueControlBlock = i]
-          [/#if]          
-          [#assign index = index + 1]
-        [/#list]
-        [#if queueName != "0"]       
-          [#assign nbQueues = nbQueues + 1]
-          [#if nbQueues == 1]
-            #n#t/* Create the queue(s) */
-          [/#if]
-          #t/* definition and creation of ${queueName} */
-          [#if queueAllocation == "Dynamic"]
-            #tosMessageQDef(${queueName}, ${queueSize}, ${queueElementType});
-          [#else]
-            #tosMessageQStaticDef(${queueName}, ${queueSize}, ${queueElementType}, ${queueBuffer}, &${queueControlBlock});
-          [/#if]
-          #t${queueName}Handle = osMessageCreate(osMessageQ(${queueName}), ${queueThreadId});
-          #n
-        [/#if]
-      [/#if]
-	[/#list]
-  [/#if]
-[/#list]
-      
-#n
-#t/* USER CODE BEGIN RTOS_QUEUES */
-#t/* add queues, ... */          
-#t/* USER CODE END RTOS_QUEUES */
 
 [/#compress]

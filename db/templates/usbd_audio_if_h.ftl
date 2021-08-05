@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbd_audio_if.h
@@ -6,10 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usbd_audio_if.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
-
+/* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USBD_AUDIO_IF_H__
 #define __USBD_AUDIO_IF_H__

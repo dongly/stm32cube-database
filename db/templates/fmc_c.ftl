@@ -5,9 +5,15 @@
   * Description        : This file provides code for the configuration
   *                      of the ${name} peripheral.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+
 [#list IPdatas as IP]
 [#assign ipvar = IP]
 /* Includes ------------------------------------------------------------------*/
@@ -52,12 +58,7 @@
   [/#if]
 [/#list]
 
-[#if useGpio]
-#include "gpio.h"
-[/#if]
-[#if useDma]
-#include "DMA.h"
-[/#if]
+
 [#-- End Define includes --]
 
 [#-- Function getInitServiceMode --]
@@ -112,7 +113,7 @@
             [/#list]
             [#if !exist]  [#-- if exist --]
               [#if argument.status!="NULL"]
-                    #t${argument.typeName} ${argument.name};
+                    #t${argument.typeName} ${argument.name} = {0};
                 [#if myListOfLocalVariables != ""]
                   [#assign myListOfLocalVariables = myListOfLocalVariables + " " + argument.name]
                 [#else]
@@ -125,7 +126,7 @@
           [/#if][#-- if global --]
         [#else][#-- if context?? --]
           [#if argument.status!="NULL"]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
           [/#if]
         [/#if][#-- if argument.context?? --]
 
@@ -306,7 +307,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n 
 		  [#else][#--if method.arguments??--]
@@ -318,7 +319,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n 
       [/#if][#--if method.arguments??--]
@@ -399,7 +400,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n 
         [#--#n[#if nTab==2]#t#t[#else]#t[/#if]${method.name}();#n[#--add blank line before function call--]
@@ -591,6 +592,16 @@ void MX_${instName}_Init(void)
     [#if halMode!=name]void MX_${instName}_${halMode}_Init(void)[#else]void MX_${instName}_Init(void)[/#if]
   [/#if]
 {
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+instName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
+#t/* USER CODE BEGIN ${instName}_Init 0 */
+#n
+#t/* USER CODE END ${instName}_Init 0 */     
+#n
+
   [#assign args = ""]
   [#assign listOfLocalVariables=""]
   [#assign resultList=""]
@@ -599,9 +610,19 @@ void MX_${instName}_Init(void)
     [#assign listOfLocalVariables=resultList]
   [/#list]
   [#if listOfLocalVariables!=""]#n[/#if]
+
+#t/* USER CODE BEGIN ${instName}_Init 1 */
+#n
+#t/* USER CODE END ${instName}_Init 1 */
+#n
   [#list instanceData.configs as config]
     [@generateConfigModelCode configModel=config inst=instName nTab=1/]
   [/#list]
+
+#t/* USER CODE BEGIN ${instName}_Init 2 */
+#n
+#t/* USER CODE END ${instName}_Init 2 */
+
 }
 [/#list]
 [/#compress]
@@ -623,7 +644,7 @@ void MX_${instName}_Init(void)
   [#list service.variables as variable] [#-- variables declaration --]
     [#if v?contains(variable.name)]
     [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
       [#assign v = v + " " + variable.name]
     [/#if]
   [/#list]
@@ -632,6 +653,41 @@ void MX_${instName}_Init(void)
 #t#treturn;
 #t}
 #t${mspinitvar} = 1;
+
+[#assign listOfLocalVariables =""]
+    [#assign resultList =""]
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+        [#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+        [#list pclockConfig.configs as config] [#--list1--]
+            [@common.getLocalVariable configModel1=config listOfLocalVariables=listOfLocalVariables resultList=resultList/]
+            [#assign listOfLocalVariables =resultList]
+        [/#list]
+    [/#if]
+[/#if]
+[/#list]
+#n
+
+
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[#assign clockInst=""]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=""  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
 [#assign ipHandler = ipvar.ipName?lower_case+ "Handle"]
 [@generateServiceCode ipName=ipvar.ipName serviceType="Init" modeName=ipvar.ipName instHandler=ipHandler tabN=1/]
 #t/* USER CODE BEGIN ${ipvar.ipName}_MspInit 1 */
@@ -681,7 +737,7 @@ void MX_${instName}_Init(void)
     [#assign words = instanceList?word_list]
     [#-- declare Variable GPIO_InitTypeDef once --]
     [#assign v = ""]
-    [#list words as inst] [#-- loop on ip instances datas --] 
+    [#list words as inst] [#-- loop on ip instances data --] 
       [#assign services = getInitServiceMode(inst)]
       [#if services.gpio??]
         [#assign service=services.gpio]

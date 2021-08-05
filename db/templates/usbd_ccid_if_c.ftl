@@ -1,4 +1,5 @@
-
+[#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbd_ccid_if.c
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          :
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#assign handleNameFS = ""]
 [#assign handleNameHS = ""]

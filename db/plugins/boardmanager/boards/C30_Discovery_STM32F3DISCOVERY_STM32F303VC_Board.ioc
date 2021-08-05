@@ -1,6 +1,6 @@
 #MicroXplorer Configuration settings - do not modify
 File.Version=6
-KeepUserPlacement=true
+KeepUserPlacement=false
 Mcu.Family=STM32F3
 Mcu.IP0=NVIC
 Mcu.IP1=RCC
@@ -274,4 +274,5 @@ SH.GPXTI4.0=GPIO_EXTI4
 SH.GPXTI4.ConfNb=1
 SH.GPXTI5.0=GPIO_EXTI5
 SH.GPXTI5.ConfNb=1
+board=STM32F3DISCOVERY
 boardIOC=true

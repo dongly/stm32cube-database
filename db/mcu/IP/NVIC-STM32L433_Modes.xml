@@ -93,7 +93,7 @@
 		<PossibleValue Comment="USART3 global interrupt" Value="USART3_IRQn:Y:USART3::"/>
 		<PossibleValue Comment="EXTI line[15:10] interrupts" Value="EXTI15_10_IRQn:Y,EXTI:EXTI10,EXTI11,EXTI12,EXTI13,EXTI14,EXTI15:HAL_GPIO_EXTI_IRQHandler:10,15"/>
 		<PossibleValue Comment="RTC alarm interrupt through EXTI line 18" Condition="RTC_ALARM_INTERRUPT" Diagnostic="" Value="RTC_Alarm_IRQn:Y,HAL:RTC:HAL_RTC_AlarmIRQHandler:"/>
-		<PossibleValue Comment="SDMMC1 global interrupt" Value="SDMMC1_IRQn:Y:SDMMC1:HAL_SD_IRQHandler:"/>
+		<PossibleValue Comment="SDMMC1 global interrupt" Value="SDMMC1_IRQn:Y:SDMMC1::"/>
 		<PossibleValue Comment="SPI3 global interrupt" Value="SPI3_IRQn:Y:SPI3::"/>
 		<PossibleValue Comment="TIM6 global interrupt, DAC channel1 and channel2 underrun error interrupts" Value="TIM6_DAC_IRQn:Y,2V1:TIM6,DAC1:TIM,DAC:"/>
 		<PossibleValue Comment="TIM7 global interrupt" Value="TIM7_IRQn:Y:TIM7:HAL_TIM_IRQHandler:"/>

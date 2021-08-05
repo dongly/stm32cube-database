@@ -260,8 +260,8 @@
         <Condition Diagnostic="" Expression="((VirtualMode = VM_SYNC) | (VirtualMode = VM_IRDA) | (VirtualMode = VM_SMARTCARD) | $IpInstance_LIN)"/>
         <PossibleValue Comment="null" Value="null"/>
     </RefParameter>	
-    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="list">
-        <Condition Diagnostic="" Expression="STM32F1"/>
+    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="uniqueElementList">
+        <Condition Diagnostic="" Expression="STM32F1 &amp; !STM32F100_Value_Line"/>
         <PossibleValue Comment="16 Samples" Value="UART_OVERSAMPLING_16"/>
     </RefParameter>
     <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="list">
@@ -327,7 +327,7 @@
     <RefParameter Comment="Prescaler" DefaultValue="10" Group="Advanced Parameters" Max="255" Min="1" Name="Prescaler" Type="integer"/>
 	
     <!-- Calculate Speed, based on Prescaler Value on SmartCard Mode -->
-    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="4000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
+    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="5000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
 		
     <!-- Specifics RefParameters for SmartCard Mode Only -->
     <RefParameter Comment="NAck if Parity Error" DefaultValue="SMARTCARD_NACK_DISABLE" Group="Advanced Parameters" Name="NACKState" Type="list">

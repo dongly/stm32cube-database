@@ -20,22 +20,28 @@
 [/#if]
 [/#list]
 [/#if]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-[#if use_dma = 1]
- [#if use_rtos = 1]
-  * @file    sd_diskio.c (based on sd_diskio_dma_rtos_template.c v2.0.2)
- [#else]
-  * @file    sd_diskio.c (based on sd_diskio_dma_template.c v2.0.2)
- [/#if]
-[#else]
-  * @file    sd_diskio.c (based on sd_diskio_template.c v2.0.2)
-[/#if]
+  * @file    sd_diskio.c
   * @brief   SD Disk I/O driver
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
-  */ 
+  */
+/* USER CODE END Header */
+
+[#-- Moved here (as the user section prevents from refreshing the comments). --]
+[#if use_dma = 1]
+ [#if use_rtos = 1]
+/* Note: code generation based on sd_diskio_dma_rtos_template.c v2.0.2 as FreeRTOS is enabled. */
+ [#else]
+/* Note: code generation based on sd_diskio_dma_template.c v2.0.2 as "Use dma template" is enabled. */
+ [/#if]
+[#else]
+/* Note: code generation based on sd_diskio_template.c v2.0.2 as "Use dma template" is disabled. */
+[/#if]
+
 /* USER CODE BEGIN firstSection */
 /* can be used to modify / undefine following code or add new definitions */
 /* USER CODE END firstSection*/
@@ -86,14 +92,14 @@
 
 [#if use_dma = 1]
 /* 
- * when using cachable memory region, it may be needed to maintain the cache
+ * when using cacheable memory region, it may be needed to maintain the cache
  * validity. Enable the define below to activate a cache maintenance at each
  * read and write operation.
  * Notice: This is applicable only for cortex M7 based platform.
  */
 /* USER CODE BEGIN enableSDDmaCacheMaintenance */
 /* #define ENABLE_SD_DMA_CACHE_MAINTENANCE  1 */
-/* USER CODE BEGIN enableSDDmaCacheMaintenance */
+/* USER CODE END enableSDDmaCacheMaintenance */
 [/#if]
 
 /* Private variables ---------------------------------------------------------*/
@@ -286,7 +292,7 @@ DRESULT SD_read(BYTE lun, BYTE *buff, DWORD sector, UINT count)
     while((ReadStatus == 0) && ((HAL_GetTick() - timeout) < SD_TIMEOUT))
     {
     }
-    /* incase of a timeout return error */
+    /* in case of a timeout return error */
     if (ReadStatus == 0)
     {
       res = RES_ERROR;
@@ -400,7 +406,7 @@ DRESULT SD_write(BYTE lun, const BYTE *buff, DWORD sector, UINT count)
     while((WriteStatus == 0) && ((HAL_GetTick() - timeout) < SD_TIMEOUT))
     {
     }
-    /* incase of a timeout return error */
+    /* in case of a timeout return error */
     if (WriteStatus == 0)
     {
       res = RES_ERROR;

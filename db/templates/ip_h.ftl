@@ -1,33 +1,32 @@
 [#ftl]
 /**
   ******************************************************************************
-  * File Name          : ${name}.h
-  * Description        : This file provides code for the configuration
-  *                      of the ${name} instances.
+  * @file    ${name?lower_case}.h
+  * @brief   This file contains all the function prototypes for
+  *          the ${name?lower_case}.c file
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __${name?lower_case}_H
-#define __${name?lower_case}_H
+#ifndef __${name}_H__
+#define __${name}_H__
+
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 [#compress]
-[#assign includesList = ""]
-[#if includes??]
-    [#list includes as include]
-        [#if !includesList?contains(include)]
-#include "${include}"
-            [#assign includesList = includesList+" "+include]
-        [/#if]
-    [/#list]
-[/#if]
-[#if H7_ETH_NoLWIP?? &&HALCompliant??]
+#include "main.h"
+
+[#if H7_ETH_NoLWIP?? && !HALCompliant??]
 #include "string.h"
+[/#if]
+
+[#if RESMGR_UTILITY??]
+#include "res_mgr_conf.h"
+#include "res_mgr.h"
 [/#if]
 [/#compress]
 
@@ -44,7 +43,7 @@
 [#-- Tracker 276386 -- GetHandle Start --]
 [#--${variable.value}* MX_${variable.name?replace("h","")?upper_case}_GetHandle(void);--]
 [#-- Tracker 276386 -- GetHandle End --]
-[#if !variable.value?contains("static const")]
+[#if !variable.value?contains("static const") && !variable.value?contains("uint")]
 extern ${variable.value} ${variable.name};
 [/#if]
 [/#list]
@@ -56,7 +55,7 @@ extern ${variable.value} ${variable.name};
 
 /* USER CODE END Private defines */
 #n
-extern void _Error_Handler(char *, int);
+
 [#-- extract hal mode list used by all instances of the ip --]
 [#assign halModeList= ""]
 
@@ -74,36 +73,8 @@ extern void _Error_Handler(char *, int);
 [#list halModeList?split(" ") as mode]
 [/#list]
 [/#list]
-[#-- PostInit declaration --]
-[#assign postinitList = ""]
-[#list IPdatas as IP]  
-[#list IP.configModelList as instanceData]
-[#if instanceData.initServices??]
-    [#if instanceData.initServices.gpioOut??]
-        [#list instanceData.initCallBackInitMethodList as initCallBack]
-            [#if initCallBack?contains("PostInit")]
-            [#assign halMode = instanceData.halMode]
-                [#assign ipName = instanceData.ipName]
-                [#assign ipInstance = instanceData.instanceName]
-                [#if halMode!=ipName&&!ipName?contains("TIM")&&!ipName?contains("CEC")]
-                    [#if !postinitList?contains(initCallBack)]
-                    #nvoid ${initCallBack}(${instanceData.halMode}_HandleTypeDef *h${instanceData.halMode?lower_case});
-                    [#assign postinitList = postinitList+" "+initCallBack]
-                    [/#if]
-                [#else]
-                    [#if !postinitList?contains(initCallBack)]
-                    #nvoid ${initCallBack}([#if ipName?contains("TIM")&&!(ipName?contains("HRTIM")||ipName?contains("LPTIM"))]TIM_HandleTypeDef *htim[#else]${ipName}_HandleTypeDef *h${ipName?lower_case}[/#if]);
-                    [#assign postinitList = postinitList+" "+initCallBack]
-                     [/#if]
-                [/#if]
-                [#break] [#-- take only the first PostInit : case of timer--]
-            [/#if]
-        [/#list]
-    [/#if]
-[/#if]
-[/#list]
-
-[/#list]
+[#-- PostInit declaration --]         
+[@common.getMspPostInit/]
 [#-- PostInit declaration : End --]
 [#compress]
 #n/* USER CODE BEGIN Prototypes */
@@ -114,14 +85,7 @@ extern void _Error_Handler(char *, int);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ ${name?lower_case}_H */
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
+#endif /* __${name}_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

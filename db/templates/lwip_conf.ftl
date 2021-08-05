@@ -6,18 +6,19 @@
   * Description        : This file overrides LwIP stack default configuration
   *                      done in opt.h file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
  
-[#assign s = name]
-[#assign s_new = s?replace(".","__")]
-[#assign inclusion_protection = s_new?upper_case]
+[#assign s_ori = name]
+[#assign s1 = s_ori?replace(".","__")]
+[#assign s2 = s1?replace("Target/","")]
+[#assign inclusion_protection = s2?upper_case]
 /* Define to prevent recursive inclusion --------------------------------------*/
 #ifndef __${inclusion_protection}__
 #define __${inclusion_protection}__
 
-#include "${FamilyName?lower_case}xx_hal.h"
+#include "main.h"
 
 [#-- SWIPdatas is a list of SWIPconfigModel --]
 [#list SWIPdatas as SWIP]
@@ -72,7 +73,9 @@ extern ${variable.value} ${variable.name};
 [#-- Special parameters RECV_BUFSIZE_DEFAULT is defined with 0xFFFFFFF (INT_MAX in opt.h) >> generate always with freertos --]
 [#-- Special parameters TCP_RCV_SCALE is not defined if LWIP_WND_SCALE is enabled (see opt.h) >> generate always --]
 [#-- Special parameters LWIP_SUPPORT_CUSTOM_PBUF (for H7) >> generate only for h7 --]
-[#assign specialList = ["LWIP_DNS_SECURE", "LWIP_DHCP", "CHECKSUM_BY_HARDWARE", "RECV_BUFSIZE_DEFAULT", "TCP_RCV_SCALE", "LWIP_SUPPORT_CUSTOM_PBUF"]]
+[#-- Special parameters LWIP_RAM_HEAP_POINTER (for H7) >> generate only for h7 --]
+[#-- Special parameters HTTPD_USE_CUSTOM_FSDATA >> limitation to force to 1 when HTTPD is used --]
+[#assign specialList = ["LWIP_DNS_SECURE", "LWIP_DHCP", "CHECKSUM_BY_HARDWARE", "LWIP_NETIF_LINK_CALLBACK", "RECV_BUFSIZE_DEFAULT", "TCP_RCV_SCALE", "LWIP_SUPPORT_CUSTOM_PBUF", "LWIP_RAM_HEAP_POINTER", "LWIP_TCP", "HTTPD_USE_CUSTOM_FSDATA"]]
 
 [#-- Checksum parameters enabled (in opt.h) and disabled in CubeMx --]
 [#assign checksumList = ["CHECKSUM_GEN_IP", "CHECKSUM_GEN_UDP", "CHECKSUM_GEN_TCP", "CHECKSUM_GEN_ICMP", "CHECKSUM_GEN_ICMP6", "CHECKSUM_CHECK_IP", "CHECKSUM_CHECK_UDP", "CHECKSUM_CHECK_TCP", "CHECKSUM_CHECK_ICMP", "CHECKSUM_CHECK_ICMP6"]]
@@ -99,6 +102,8 @@ extern ${variable.value} ${variable.name};
 [#assign fileName = SWIP.fileName]
 [#assign version = SWIP.version]
 [#assign lwip_mbed = 0]
+[#assign lwip_httpd = 0]
+[#assign cmsis_version = "v1"]
 	
 [#if SWIP.defines??]
 	[#list SWIP.defines as definition]
@@ -114,7 +119,12 @@ extern ${variable.value} ${variable.name};
 			[#if definition.value == "1"] 
 			    [#assign lwip_mbed = 1]
 			[/#if]
-		[/#if]		
+		[/#if]
+		[#if definition.name == "LWIP_HTTPD"] 
+			[#if definition.value == "1"] 
+			    [#assign lwip_httpd = 1]
+			[/#if]
+		[/#if]	
 		[#if definition.name == "LWIP_STATS"] [#assign lwip_stats = definition.value] [/#if]
 		[#if definition.name == "LWIP_SO_RCVBUF"] [#assign lwip_so_rcvbuf = definition.value] [/#if]
 		[#if definition.name == "MEMP_NUM_TCPIP_MSG_API"] [#assign memp_num_tcpip_msg_api = definition.value] [/#if]
@@ -151,6 +161,14 @@ extern ${variable.value} ${variable.name};
         [#if definition.name == "LWIP_SNMP"] [#assign lwip_snmp = definition.value] [/#if]
         [#if definition.name == "LWIP_WND_SCALE"] [#assign lwip_wnd_scale = definition.value] [/#if]
         [#if definition.name == "LWIP_SOCKET"] [#assign lwip_socket = definition.value] [/#if]
+        [#if (definition.name == "CMSIS_VERSION")]
+                [#if definition.value == "0"]
+                    [#assign cmsis_version = "v1"]
+                [/#if]
+                [#if definition.value == "1"]
+                    [#assign cmsis_version = "v2"]
+                [/#if]
+        [/#if][#-- CMSIS_VERSION --]
 	[/#list]
 
 [#compress]
@@ -213,7 +231,21 @@ extern ${variable.value} ${variable.name};
             [#if (definition.name=="LWIP_DHCP") && (definition.value == "1")]
 /*----- Value in opt.h for ${definition.name}: 0 -----*/
 #define ${definition.name}   ${definition.value}
-            [/#if]            
+            [/#if]     
+            [#if (definition.name=="LWIP_TCP") && (definition.value == "0")]
+/*----- Value in opt.h for ${definition.name}: 1 -----*/
+#define ${definition.name}   ${definition.value}
+            [/#if]
+            [#if (definition.name=="LWIP_NETIF_LINK_CALLBACK") && (definition.value == "1")]
+/*----- Value in opt.h for ${definition.name}: 0 -----*/
+#define ${definition.name}   ${definition.value}
+            [/#if]
+            [#if lwip_httpd == 1]
+                [#if (definition.name=="HTTPD_USE_CUSTOM_FSDATA") && (definition.value == "1")]
+/*----- Value in opt.h for ${definition.name}: 0 -----*/
+#define ${definition.name}   ${definition.value}
+                [/#if]
+            [/#if]
 			[#if (definition.name=="NO_SYS") && (definition.value !="0")]
 /*----- Value in opt.h for ${definition.name}: 0 -----*/
 #define ${definition.name}  ${definition.value}
@@ -380,9 +412,35 @@ extern ${variable.value} ${variable.name};
 /*----- Value in opt.h for ${definition.name}: 0 -----*/
 #define ${definition.name}  ${definition.value}
             [/#if]
-            [#if (definition.name=="TCPIP_THREAD_PRIO")  && (definition.value != "valueNotSetted") && (lwip_rtos == 1) && (definition.value != "1")][#-- rtosMaskList Param visible if freertos --]
-/*----- Value in opt.h for ${definition.name}: 1 -----*/
+            [#if (definition.name=="TCPIP_THREAD_PRIO")  && (definition.value != "valueNotSetted") && (lwip_rtos == 1)][#-- rtosMaskList Param visible if freertos --]
+            /*----- Value in opt.h for ${definition.name}: 1 -----*/
+            [#if cmsis_version = "v1"]
+                [#if definition.value = "0"]
+#define ${definition.name}  osPriorityIdle
+                [/#if]
+                [#if definition.value = "1"]
+#define ${definition.name}  osPriorityLow
+                [/#if]
+                [#if definition.value = "2"]
+#define ${definition.name}  osPriorityBelowNormal
+                [/#if]
+                [#if definition.value = "3"]
+#define ${definition.name}  osPriorityNormal
+                [/#if]
+                [#if definition.value = "4"]
+#define ${definition.name}  osPriorityAboveNormal
+                [/#if]
+                [#if definition.value = "5"]
+#define ${definition.name}  osPriorityHigh
+                [/#if]
+                [#if definition.value = "6"]
+#define ${definition.name}  osPriorityRealtime
+                [/#if]
+            [#else]
+                [#if definition.value != "1"]
 #define ${definition.name}  ${definition.value}
+                [/#if]
+            [/#if]
             [/#if]                 
             [#if (definition.name=="SLIPIF_THREAD_STACKSIZE") && (definition.value != "valueNotSetted") && (lwip_rtos == 1) && (definition.value != "0")][#-- rtosMaskList Param visible if freertos, with default value changing on certain condition --]
 /*----- Value in opt.h for ${definition.name}: 0 -----*/
@@ -531,11 +589,19 @@ extern ${variable.value} ${variable.name};
 #define ${definition.name}   ${definition.value}
             [/#if]
             [#if series == "stm32h7"]
-                [#if (definition.name=="LWIP_SUPPORT_CUSTOM_PBUF") && (definition.value != "valueNotSetted") && (definition.value == "1")]
+            [#if (definition.name=="LWIP_SUPPORT_CUSTOM_PBUF") && (definition.value != "valueNotSetted") && (definition.value == "1")]
 /*----- Value supported for H7 devices: 1 -----*/
 #define ${definition.name}   ${definition.value}
-            	[/#if]
             [/#if]
+            [#if (definition.name=="LWIP_RAM_HEAP_POINTER") && (definition.value != "valueNotSetted")]
+/*----- Default Value for H7 devices: 0x30044000 -----*/
+#define ${definition.name}   ${definition.value}
+            [/#if]
+            [#if (definition.value != "valueNotSetted") && (definition.name=="ETH_RX_BUFFER_SIZE")]
+/*----- Default value in ETH configuration GUI in CubeMx: 1524 -----*/
+#define ${definition.name}   ${definition.value}
+            [/#if]
+            [/#if][#-- stm32h7 --]
 		[/#if][#-- definition.defaultValue --]
 	[/#list][#-- SWIP.defines line 108 --]
 /*-----------------------------------------------------------------------------*/
@@ -550,6 +616,6 @@ extern ${variable.value} ${variable.name};
 #ifdef __cplusplus
 }
 #endif
-#endif /*__${inclusion_protection}_H */
+#endif /*__${inclusion_protection}__ */
 
 /************************* (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : ${name?lower_case}.h
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usb_device.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __${name?upper_case}__H__
@@ -49,12 +51,27 @@
 [#-- Global variables --]
 [#if IP.variables??]
 	[#list IP.variables as variable]
-/** USB device core handle. */
-extern ${variable.value} ${variable.name};
+[#--/** USB device core handle. */--]
+[#--extern ${variable.value} ${variable.name};--]
 	[/#list]
 [/#if]
 [#-- Global variables --]
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN PV */
 
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/*
+ * -- Insert your variables declaration here --
+ */
+/* USER CODE BEGIN VARIABLES */
+
+/* USER CODE END VARIABLES */
 /**
   * @}
   */
@@ -81,7 +98,12 @@ extern ${variable.value} ${variable.name};
 void MX_USB_DEVICE_Init(void);
 
 [/#list]
+/*
+ * -- Insert functions declaration here --
+ */
+/* USER CODE BEGIN FD */
 
+/* USER CODE END FD */
 /**
   * @}
   */

@@ -3,13 +3,27 @@
 [#assign nbThreads = 0]
 [#assign generateFunction = "1"]
 [#assign option = "Default"]
+[#assign useMPU = "0"]
+[#assign familyName=FamilyName?lower_case]
+
+[#list SWIPdatas as SWIP]
+  [#if SWIP.defines??]
+    [#list SWIP.defines as definition]
+      [#if definition.name=="USE_MPU"]
+        [#assign useMPU = definition.value]
+      [/#if]
+     [/#list]
+  [/#if]
+[/#list]
+
+[#-- SWIPdatas is a list of SWIPconfigModel --]  
 [#list SWIPdatas as SWIP]
   [#if SWIP.variables??]
-	[#list SWIP.variables as variable]
-	
-	  [#if variable.name == "Threads"]
-	    [#assign s = variable.valueList]
-	    [#assign index = 0]
+    [#list SWIP.variables as variable]
+    [#-- Look for threads --]  
+      [#if variable.name == "Threads"]
+        [#assign s = variable.valueList]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 3]
             [#assign threadFunction = i]
@@ -22,18 +36,25 @@
           [/#if]
           [#assign index = index + 1]
         [/#list]
-        [#if generateFunction == "1"]
-         [#if option == "As external"]
-         extern void ${threadFunction}(void  * argument);
-         [#else]
-         void ${threadFunction}(void * argument);
+
+        [#assign nbThreads = nbThreads + 1]
+        [#if (nbThreads == 1) && (useMPU == "1") && (familyName=="stm32wb")]
+          [#-- For WB and MPU: do not generate default task --]
+        [#else]
+         [#if generateFunction == "1"]
+          [#if option == "As external"]
+           extern void ${threadFunction}(void  * argument);
+          [#else]
+           void ${threadFunction}(void * argument);
+          [/#if]
          [/#if]
         [/#if]
+
       [/#if]
-      
- 	  [#if variable.name == "Timers"]
-	    [#assign s = variable.valueList]
-	    [#assign index = 0]
+      [#-- Look for timers --]  
+      [#if variable.name == "Timers"]
+        [#assign s = variable.valueList]
+        [#assign index = 0]
         [#list s as i]
           [#if index == 1]
             [#assign timerCallback = i]
@@ -53,9 +74,9 @@
          void ${timerCallback}(void * argument);
          [/#if]
         [/#if]
-      [/#if]     
-      
-	[/#list]
+      [/#if]
+    [/#list]   [#-- end loop on SWIP.variables --]  
   [/#if]
 [/#list]
 [/#compress]
+#n

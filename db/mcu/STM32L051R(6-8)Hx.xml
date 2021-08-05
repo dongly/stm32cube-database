@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Mcu ClockTree="STM32L0" DBVersion="V3.0" Family="STM32L0" HasPowerPad="false" IOType="" Line="STM32L0x1" Package="TFBGA64" RefName="STM32L051R(6-8)Hx" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
-	<Core>ARM Cortex-M0+</Core>
+	<Core>Arm Cortex-M0+</Core>
 	<Frequency>32</Frequency>
 	<E2prom>2048</E2prom>
 	<Ram>8</Ram>
@@ -90,7 +90,7 @@
 		<Signal Name="RCC_OSC32_OUT"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>
 	</Pin>
-	<Pin Name="VLCD" Position="B2" Type="Power"/>
+	<Pin Name="VDD" Position="B2" Type="Power"/>
 	<Pin Name="PB8" Position="B3" Type="I/O">
 		<Signal Name="I2C1_SCL"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>
@@ -118,7 +118,6 @@
 		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>
 	</Pin>
 	<Pin Name="PH0-OSC_IN" Position="C1" Type="I/O">
-		<Signal Name="CRS_SYNC"/>
 		<Signal Name="RCC_OSC_IN"/>
 		<Signal IOModes="Input,Output,Analog,EXTI" Name="GPIO"/>
 	</Pin>
@@ -174,7 +173,6 @@
 	<Pin Name="VSS" Position="D5" Type="Power"/>
 	<Pin Name="VSS" Position="D6" Type="Power"/>
 	<Pin Name="PA8" Position="D7" Type="I/O">
-		<Signal Name="CRS_SYNC"/>
 		<Signal Name="RCC_MCO"/>
 		<Signal Name="USART1_CK"/>
 		<Signal IOModes="Input,Output,Analog,EVENTOUT,EXTI" Name="GPIO"/>

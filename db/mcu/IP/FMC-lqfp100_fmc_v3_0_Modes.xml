@@ -744,7 +744,10 @@
     </RefParameter>
     <!-- End NOR Flash 2 RefParameters -->
     <!-- Begin NAND Flash 1 RefParameters -->
-
+    <RefParameter Comment="Nand Coherent Pinout" DefaultValue="MEMORY_PINOUT_OK" Name="NandCoherentPinout1" Type="list" TabName="NAND 1" Group="NAND control" Visible="false">
+        <Condition Expression="STM32MP1&amp;NandDataAddressMux1&amp;!NandPccWait1" Diagnostic=""/>
+        <PossibleValue Comment="PINOUT KO" Value="MEMORY_WAIT_KO"/>
+    </RefParameter>
     <RefParameter Comment="Nand Coherent Pinout" DefaultValue="MEMORY_PINOUT_OK" Name="NandCoherentPinout1" Type="list" TabName="NAND 1" Group="NAND control" Visible="false">
         <Condition Expression="NandDataAddressMux1" Diagnostic=""/>
         <PossibleValue Comment="PINOUT OK" Value="MEMORY_PINOUT_OK"/>
@@ -758,12 +761,11 @@
     </RefParameter>
     <!-- FMC_PCRx PWID -->
     <RefParameter Comment="Data size" DefaultValue="FMC_NAND_MEM_BUS_WIDTH_8" Name="NandMemoryDataWidth1" Type="list" TabName="NAND 1" Group="NAND control" Visible="false">
-        <Condition Expression="_8b_dmux1|_9b_dmux1|_10b_dmux1|_11b_dmux1|_12b_dmux1|_13b_dmux1|_14b_dmux1|_15b_dmux1" Diagnostic=""/>
+        <Condition Expression="_8b_dmux1" Diagnostic=""/>
         <PossibleValue Comment="8 bits" Value="FMC_NAND_MEM_BUS_WIDTH_8"/>
     </RefParameter>
-    <RefParameter Comment="Data size" DefaultValue="FMC_NAND_MEM_BUS_WIDTH_16" Name="NandMemoryDataWidth1" Type="list" TabName="NAND 1" Group="NAND control">
+    <RefParameter Comment="Data size" DefaultValue="FMC_NAND_MEM_BUS_WIDTH_16" Name="NandMemoryDataWidth1" Type="list" TabName="NAND 1" Group="NAND control" Visible="false">
         <Condition Expression="_16b_dmux1" Diagnostic=""/>
-        <PossibleValue Comment="8 bits" Value="FMC_NAND_MEM_BUS_WIDTH_8"/>
         <PossibleValue Comment="16 bits" Value="FMC_NAND_MEM_BUS_WIDTH_16"/>
     </RefParameter>
     <RefParameter Comment="Data size" DefaultValue="FMC_NAND_MEM_BUS_WIDTH_16" Name="NandMemoryDataWidth1" Type="list" TabName="NAND 1" Group="NAND control">
@@ -1087,131 +1089,157 @@
               <SignalLogicalOp Name="AND">
                 <Signal Name="A0"/>
               </SignalLogicalOp>
+			  <Semaphore>A0LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A1_1" UserName="A1">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A1"/>
               </SignalLogicalOp>
+			  <Semaphore>A1LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A2_1" UserName="A2">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A2"/>
               </SignalLogicalOp>
+			  <Semaphore>A2LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A3_1" UserName="A3">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A3"/>
               </SignalLogicalOp>
+			  <Semaphore>A3LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A4_1" UserName="A4">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A4"/>
               </SignalLogicalOp>
+			  <Semaphore>A4LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A5_1" UserName="A5">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A5"/>
               </SignalLogicalOp>
+			  <Semaphore>A5LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A6_1" UserName="A6">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A6"/>
               </SignalLogicalOp>
+			  <Semaphore>A6LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A7_1" UserName="A7">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A7"/>
               </SignalLogicalOp>
+			  <Semaphore>A7LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A8_1" UserName="A8">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A8"/>
               </SignalLogicalOp>
+			  <Semaphore>A8LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A9_1" UserName="A9">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A9"/>
               </SignalLogicalOp>
+			  <Semaphore>A9LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A10_1" UserName="A10">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A10"/>
               </SignalLogicalOp>
+			  <Semaphore>A10LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A11_1" UserName="A11">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A11"/>
               </SignalLogicalOp>
+			  <Semaphore>A11LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A12_1" UserName="A12">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A12"/>
               </SignalLogicalOp>
+			  <Semaphore>A12LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A13_1" UserName="A13">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A13"/>
               </SignalLogicalOp>
+			  <Semaphore>A13LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A14_1" UserName="A14">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A14"/>
               </SignalLogicalOp>
+			  <Semaphore>A14LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A15_1" UserName="A15">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A15"/>
               </SignalLogicalOp>
+			  <Semaphore>A15LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A16_1" UserName="A16">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A16"/>
               </SignalLogicalOp>
+			  <Semaphore>A16LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A17_1" UserName="A17">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A17"/>
               </SignalLogicalOp>
+			  <Semaphore>A17LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A18_1" UserName="A18">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A18"/>
               </SignalLogicalOp>
+			  <Semaphore>A18LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A19_1" UserName="A19">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A19"/>
               </SignalLogicalOp>
+			  <Semaphore>A19LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A20_1" UserName="A20">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A20"/>
               </SignalLogicalOp>
+			  <Semaphore>A20LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A21_1" UserName="A21">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A21"/>
               </SignalLogicalOp>
+			  <Semaphore>A21LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A22_1" UserName="A22">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A22"/>
               </SignalLogicalOp>
+			  <Semaphore>A22LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A23_1" UserName="A23">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A23"/>
               </SignalLogicalOp>
+			  <Semaphore>A23LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A24_1" UserName="A24">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A24"/>
               </SignalLogicalOp>
+			  <Semaphore>A24LcdUsed_1</Semaphore>
             </Mode>
             <Mode Name="A25_1" UserName="A25">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A25"/>
               </SignalLogicalOp>
+              <Semaphore>A25LcdUsed_1</Semaphore>
             </Mode>
           </ModeLogicOperator>
           <Semaphore>OneBitAddress1</Semaphore>
@@ -1244,6 +1272,7 @@
                 <Signal Name="D15"/>
               </SignalLogicalOp>
               <Semaphore>_16_bit_data1</Semaphore>
+              <Condition Expression="!A25LcdUsed_1" Diagnostic="16 bits LCD Interface is not compatible with the use of A25"/>
             </Mode>
           </ModeLogicOperator>
           <Semaphore>Data1</Semaphore>
@@ -1522,131 +1551,157 @@
               <SignalLogicalOp Name="AND">
                 <Signal Name="A0"/>
               </SignalLogicalOp>
+			  <Semaphore>A0LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A1_2" UserName="A1">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A1"/>
               </SignalLogicalOp>
+			  <Semaphore>A1LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A2_2" UserName="A2">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A2"/>
               </SignalLogicalOp>
+			  <Semaphore>A2LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A3_2" UserName="A3">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A3"/>
               </SignalLogicalOp>
+			  <Semaphore>A3LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A4_2" UserName="A4">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A4"/>
               </SignalLogicalOp>
+			  <Semaphore>A4LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A5_2" UserName="A5">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A5"/>
               </SignalLogicalOp>
+			  <Semaphore>A5LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A6_2" UserName="A6">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A6"/>
               </SignalLogicalOp>
+			  <Semaphore>A6LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A7_2" UserName="A7">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A7"/>
               </SignalLogicalOp>
+			  <Semaphore>A7LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A8_2" UserName="A8">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A8"/>
               </SignalLogicalOp>
+			  <Semaphore>A8LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A9_2" UserName="A9">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A9"/>
               </SignalLogicalOp>
+			  <Semaphore>A9LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A10_2" UserName="A10">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A10"/>
               </SignalLogicalOp>
+			  <Semaphore>A10LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A11_2" UserName="A11">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A11"/>
               </SignalLogicalOp>
+			  <Semaphore>A11LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A12_2" UserName="A12">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A12"/>
               </SignalLogicalOp>
+			  <Semaphore>A12LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A13_2" UserName="A13">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A13"/>
               </SignalLogicalOp>
+			  <Semaphore>A13LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A14_2" UserName="A14">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A14"/>
               </SignalLogicalOp>
+			  <Semaphore>A14LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A15_2" UserName="A15">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A15"/>
               </SignalLogicalOp>
+			  <Semaphore>A15LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A16_2" UserName="A16">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A16"/>
               </SignalLogicalOp>
+			  <Semaphore>A16LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A17_2" UserName="A17">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A17"/>
               </SignalLogicalOp>
+			  <Semaphore>A17LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A18_2" UserName="A18">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A18"/>
               </SignalLogicalOp>
+			  <Semaphore>A18LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A19_2" UserName="A19">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A19"/>
               </SignalLogicalOp>
+			  <Semaphore>A19LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A20_2" UserName="A20">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A20"/>
               </SignalLogicalOp>
+			  <Semaphore>A20LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A21_2" UserName="A21">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A21"/>
               </SignalLogicalOp>
+			  <Semaphore>A21LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A22_2" UserName="A22">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A22"/>
               </SignalLogicalOp>
+			  <Semaphore>A22LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A23_2" UserName="A23">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A23"/>
               </SignalLogicalOp>
+			  <Semaphore>A23LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A24_2" UserName="A24">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A24"/>
               </SignalLogicalOp>
+			  <Semaphore>A24LcdUsed_2</Semaphore>
             </Mode>
             <Mode Name="A25_2" UserName="A25">
               <SignalLogicalOp Name="AND">
                 <Signal Name="A25"/>
               </SignalLogicalOp>
+              <Semaphore>A25LcdUsed_2</Semaphore>
             </Mode>
           </ModeLogicOperator>
           <Semaphore>OneBitAddress2</Semaphore>
@@ -1679,6 +1734,7 @@
                 <Signal Name="D15"/>
               </SignalLogicalOp>
               <Semaphore>_16_bit_data2</Semaphore>
+              <Condition Expression="!A25LcdUsed_2" Diagnostic="16 bits LCD Interface is not compatible with the use of A25"/>
             </Mode>
           </ModeLogicOperator>
           <Semaphore>Data2</Semaphore>
@@ -1896,7 +1952,7 @@
               </SignalLogicalOp>
               <Semaphore>NandChipSelect2_1</Semaphore>
             </Mode>
-            <Mode Name="NandChipSelect3_1" UserName="NCE">
+            <Mode Name="NandChipSelect3_1" UserName="NCE" ShrinkName="NCE Chip Select">
               <SignalLogicalOp Name="AND">
                 <Signal Name="NCE"/>
               </SignalLogicalOp>
@@ -1906,68 +1962,33 @@
           <Semaphore>NandFlash1</Semaphore>
         </Mode>
         <Mode Name="NandDataAddressMux1" UserName="Data/Address">
-          <ModeLogicOperator Name="LIST">
+          <SignalLogicalOp Name="AND">
+            <Signal Name="D0"/>
+            <Signal Name="D1"/>
+            <Signal Name="D2"/>
+            <Signal Name="D3"/>
+            <Signal Name="D4"/>
+            <Signal Name="D5"/>
+            <Signal Name="D6"/>
+            <Signal Name="D7"/>
+            <Signal Name="ALE"/>
+            <Signal Name="CLE"/>
+            <Signal Name="NOE"/>
+            <Signal Name="NWE"/>
+          </SignalLogicalOp>
+          <ModeLogicOperator Name="XOR">
             <Mode Name="8b-dmux1" UserName="8 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D0"/>
-                <Signal Name="D1"/>
-                <Signal Name="D2"/>
-                <Signal Name="D3"/>
-                <Signal Name="D4"/>
-                <Signal Name="D5"/>
-                <Signal Name="D6"/>
-                <Signal Name="D7"/>
-                <Signal Name="ALE"/>
-                <Signal Name="CLE"/>
-                <Signal Name="NOE"/>
-                <Signal Name="NWE"/>
-              </SignalLogicalOp>
               <Semaphore>_8b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="9b-dmux1" UserName="9 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D8"/>
-              </SignalLogicalOp>
-              <Semaphore>_9b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="10b-dmux1" UserName="10 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D9"/>
-              </SignalLogicalOp>
-              <Semaphore>_10b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="11b-dmux1" UserName="11 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D10"/>
-              </SignalLogicalOp>
-              <Semaphore>_11b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="12b-dmux1" UserName="12 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D11"/>
-              </SignalLogicalOp>
-              <Semaphore>_12b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="13b-dmux1" UserName="13 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D12"/>
-              </SignalLogicalOp>
-              <Semaphore>_13b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="14b-dmux1" UserName="14 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D13"/>
-              </SignalLogicalOp>
-              <Semaphore>_14b_dmux1</Semaphore>
-            </Mode>
-            <Mode Name="15b-dmux1" UserName="15 bits">
-              <SignalLogicalOp Name="AND">
-                <Signal Name="D14"/>
-              </SignalLogicalOp>
-              <Semaphore>_15b_dmux1</Semaphore>
             </Mode>
             <Mode Name="16b-dmux1" UserName="16 bits">
               <SignalLogicalOp Name="AND">
+                <Signal Name="D8"/>
+                <Signal Name="D9"/>
+                <Signal Name="D10"/>
+                <Signal Name="D11"/>
+                <Signal Name="D12"/>
+                <Signal Name="D13"/>
+                <Signal Name="D14"/>
                 <Signal Name="D15"/>
               </SignalLogicalOp>
               <Semaphore>_16b_dmux1</Semaphore>
@@ -1978,7 +1999,7 @@
         </Mode>
         <Mode Name="NandReadyOrBusy1" UserName="Ready or busy">
           <ModeLogicOperator Name="XOR">
-            <Mode Name="Wait1" UserName="NWAIT">
+            <Mode Name="Wait1" UserName="NWAIT" ShrinkName="NWAIT Ready/Busy">
               <SignalLogicalOp Name="AND">
                 <Signal Name="NWAIT"/>
               </SignalLogicalOp>
@@ -2077,7 +2098,7 @@
   <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="NL" ShareableGroupName="FMC_NL"/>
   <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="NOE" ShareableGroupName="FMC_NOE"/>
   <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="NWAIT" ShareableGroupName="FMC_NWAIT"/>
-  <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="NWE" ShareableGroupName="FMC_NWE"/> 
+  <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="NWE" ShareableGroupName="FMC_NWE"/>
   <!-- End RefSignals -->
   <Semaphore>FMCUsed_ForRCC</Semaphore>
 </IP>

@@ -19,22 +19,27 @@
 [/#if]
 [/#list]
 [/#if]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-[#if use_dma = 1]
- [#if use_rtos = 1]
-  * @file    sd_diskio.h (based on sd_diskio_dma_rtos_template.h v2.0.2)
- [#else]
-  * @file    sd_diskio.h (based on sd_diskio_dma_template.h v2.0.2)
- [/#if]
-[#else]
-  * @file    sd_diskio.h (based on sd_diskio_template.h v2.0.2)
-[/#if]
+  * @file    sd_diskio.h
   * @brief   Header for sd_diskio.c module
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
+
+[#-- Moved here (as the user section prevents from refreshing the comments). --]
+[#if use_dma = 1]
+ [#if use_rtos = 1]
+/* Note: code generation based on sd_diskio_dma_rtos_template.h */
+ [#else]
+/* Note: code generation based on sd_diskio_dma_template.h */
+ [/#if]
+[#else]
+/* Note: code generation based on sd_diskio_template.h */
+[/#if]
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __SD_DISKIO_H

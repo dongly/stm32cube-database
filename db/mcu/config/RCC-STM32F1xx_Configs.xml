@@ -18,20 +18,20 @@
     </RefConfig>	
 
 	<RefConfig Comment="Configure the Systick interrupt time" Name="RCC_interrupt_Time_SYSTICK_Config">
-            <CallLibMethod Name="HAL_SYSTICK_Config" ReturnHAL="false">
+            <!--CallLibMethod Name="HAL_SYSTICK_Config" ReturnHAL="false">
             <MethodArg Name="TicksNumb" ParameterName="Cortex_DivARG"/>
-        </CallLibMethod>
+        </CallLibMethod-->
     </RefConfig>
 	
 	<RefConfig Comment="Configure the Systick" Name="RCC_SYSTICK_CONFIG">
     
-        <CallLibMethod Name="HAL_SYSTICK_CLKSourceConfig" ReturnHAL="false">
+        <!--CallLibMethod Name="HAL_SYSTICK_CLKSourceConfig" ReturnHAL="false">
             <MethodArg Name="CLKSource" ParameterName="TimSys_Div"/>
-        </CallLibMethod>
+        </CallLibMethod-->
     </RefConfig>
 	  
 
-    <RefConfig Comment="Initializes the CPU, AHB and APB busses clocks" Name="RCC_OSCConfig">
+    <RefConfig Comment="Initializes the RCC Oscillators according to the specified parameters#n#t*  in the RCC_OscInitTypeDef structure." Name="RCC_OSCConfig">
         <CallLibMethod Name="HAL_RCC_OscConfig">
 		
             <MethodArg Name="HSEState" ParameterName="HSEStateARG"/>
@@ -75,7 +75,7 @@
     </RefConfig>
 	
    
-    <RefConfig Comment="Initializes the CPU, AHB and APB busses clocks" Name="RCC_ClockConfig">
+    <RefConfig Comment="Initializes the CPU, AHB and APB buses clocks" Name="RCC_ClockConfig">
         <CallLibMethod Name="HAL_RCC_ClockConfig">
 		
             <MethodArg Name="ClockType" ParameterName="ClockTypeARG"/>
@@ -116,7 +116,7 @@
 
  
       
-    <LibMethod Comment="Initializes the CPU, AHB and APB busses clocks" Name="HAL_RCC_OscConfig">
+    <LibMethod Comment="Initializes the RCC Oscillators according to the specified parameters#n#t*  in the RCC_OscInitTypeDef structure." Name="HAL_RCC_OscConfig">
         <Argument AddressOf="true" GenericType="struct" Name="RCC_OscInitStruct" TypeName="RCC_OscInitTypeDef">
             <Argument AddressOf="false" GenericType="simple" Name="OscillatorType" OptimizationCondition="equal"/>
             <Argument AddressOf="false" GenericType="simple" Name="HSEState" OptimizationCondition="equal"/>
@@ -225,5 +225,9 @@
         <File Category="header" Name="Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_flash_ex.h"/>
         <File Category="source" Name="Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c"/>
         <File Category="source" Name="Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c"/>
+    </RefComponent>
+    	<RefComponent Cclass="HAL" Cgroup="EXTI" Cversion="0.1.0">
+        <File Category="header" Name="Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_exti.h"/>
+        <File Category="source" Name="Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c"/>
     </RefComponent>
 </IP>

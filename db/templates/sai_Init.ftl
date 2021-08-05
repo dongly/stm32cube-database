@@ -86,32 +86,36 @@
 [/#if]   
 [#if serviceName=="gpioA"]
  [#assign instanceIndex =""]
-    [@common.generateConfigModelCode configModel=gpioServiceA inst=ipName nTab=tabN index=""/]
+    [@common.generateConfigModelCode configModel=gpioServiceA inst=ipName nTab=tabN index="" mode="type"/]
 [/#if]
 [#if serviceName=="gpioB"]
  [#assign instanceIndex =""]
-    [@common.generateConfigModelCode configModel=gpioServiceB inst=ipName nTab=tabN index=""/]
+    [@common.generateConfigModelCode configModel=gpioServiceB inst=ipName nTab=tabN index="" mode="type"/]
 [/#if]
 [#if serviceName=="dmaA" && dmaServiceA??]
- [#assign instanceIndex =""]
+ [#assign instanceIndex =""]   
     [#list dmaServiceA as dmaconfig] 
-     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+      [#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
+     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode="type"/]
         [#assign dmaCurrentRequest = dmaconfig.dmaRequestName?lower_case]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
         
 #t__HAL_LINKDMA(${instHandler},[#if dmaconfig.dmaHandel??]${dmaconfig.dmaHandel}[#else]hdma${prefix}[/#if],hdma_${dmaconfig.dmaRequestName?lower_case});#n
+[/#if]
     [/#list] [#-- list dmaService as dmaconfig --]
 [/#if]
 [#if serviceName=="dmaB" && dmaServiceB??]
  [#assign instanceIndex =""]
     [#list dmaServiceB as dmaconfig] 
-     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+[#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
+     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode="type"/]
         [#assign dmaCurrentRequest = dmaconfig.dmaRequestName?lower_case]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
         
 #t__HAL_LINKDMA(${instHandler},[#if dmaconfig.dmaHandel??]${dmaconfig.dmaHandel}[#else]hdma${prefix}[/#if],hdma_${dmaconfig.dmaRequestName?lower_case});#n
+[/#if]
     [/#list] [#-- list dmaService as dmaconfig --]
 [/#if]
 [/#macro]
@@ -283,6 +287,10 @@
         /* ${instName} init function */
         [#if halMode!=name]void MX_${instName}_${halMode}_Init(void)[#else]void MX_${instName}_Init(void)[/#if]
 {
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=mxTmpFolder+"/resmgrutility_"+instName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
         [#-- assign ipInstanceIndex = instName?replace(name,"")--]
         [#assign args = ""]
         [#assign listOfLocalVariables =""]
@@ -293,7 +301,7 @@
 
         [/#list]
         [#list instanceData.configs as config]
-            [#if instanceData.instIndex??][@common.generateConfigModelCode configModel=config inst=instName  nTab=1 index=instanceData.instIndex/][#else][@common.generateConfigModelCode configModel=config inst=instName  nTab=1 index=""/][/#if]
+            [#if instanceData.instIndex??][@common.generateConfigModelCode configModel=config inst=instName  nTab=1 index=instanceData.instIndex mode="Init"/][#else][@common.generateConfigModelCode configModel=config inst=instName  nTab=1 index="" mode="Init"/][/#if]
         [/#list]
 #n}
   

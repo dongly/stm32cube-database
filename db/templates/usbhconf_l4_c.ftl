@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : ${name}
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : This file implements the board support package for the USB host library
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
 [#if SWIncludes??]
@@ -17,6 +19,7 @@
 [/#list]
 [/#if]
 #include "usbh_core.h"
+#include "main.h"
 [#assign BspPlatform = "false"]
 [#if Platform??]
 	[#if Platform = "true"]
@@ -71,10 +74,10 @@
 /* USER CODE END PV */
 
 [#if handleNameFS == "FS"]
-[#include sourceDir+"Src/usb_otg_fs_vars.tmp"]
+[#include mxTmpFolder+"/usb_otg_fs_vars.tmp"]
 [/#if]
 [#if handleNameHS == "HS"]
-[#include sourceDir+"Src/usb_otg_hs_vars.tmp"]
+[#include mxTmpFolder+"/usb_otg_hs_vars.tmp"]
 [/#if]
 
 /* USER CODE BEGIN 0 */
@@ -83,6 +86,7 @@
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status);
 
 /* USER CODE END PFP */
 
@@ -99,14 +103,14 @@
 [#if handleNameFS == "FS"]
 [#if includeMspDone == 0]
 [#assign includeMspDone = 1]
-[#include sourceDir+"Src/usb_otg_fs_Msp.tmp"]
+[#include mxTmpFolder+"/usb_otg_fs_Msp.tmp"]
 [/#if]
 [/#if]
 
 [#if handleNameHS == "HS"]
 [#if includeMspDone == 0]
 [#assign includeMspDone = 1]
-[#include sourceDir+"Src/usb_otg_hs_Msp.tmp"]
+[#include mxTmpFolder+"/usb_otg_hs_Msp.tmp"]
 [/#if]
 [/#if]
 
@@ -156,6 +160,27 @@ void HAL_HCD_HC_NotifyURBChange_Callback(HCD_HandleTypeDef *hhcd, uint8_t chnum,
 #endif
 }
 
+/**
+* @brief  Port Port Enabled callback.
+  * @param  hhcd: HCD handle
+  * @retval None
+  */
+void HAL_HCD_PortEnabled_Callback(HCD_HandleTypeDef *hhcd)
+{
+  USBH_LL_PortEnabled(hhcd->pData);
+} 
+
+
+/**
+  * @brief  Port Port Disabled callback.
+  * @param  hhcd: HCD handle
+  * @retval None
+  */
+void HAL_HCD_PortDisabled_Callback(HCD_HandleTypeDef *hhcd)
+{
+  USBH_LL_PortDisabled(hhcd->pData);
+} 
+
 /*******************************************************************************
                        LL Driver Interface (USB Host Library --> HCD)
 *******************************************************************************/
@@ -175,7 +200,7 @@ USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost)
 #t/* Link the driver to the stack. */
 #thhcd_USB_OTG_FS.pData = phost;
 #tphost->pData = &hhcd_USB_OTG_FS;
-[#include sourceDir+"Src/usb_otg_fs_HalInit.tmp"]
+[#include mxTmpFolder+"/usb_otg_fs_HalInit.tmp"]
 #tUSBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(&hhcd_USB_OTG_FS));
 #t}
 [/#if]
@@ -186,7 +211,7 @@ USBH_StatusTypeDef USBH_LL_Init(USBH_HandleTypeDef *phost)
 #t/* Link the driver to the stack. */
 #thhcd_USB_OTG_HS.pData = phost;
 #tphost->pData = &hhcd_USB_OTG_HS;
-[#include sourceDir+"Src/usb_otg_hs_HalInit.tmp"]
+[#include mxTmpFolder+"/usb_otg_hs_HalInit.tmp"]
 #tUSBH_LL_SetTimer(phost, HAL_HCD_GetCurrentFrame(&hhcd_USB_OTG_HS));
 #t}
 [/#if]
@@ -205,23 +230,8 @@ USBH_StatusTypeDef USBH_LL_DeInit(USBH_HandleTypeDef *phost)
 
   hal_status = HAL_HCD_DeInit(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
@@ -237,23 +247,8 @@ USBH_StatusTypeDef USBH_LL_Start(USBH_HandleTypeDef *phost)
 
   hal_status = HAL_HCD_Start(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
@@ -269,23 +264,8 @@ USBH_StatusTypeDef USBH_LL_Stop(USBH_HandleTypeDef *phost)
 
   hal_status = HAL_HCD_Stop(phost->pData);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
@@ -330,28 +310,14 @@ USBH_StatusTypeDef USBH_LL_ResetPort(USBH_HandleTypeDef *phost)
   USBH_StatusTypeDef usb_status = USBH_OK;
 
   hal_status = HAL_HCD_ResetPort(phost->pData);
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
 /**
-  * @brief  Return the last transfered packet size.
+  * @brief  Return the last transferred packet size.
   * @param  phost: Host handle
   * @param  pipe: Pipe index
   * @retval Packet size
@@ -381,23 +347,8 @@ USBH_StatusTypeDef USBH_LL_OpenPipe(USBH_HandleTypeDef *phost, uint8_t pipe_num,
   hal_status = HAL_HCD_HC_Init(phost->pData, pipe_num, epnum,
                                dev_address, speed, ep_type, mps);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
@@ -414,23 +365,8 @@ USBH_StatusTypeDef USBH_LL_ClosePipe(USBH_HandleTypeDef *phost, uint8_t pipe)
 
   hal_status = HAL_HCD_HC_Halt(phost->pData, pipe);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+   
   return usb_status;
 }
 
@@ -472,23 +408,8 @@ USBH_StatusTypeDef USBH_LL_SubmitURB(USBH_HandleTypeDef *phost, uint8_t pipe, ui
                                         ep_type, token, pbuff, length,
                                         do_ping);
 
-  switch (hal_status) {
-    case HAL_OK :
-      usb_status = USBH_OK;
-    break;
-    case HAL_ERROR :
-      usb_status = USBH_FAIL;
-    break;
-    case HAL_BUSY :
-      usb_status = USBH_BUSY;
-    break;
-    case HAL_TIMEOUT :
-      usb_status = USBH_FAIL;
-    break;
-    default :
-      usb_status = USBH_FAIL;
-    break;
-  }
+  usb_status = USBH_Get_USB_Status(hal_status);
+  
   return usb_status;
 }
 
@@ -516,8 +437,8 @@ USBH_URBStateTypeDef USBH_LL_GetURBState(USBH_HandleTypeDef *phost, uint8_t pipe
   * @param  phost: Host handle
   * @param  state : VBUS state
   *          This parameter can be one of the these values:
-  *           0 : VBUS Active
-  *           1 : VBUS Inactive
+  *           0 : VBUS Inactive
+  *           1 : VBUS Active
   * @retval Status
   */
 USBH_StatusTypeDef USBH_LL_DriverVBUS(USBH_HandleTypeDef *phost, uint8_t state)
@@ -642,4 +563,33 @@ void USBH_Delay(uint32_t Delay)
   HAL_Delay(Delay);
 }
 
+/**
+  * @brief  Returns the USB status depending on the HAL status:
+  * @param  hal_status: HAL status
+  * @retval USB status
+  */
+USBH_StatusTypeDef USBH_Get_USB_Status(HAL_StatusTypeDef hal_status)
+{
+  USBH_StatusTypeDef usb_status = USBH_OK;
+
+  switch (hal_status)
+  {
+    case HAL_OK :
+      usb_status = USBH_OK;
+    break;
+    case HAL_ERROR :
+      usb_status = USBH_FAIL;
+    break;
+    case HAL_BUSY :
+      usb_status = USBH_BUSY;
+    break;
+    case HAL_TIMEOUT :
+      usb_status = USBH_FAIL;
+    break;
+    default :
+      usb_status = USBH_FAIL;
+    break;
+  }
+  return usb_status;
+}
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

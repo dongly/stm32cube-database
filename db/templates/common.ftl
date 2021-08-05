@@ -1,7 +1,15 @@
 [#ftl]
+[#assign cmp0 =1]
 [#-- macro generateConfigModelCode --]
 
-[#macro generateConfigModelCode configModel inst nTab index]
+[#macro generateConfigModelCode configModel inst nTab index mode]
+[#if configModel.clockEnableMacro?? && mode=="Init"] [#-- Enable Port clock --]
+    [#list configModel.clockEnableMacro as clkmacroList]
+        [#if clkmacroList?trim!=""]
+            [#if nTab==2]#t#t[#else]#t[/#if]${clkmacroList}[#if !clkmacroList?contains("(")]()[/#if];
+        [/#if]
+    [/#list]
+[/#if] 
 [#if configModel.methods??] [#-- if the pin configuration contains a list of LibMethods--]
     [#assign methodList = configModel.methods]
 [#else]
@@ -15,40 +23,57 @@
     [#if method.status=="OK"][#assign writeConfigComments=true][/#if]
 [/#list]
 [#if writeConfigComments]
-    [#if configModel.comments??] 
-        [#if nTab == 2]#t[/#if][#if nTab == 2]#t/**${configModel.comments?replace("#t","#t#t")} #n#t#t*/[#else]#t/**${configModel.comments?replace("#t","#t")} #n#t*/[/#if]
+    [#if configModel.comments??]
+        [#if nTab == 2]#t[/#if][#if nTab == 2]#t/**${configModel.comments?replace("#t","#t#t")}#n#t#t*/[#else]#t/**${configModel.comments?replace("#t","#t")}#n#t*/[/#if]
+
     [/#if]
 [/#if]
-    [#list methodList as method][#assign args = ""]	      
-                [#if method.hardCode??] [#-- Hard code --]
-                    ${method.hardCode}
-
+    [#list methodList as method][#assign args = ""]
+            [#if method.hardCode??] [#-- Hard code --]
+                ${method.hardCode.text?replace("$IpInstance",inst)} 
+            [#else]
+                [#if method.type == "Template"] [#-- Template code --]  
+                    [#list method.name?split("/") as n]
+                        [#assign tplName = n]
+                    [/#list]
+                    [@optinclude name=mxTmpFolder+"/${tplName?replace('ftl','tmp')}" /] 
                 [/#if]
-        [#if method.status=="OK"&&method.type!="HardCode"]
+            [/#if]
+            [#if method.status=="OK" && method.type != "Template" && method.type != "HardCode"]
 [#if method.comment??]
 [/#if]
                 [#if method.arguments??]
                     [#list method.arguments as fargument][#compress]
-                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
+                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
+                    [/#compress]
                     [#if fargument.genericType == "struct"]
-                        [#if fargument.context??]
+                         [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name]
+                                [#if fargument.cast??] [#assign arg = fargument.cast + arg][/#if]
+                        [/#if]
+                        [#if fargument.context?? && fargument.optional!="output"]
                             [#if fargument.context=="global"]
                                 [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA"]
                                     [#assign instanceIndex = "_"+ configModel.dmaRequestName?lower_case]
                                 [#else]
-                                   [#-- [#assign instanceIndex = inst?replace(name,"")]--]
-                                   [#if index??][#assign instanceIndex = index][#else][#if name??][#assign instanceIndex = inst?replace(name,"")][/#if][/#if]
-                                   [#if configModel.ipName=="DFSDM"]
+                                   [#if configModel.ipName?starts_with("GPDMA") || configModel.ipName?starts_with("LPDMA")]
                                         [#assign instanceIndex = ""]
+                                   [#else]
+                                        [#-- [#assign instanceIndex = inst?replace(name,"")]--]
+                                        [#if index??][#assign instanceIndex = index][#else][#if name??][#assign instanceIndex = inst?replace(name,"")][/#if][/#if]
+                                        [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
+                                             [#assign instanceIndex = ""]
+                                        [/#if]
                                    [/#if]
                                 [/#if]
                             [/#if]
-                        [/#if]                     
+                        [/#if]
                         [#if instanceIndex??&&fargument.context=="global"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
                         [#-- [#assign arg = "" + adr + fargument.name] --]
                         [#if ((!method.name?contains("Init")&&fargument.context=="global")||(fargument.optional=="output"))]
                         [#else]
-                        [#list fargument.argument as argument]	
+                        [#list fargument.argument as argument]
                             [#if argument.genericType != "struct"]
                                 [#if argument.mandatory]
                                 [#if argument.value?? && argument.value!="__NULL"]
@@ -57,7 +82,7 @@
                                     [#else]
                                         [#assign argValue=argument.value]
                                     [/#if][#-- if global --]
-                                    [#if argument.genericType=="Array" && argument.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if argument.genericType=="Array" && argument.context!="globalConst" && argument.context!="globalInit"][#-- if genericType=Array --]
                                     [#assign valList = argument.value?split(argument.arraySeparator)]     
                                             [#assign i = 0]                                  
                                         [#list valList as val] 
@@ -67,7 +92,7 @@
                                         [#assign argValue="&"+argument.name]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument.genericType=="Array" && argument.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument.genericType=="Array" && (argument.context=="globalConst"|| argument.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument.typeName +" *)"+argument.name]
                                     [/#if]
                                     [#if argument.value!="" && argument.value!="N/A"]
@@ -103,7 +128,7 @@
                                 [#if argument2.mandatory]
                                     [#if argument2.value?? && argument2.value!="__NULL"]
                                     [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
-                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst" && argument2.context!="globalInit"][#-- if genericType=Array --]
                                         [#if argument2.arraySeparator?? && argument2.arraySeparator!=""]
                                         [#assign valList = argument2.value?split(argument2.arraySeparator)]     
                                         [#else]
@@ -117,7 +142,7 @@
                                         [#assign argValue="&"+argument2.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument2.genericType=="Array" && argument2.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument2.genericType=="Array" && (argument2.context=="globalConst" || argument2.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument2.typeName +" *)"+argument2.name]
                                     [/#if]
                                     [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
@@ -136,7 +161,7 @@
                                 [#if argument3.mandatory]
                                     [#if argument3.value?? && argument3.value!="__NULL"]
                                     [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
-                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst"][#-- if genericType=Array --] 
+                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst" && argument3.context!="globalInit"][#-- if genericType=Array --] 
                                         [#if argument3.arraySeparator?? && argument3.arraySeparator!=""]
                                             [#assign valList = argument3.value?split(argument3.arraySeparator)]     
                                         [#else]
@@ -150,7 +175,7 @@
                                         [#assign argValue="&"+argument3.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument3.genericType=="Array" && argument3.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument3.genericType=="Array" && (argument3.context=="globalConst" || argument3.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument3.typeName +" *)"+argument3.name]
                                     [/#if]
                                     [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};                                    
@@ -204,7 +229,7 @@
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n
             [#-- [/#if] --]
@@ -216,7 +241,7 @@
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n
                 [/#if]			
@@ -226,14 +251,15 @@
             [#if method.arguments??]			
                 [#list method.arguments as fargument]
                     [#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
                     [#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
                                         [#if fargument.context??]                   
                                             [#if fargument.context=="global"]
-                                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA"]
+                                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || config.ipName=="BDMA1"]
                                                 [#assign instanceIndex = "_"+ configModel.dmaRequestName?lower_case]
                                                 [#else]
                                                 [#assign instanceIndex = inst?replace(name,"")]
-                                                [#if configModel.ipName=="DFSDM"]
+                                                [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                                     [#assign instanceIndex = ""]
                                                 [/#if]
                                                 [/#if]
@@ -276,7 +302,7 @@
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n
                         [/#if]
@@ -310,13 +336,13 @@
                         [/#if]
                     [/#list]
                     [#if !exist]  [#-- if exist --]                  
-                    #t${argument.typeName} ${argument.name};                        
+                    #t${argument.typeName} ${argument.name} = {0};                        
                       [#assign myListOfLocalVariables = myListOfLocalVariables + " "+ argument.name]
                       [#assign resultList = myListOfLocalVariables]
                     [/#if][#-- if exist --]
                     [/#if][#-- if global --]
                 [#else][#-- if context?? --]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
             [/#if][#-- if argument.context?? --]
 
             [#-- Array type --]
@@ -326,7 +352,7 @@
                 [/#if] [#-- if genericType == "Array" --]
                 [#if subArg.genericType =="struct"]
                     [#list subArg.argument as subArg1] [#-- list subArg1 --]
-                        [#if subArg1.genericType=="Array" && (subArg1.context!="globalConst")] [#-- if genericType == "Array" --]
+                        [#if subArg1.genericType=="Array" && (subArg1.context!="globalConst")  && subArg1.context!="globalInit"] [#-- if genericType == "Array" --]
                            [#if subArg1.value?? && subArg1.value!="__NULL"]
                                 #t ${subArg1.typeName} ${subArg1.name}[${subArg1.arraySize}] ; 
                             [/#if]
@@ -346,13 +372,13 @@
                         [/#if]
                     [/#list]
                     [#if !exist]  [#-- if exist --]                  
-                    #t${argument.typeName} ${argument.name};                        
+                    #t${argument.typeName} ${argument.name} = {0};                        
                       [#assign myListOfLocalVariables = myListOfLocalVariables + " "+ argument.name]
                       [#assign resultList = myListOfLocalVariables]
                     [/#if][#-- if exist --]
                     [/#if][#-- if global --]
                 [#else][#-- if context?? --]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
             [/#if]
             [/#if][#-- if struct --]
         [/#list][#-- list method.arguments --]
@@ -382,8 +408,7 @@
 [#macro generateConfigModelListCode configModel inst nTab index]
 [#assign listofDeclaration = ""]
 [#assign listofCalledMethod = ""]
-[#assign bz36245=false]
-[#assign bz36245_BKPSet=false]
+
 [#list configModel.configs as config]
 [#assign bz36245=false]
 [#if config.methods??] [#-- if the pin configuration contains a list of LibMethods--]
@@ -397,20 +422,20 @@
 [/#list]
 [#if writeConfigComments]
 [#if config.ipName?contains("CORTEX")]
-[#if config.comments?? && config.comments!=""] #t/**${config.comments} #n#t*/[/#if]
+[#if config.comments?? && config.comments!=""]#t/** ${config.comments}#n#t*/[/#if]
 [#else]
-[#if config.comments?? && config.comments!=""] #t#t/**${config.comments?replace("#t","#t#t")} #n#t#t*/[/#if]
+[#if config.comments?? && config.comments!=""]#t/** ${config.comments?replace("#t","#t")}#n#t*/[/#if]
 [/#if]
 [/#if]
     [#list methodList as method][#assign args = ""]	 
             [#if method.hardCode??] [#-- Hard code --]              
-                ${method.hardCode.text} 
+                ${method.hardCode.text?replace("$IpInstance",inst)} 
             [#else]
                 [#if method.type == "Template"] [#-- Template code --]  
                     [#list method.name?split("/") as n]
                         [#assign tplName = n]
                     [/#list]
-                    [@optinclude name=sourceDir+"Src/${tplName?replace('ftl','tmp')}" /] 
+                    [@optinclude name=mxTmpFolder+"/${tplName?replace('ftl','tmp')}" /] 
                 [/#if]
             [/#if]
             [#if method.status=="OK" && method.type != "Template" && method.type != "HardCode"]
@@ -423,41 +448,50 @@
     [#if args == "" && arg!=""][#assign args = args + arg ][#else][#if arg!=""][#assign args = args + ', ' + arg][/#if][/#if]
 [/#if] [#-- end if fargument.refMethod??--] [#-- New --]
 
-                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
+                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if][/#compress] 
                     [#if fargument.genericType == "struct" && fargument.argumentReference == "RefParameter"]
-                        [#if fargument.context??]
-                            [#if fargument.context=="global"]
+                        [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name]
+                                [#if fargument.cast??][#assign arg = fargument.cast + arg][/#if]
+                        [/#if]
+                        [#if fargument.context?? && fargument.optional!="output"]
+                            [#if fargument.context=="global"]                            
                                 [#if config.ipName=="DMA" || config.ipName=="BDMA"]
                                     [#assign instanceIndex = "_"+ config.dmaRequestName?lower_case]
                                 [#else]
-                                   [#-- [#assign instanceIndex = instRef?replace(name,"")]--]
-                                   [#if index??][#assign instanceIndex = index][#else][#if name??][#assign instanceIndex = inst?replace(name,"")][/#if][/#if]
-                                                [#if configModel.ipName=="DFSDM"]
-                                                    [#assign instanceIndex = ""]
-                                                [/#if]
-                                [/#if]
+                                    [#if config.ipName?starts_with("GPDMA") || config.ipName?starts_with("LPDMA")]
+                                        [#assign instanceIndex = ""]
+                                   [#else]
+                                        [#-- [#assign instanceIndex = instRef?replace(name,"")]--]
+                                        [#if index??][#assign instanceIndex = index][#else][#if name??][#assign instanceIndex = inst?replace(name,"")][/#if][/#if]
+                                                     [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
+                                                         [#assign instanceIndex = ""]
+                                                     [/#if]
+                                        [/#if]
+                                    [/#if]
                             [/#if]
                         [/#if]
-                        [#if instanceIndex??&&fargument.context=="global"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
+                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
                         [#-- [#assign arg = "" + adr + fargument.name] --]
                         [#if ((!method.name?contains("Init")&&fargument.context=="global")||(fargument.optional=="output"))]
+                        [#-- MDF : if ((!(fargument.context=="global"))||(fargument.optional=="output"))--]
                         [#else]
                             [#assign index1 =1] [#-- index of argument struct level1 --]
                         [#list fargument.argument as argument]	
 
                             [#if argument.genericType != "struct"]
-                                [#if argument.mandatory]
+                                [#if argument.mandatory && !argument.refMethod??] 
                                 [#if argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]
                                         [#assign argValue=argument.value?replace("$Index",instanceIndex)]
                                     [#else]
                                         [#assign argValue=argument.value]
                                     [/#if][#-- if global --]
                                     [#-- Bz40086 - Begin tweak of the value in case of ADC --]
-                                    [#if (config.name == "ADC_RegularChannelConfig" || config.name == "ADC_InjectedChannelConfig") && (FamilyName!="STM32F0" && FamilyName!="STM32L0" && FamilyName!="STM32F2" && FamilyName!="STM32F4")]
-                                        [#list argument?keys as k]
-                                            [#if k == "name"]
-                                                [#if argument[k] == "Rank"]
+[#if ((config.name == "ADC_RegularChannelConfig" && (FamilyName!="STM32G0" || FamilyName!="STM32WL") ) || config.name == "ADC_InjectedChannelConfig" ||  ((FamilyName=="STM32G0" || FamilyName=="STM32WL" || FamilyName=="STM32U5") && config.name == "ADC_RegularChannelRankConfig")) && (FamilyName!="STM32F0" && FamilyName!="STM32L0" && FamilyName!="STM32F2" && FamilyName!="STM32F4")]                                        [#list argument?keys as k]
+                                            [#if k == "name" && !(argument.value)?starts_with("ADC")]
+                                                [#if argument[k] == "Rank"]                                                 
                                                     [#assign argValue="ADC_REGULAR_RANK_"+argument.value]
                                                 [#elseif argument[k] == "InjectedRank"]
                                                     [#assign argValue="ADC_INJECTED_RANK_"+argument.value]
@@ -466,7 +500,7 @@
                                         [/#list]
                                     [/#if]                                   
                                     [#-- Bz40086 End tweak of the value in case of ADC --]
-                                    [#if argument.genericType=="Array" && argument.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if argument.genericType=="Array" && argument.context!="globalConst" && argument.context!="globalInit"][#-- if genericType=Array --]
                                     [#assign valList = argument.value?split(argument.arraySeparator)]     
                                             [#assign i = 0]                                  
                                         [#list valList as val]
@@ -479,20 +513,20 @@
                                         [/#list]
                                         [#assign argValue="&"+argument.name]                                    
                                     [/#if] [#-- if genericType=Array --]
-                                    [#if argument.genericType=="Array" && argument.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument.genericType=="Array" && (argument.context=="globalConst" || argument.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument.typeName +" *)"+argument.name]
                                     [/#if]
                                     [#if argument.value!="" && argument.value!="N/A"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +"." +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign varName=fargument.name +"." +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                         [#assign indicator = varName+"."+argument.name+" = "+argValue+" "]
                                         [#assign indicatorName = varName+"."+argument.name]
                                         [#if !listofDeclaration?contains(indicator)][#-- if not repeted --]  
-                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#assign varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};
+                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#assign varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};
                                             [#assign listofDeclaration = listofDeclaration?replace(indicatorName+" =","")]
                                             [#assign listofDeclaration = listofDeclaration +", "+ varName+"."+argument.name+" = "+argValue+" "]                                                                                 
                                         [/#if]
                                     [#else]
-                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
+                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
                                     [/#if]                                                                     
                                     [/#if]
                                     [#else] [#-- else argument.mandatory--]
@@ -501,7 +535,7 @@
                                               [#-- calculate the value of Instance argument if contains $Index --]
                                                 [#if  (argument.value??&& argument.value!="__NULL") && (argument.value?contains("$Index"))]
                                                     [#assign instanceValue=argument.value?replace("$Index",index)]
-[#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                                     [#assign indicator = varName+"."+argument.name+" = "+instanceValue+" "]
                                                     [#if !listofDeclaration?contains(indicator)]    [#-- if not repeted --]
                                                     [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${instanceValue};
@@ -509,7 +543,7 @@
                                                     
                                                     [/#if]
                                                 [#else]
-[#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name+instanceIndex][#else][#assign varName=fargument.name][/#if] [#if argument.value?? && argument.value!="__NULL"][#assign argv =argument.value][#else][#assign argv=inst][/#if]
+[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name+instanceIndex][#else][#assign varName=fargument.name][/#if] [#if argument.value?? && argument.value!="__NULL"][#assign argv =argument.value][#else][#assign argv=inst][/#if]
                                                    [#assign indicator = varName+"."+argument.name+" = "+argv+" "]
                                                    [#if !listofDeclaration?contains(indicator)] [#-- if not repeted --]
                                                     [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value?? && argument.value!="__NULL"]${argument.value};[#else]${inst};[/#if]
@@ -518,7 +552,7 @@
                                                             [#if index1 == fargument.argument?size]
                                                                 #n
                                                             [/#if]
-                                                            [#if configModel.ipName=="RTC" && config.name=="RTC_Init_Only" && Line!="STM32F0x0 Value Line"]
+                                                            [#if configModel.ipName=="RTC" && config.name=="RTC_Init_Only"]
                                                                 [#list configModel.configs as bz36245config]
                                                                     [#if bz36245config.name=="RTC_Init"]
                                                                         [#assign bz36245=true]
@@ -526,67 +560,126 @@
                                                                 [/#list]
                                                             [/#if]
                                                             [#if bz36245]
-                                                                [#if FamilyName=="STM32F1"]
-                                                                    #tif(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR1) != 0x32F2){
-                                                                [#else]
-                                                                    if(HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 0x32F2){
-                                                                [/#if]
-                                                                [#assign bz36245_BKPSet=true]
+                                                              
                                                             [/#if]
                                                    [/#if]
                                                 [/#if]
                                           [#else]
                                               [#if argument.status=="KO"]
-                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
+                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
                                               [/#if]
                                               [#if argument.value?? && argument.value!="__NULL"]
-                                                   [#if argument.value!="N/A"][#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};  [/#if]
- [#if index1 == fargument.argument?size]
+
+[#if argument.refMethod??] [#-- CallLibMethod for Argument value --]
+    [#assign argumentValue=""]
+    [@callLibMethod CLmethod=argument.refMethod configModelRef=configModel instRef=inst nTabRef=nTab indexRef=index argumentValue=argumentValue/]
+    [#assign argTmp = argumentValue]
+[/#if] [#-- end if fargument.refMethod??--] [#-- New --]
+                [#if argument.value!="N/A"]
+                                                        [#if argument.refMethod??][#assign argValue=argumentValue][#else][#assign argValue=argument.value][/#if]
+                                                        [#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name+instanceIndex][#else][#assign varName=fargument.name][/#if]
+                                                        [#assign indicator = varName+"."+argument.name+" = "+argValue+" "]
+                                                        [#assign indicatorName = varName+"."+argument.name]
+                                                        [#if !listofDeclaration?contains(indicator)][#-- if not repeted --]  
+                                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#assign varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};
+                                                            [#assign listofDeclaration = listofDeclaration?replace(indicatorName+" =","")]
+                                                            [#assign listofDeclaration = listofDeclaration +", "+ varName+"."+argument.name+" = "+argValue+" "]                                                                                 
+                                                        [/#if]
+                                                    [/#if]
+[#if index1 == fargument.argument?size]
                                                                 #n
                                                             [/#if]
+
                                               [/#if]                                    
                                           [/#if][#-- if argument=Instance--]                                
                                       [/#if]    
-                                [/#if][#-- if argument.mandatory--]                                
+                                [/#if][#-- if argument.mandatory--]     
                             [#else]
                             [#assign index2=0]
-                            [#list argument.argument as argument2]
-[#if argument2.genericType!="struct"]
+
+
+[#list argument.argument as argument2]
+			[#if argument2.genericType!="struct"]
+[#if config.ipName=="ETH"]
+                                [#if argument2.value??][#assign argValue=argument2.value][#else] [#assign argValue=""][/#if]
+                                [#if argument2.mandatory]
+                                    [#if argument2.value??]
+                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
+                                    [#if argument2.genericType=="Array"][#-- if genericType=Array --] 
+                                        [#assign valList = argument2.value?split(":")]     
+                                            [#assign i = 0]                                  
+                                        [#list valList as val] 
+                                            [#if argument2.typeName == "10"]
+                                                #t${argument2.name}[${i}] = ${val};
+                                            [#else]
+                                                #t${argument2.name}[${i}] = 0x${val};
+                                            [/#if]                                            [#assign i = i+1]
+                                        [/#list]
+                                        [#assign argValue="&"+argument2.name+"[0]"]
+                                    [/#if] [#-- if genericType=Array --]
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+                                    [/#if]
+                               [#else] [#-- !argument.mandatory --]
+                                    [#if argument2.status=="KO"]
+                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                    [/#if]
+                                    [#if argument2.status=="OK"]
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                    [/#if]
+[/#if]
+                                [/#if][#-- if argument.mandatory --]
+				
+
+
+[#if config.ipName!="ETH"]
                                 [#if argument2.value?? && argument2.value!="__NULL"][#assign argValue=argument2.value][#else] [#assign argValue=""][/#if]
                                 [#if argument2.mandatory]
                                     [#if argument2.value?? && argument2.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
-                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
+                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst" && argument2.context!="globalInit"][#-- if genericType=Array --]
                                         [#if argument2.arraySeparator?? && argument2.arraySeparator!=""]
                                         [#assign valList = argument2.value?split(argument2.arraySeparator)]     
                                         [#else]
                                             [#assign valList = argument2.value?split(":")]
                                         [/#if]
-                                            [#assign i = 0]                                  
-                                        [#list valList as val] 
-                                            [#if argument2.base == "10"]
-                                                #t${argument2.name}[${i}] = ${val};
+                                            [#assign i = 0]
+                                            [#assign argValue="&"+argument2.name+"[0]"]
+                                            [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+
+                                        [#list valList as val]
+                                            [#if nTab==2]#t#t[#else]#t[/#if][#t]
+                                            [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#t]
+                                                ${fargument.name}${instanceIndex}[#t]
                                             [#else]
-                                                #t${argument2.name}[${i}] = 0x${val};
+                                                ${fargument.name}[#t]
                                             [/#if]
-                                            [#assign i = i+1]
+                                            .${argument.name}.${argument2.name}[${i}] =[#t]
+                                            [#if argument2.base == "10"]
+                                                #t${val};
+                                            [#else]
+                                                #t0x${val};
+                                            [/#if]
+                                          [#assign i = i+1]
                                         [/#list]
-                                        [#assign argValue="&"+argument2.name+"[0]"]
-                                    [/#if] [#-- if genericType=Array --]
+                                            [#if index2 == argument.argument?size]
+                                                 [#-- add space line at the end of argument setting --]
+                                            [/#if]
+                                    [#else] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument2.genericType=="Array" && argument2.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument2.genericType=="Array" && (argument2.context=="globalConst" || argument2.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument2.typeName +" *)"+argument2.variableName]
                                     [/#if]                                         
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                                     [#assign indicator = varName+"."+argument.name+"."+argument2.name+" = "+argValue+" "]
                                                     [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]
-                                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
-                                                            
+                                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+
                                                         [#if index2 == argument.argument?size]
                                                             #n [#-- add space line at the end of argument setting --] 
                                                         [/#if]
                                                             [#assign listofDeclaration = listofDeclaration +", "+ indicator]
                                                     [/#if]
+                                        [/#if]
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument2.status=="WARNING"]
@@ -594,32 +687,35 @@
                                             [#assign argValue ="0"]
                                             [#assign indicator = varName+"."+argument.name+"."+argument2.name+" = "+argValue+" "]
                                             [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]
-                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
-                                                [#if index2 == argument.argument?size]
+                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+                                               [#if index2 == argument.argument?size]
                                                         #n [#-- add space line at the end of argument setting --]
                                                 [/#if]
                                             [/#if]
                                         [/#if]
                                     [/#if]
                                     [#if argument2.status=="KO"]
-                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                     [/#if]
                                     [#if argument2.status=="OK"]
 [#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                          [#assign indicator = varName+"."+argument.name+"."+argument2.name+" = "+argValue+" "]
                                          [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]   
-                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                             [#assign listofDeclaration = listofDeclaration +", "+ indicator]                                            
                                          [/#if]
                                     [/#if]
+
+[/#if]
                                 [/#if][#-- if argument.mandatory --]
 [#else]
 [#list argument2.argument as argument3]
- [#if argument3.value?? && argument3.value!="__NULL"][#assign argValue=argument3.value][#else] [#assign argValue=""][/#if]
+    [#if argument3.genericType!="struct"]
+        [#if argument3.value?? && argument3.value!="__NULL"][#assign argValue=argument3.value][#else] [#assign argValue=""][/#if]
                                 [#if argument3.mandatory]
                                     [#if argument3.value?? && argument3.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
-                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst"][#-- if genericType=Array --] 
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
+                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst" && argument3.context!="globalInit"][#-- if genericType=Array --] 
                                         [#if argument3.arraySeparator?? && argument3.arraySeparator!=""]
                                             [#assign valList = argument3.value?split(argument3.arraySeparator)]     
                                         [#else]
@@ -637,10 +733,10 @@
                                         [#assign argValue="&"+argument3.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                      [#-- if argument is a global array --]
-                                    [#if argument3.genericType=="Array" && argument3.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument3.genericType=="Array" && (argument3.context=="globalConst"||argument3.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument3.typeName +" *)"+argument3.name]
                                     [/#if]
-[#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                          [#assign indicator = varName+"."+argument.name+"."+argument2.name+"."+argument3.name+" = "+argValue+ " "]
                                          [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]                                      
                                             [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};                                    
@@ -648,7 +744,7 @@
                                          [/#if]                                       [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument3.status=="KO"]
-[#if instanceIndex??&&fargument.context=="global"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
                                          [#assign indicator = varName+"."+argument.name+"."+argument2.name+"."+argument3.name+" = "+argValue+" "] 
                                          [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]  
                                             [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
@@ -656,18 +752,78 @@
                                          [/#if]
                                     [/#if]
                                     [#if argument3.status=="OK"]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                                         [#assign indicator = varName+"."+argument.name+"."+argument2.name+"."+argument3.name+" = "+argValue+" "] 
+                                         [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]  
+                                            [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+                                            [#assign listofDeclaration = listofDeclaration +", "+ indicator]
+                                        [/#if]
                                     [/#if]
                                 [/#if][#-- if argument.mandatory --]
+    [#else]
+		[#list argument3.argument as argument4]
+			[#if argument4.genericType!="struct"]
+				[#if argument4.value?? && argument4.value!="__NULL"][#assign argValue=argument4.value][#else] [#assign argValue=""][/#if]
+				[#if argument4.value?? && argument4.value!="__NULL"]
+					[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                    [#assign indicator = varName+"."+argument.name+"."+argument2.name+"."+argument3.name+"."+argument4.name+" = "+argValue+" "] 
+                    [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]  
+                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name}.${argument4.name} = ${argValue};                                    
+                        [#assign listofDeclaration = listofDeclaration +", "+ indicator]
+                    [/#if]
+				[/#if]
+			[#else]
+				[#list argument4.argument as argument5]
+					[#if argument5.genericType!="struct"]
+						[#if argument5.value?? && argument5.value!="__NULL"][#assign argValue=argument5.value][#else] [#assign argValue=""][/#if]
+						[#if argument5.value?? && argument5.value!="__NULL"]
+                            [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign varName=fargument.name +instanceIndex][#else][#assign varName=fargument.name][/#if]
+                            [#assign indicator = varName+"."+argument.name+"."+argument2.name+"."+argument3.name+"."+argument4.name+"."+argument5.name+" = "+argValue+" "] 
+                            [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]  
+                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name}.${argument4.name}.${argument5.name} = ${argValue};                                    
+                                [#assign listofDeclaration = listofDeclaration +", "+ indicator]
+                            [/#if]
+						[/#if]
+					[/#if]
+				[/#list]
+			[/#if]
+		 [/#list]
+    [/#if]                                
 [/#list]
 [/#if]
+
 [#assign index2=index2 + 1]
                             [/#list]
                             [/#if]
 [#assign index1 =index1 + 1]
+
+
                         [/#list][#-- list  fargument.argument as argument--]
                         [/#if]
                     [#else][#-- if fargument a simple type struct --]
+                        [#if fargument.genericType=="Array"][#-- if genericType=Array --]
+                            [#if fargument.context!="globalConst" && fargument.context!="globalInit"]
+                                [#assign valList = fargument.value?split(fargument.arraySeparator)]
+                                [#assign i = 0]
+                                [#list valList as val]
+                                    [#if fargument.base == "10"]
+                                        #t${fargument.name}[${i}] = ${val};
+                                    [#else]
+                                        #t${fargument.name}[${i}] = 0x${val};
+                                    [/#if]
+                                    [#assign i = i+1]
+                                [/#list]
+                            [/#if]
+                            [#if fargument.status!="NULL"]
+                                [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]
+                                    [#assign arg = "" + adr + fargument.name + instanceIndex]
+                                [#else]
+                                    [#assign arg = "" + adr + fargument.name]
+                                [/#if]
+                            [#else]
+                                [#assign arg = "NULL"]
+                            [/#if]
+                        [#else] [#-- if genericType=Array --]
                     [#assign arg = ""]
                         [#if fargument.status=="OK" && fargument.value?? && fargument.value!="__NULL" && fargument.argumentReference == "RefParameter"]
                             [#if name??][#assign argIndex = inst?replace(name,"")]  [/#if]
@@ -684,7 +840,7 @@
                         [#else] 
                             [#if fargument.status=="NULL"][#assign arg = "" + adr + "NULL"] [/#if]      
                     [/#if]
-
+                        [/#if] [#-- if genericType=Array --]
                     [/#if] [#-- end if fargument is struct --]
                     [#if args == "" && arg!=""][#assign args = args + arg ][#else][#if arg!=""][#assign args = args + ', ' + arg][/#if][/#if]
                     [/#list]
@@ -694,7 +850,7 @@
                 [#assign retval=argument.name]
             [/#if]
             [/#list]
-[#if S_FATFS_SDIO?? && (inst=="SDIO" || inst?starts_with("SDMMC"))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--]
+[#if !(method.callMethod) || (S_FATFS_SDIO?? && (inst=="SDIO" || inst?starts_with("SDMMC")) && !(method.name=="HAL_RCCEx_PeriphCLKConfig"))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--]
 [#else]		    
                 [#if inst?contains("ETH")]
                     #n
@@ -703,6 +859,7 @@
                     #t/* USER CODE END MACADDRESS */
                     #n
                 [/#if]
+
 [#--[#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n--]
         [#if method.returnHAL=="false"]
             [#-- Check if Method is already called (listofCalledMethod)--]
@@ -712,6 +869,11 @@
                 [#if method.optimizale??&&method.optimizale==true]
                 [#assign listofCalledMethod = listofCalledMethod + ", "+ methodName]
                 [/#if]
+            [#if bz36245]
+
+             }
+
+               [/#if]
             [/#if]
         [#else]
             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
@@ -720,17 +882,22 @@
             [#if !listofCalledMethod?contains(methodName) && method.optimizale??]
                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
+
+				
+
                 [#if nTab==2]#t#t[#else]#t[/#if]}
                 [#if method.optimizale??&&method.optimizale==true]
                 [#assign listofCalledMethod = listofCalledMethod + ", "+ methodName]
                 [/#if]
+
+
             [/#if]
-        [/#if]#n
+        [/#if]
 [/#if]
                     
             [#else]
-                    [#if S_FATFS_SDIO?? && (inst=="SDIO" || inst?starts_with("SDMMC"))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--][#else]
+                    [#if !(method.callMethod) || (S_FATFS_SDIO?? && (inst=="SDIO" || inst?starts_with("SDMMC")))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--][#else]
                         [#--[#if nTab==2]#t#t[#else]#t[/#if]${method.name}();#n--]
                         [#if method.returnHAL=="false"]
             [#if nTab==2]#t#t[#else]#t[/#if]${method.name}();
@@ -738,7 +905,7 @@
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n                  
                     [/#if]
@@ -749,26 +916,28 @@
             [#if method.arguments??]			
                 [#list method.arguments as fargument]
                     [#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
                     [#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
                                         [#if fargument.context??]                   
                                             [#if fargument.context=="global"]
-                                                [#if config.ipName=="DMA" || config.ipName=="BDMA"]
+                                                [#if config.ipName=="DMA" || config.ipName=="BDMA" || config.ipName=="BDMA1"]
                                                 [#assign instanceIndex = "_"+ config.dmaRequestName?lower_case]
                                                 [#else]
                                                [#if name??] [#assign instanceIndex = inst?replace(name,"")][/#if]
-                                                [#if configModel.ipName=="DFSDM"]
+                                                [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                                     [#assign instanceIndex = ""]
                                                 [/#if]                
                                                 [/#if]
                                             [/#if]
                                         [/#if]              
-                        [#if instanceIndex??&&fargument.context=="global"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "" + adr + fargument.name][/#if]
+                        [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "" + adr + fargument.name][/#if]
                         [#if (!method.name?contains("Init")&&fargument.context=="global")]
+        [#-- MDF  --]
                         [#else]
                         [#list fargument.argument as argument]	
                                 [#if argument.genericType != "struct"]
                                 [#if argument.mandatory && argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument.value][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign argValue=argument.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument.value][/#if]
                                     [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
                                  [#else]
                                     [#if argument.name=="Instance"]
@@ -778,8 +947,8 @@
                             [#else]
                             [#list argument.argument as argument1]
                                 [#if argument1.mandatory && argument1.value?? && argument1.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
-                                [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
+                                [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
                                 [/#if]
                             [/#list]
                             [/#if]
@@ -808,7 +977,7 @@
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n
                                [#--[#if nTab==2]#t#t[#else]#t[/#if]${method.name}();--]
@@ -818,17 +987,16 @@
         [/#list]
 [#-- assign instanceIndex = "" --]
  [#-- else there is no LibMethod to call--]
-[/#list]
-[#if bz36245_BKPSet]
-    [#if FamilyName=="STM32F1"]
-            #t#tHAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR1,0x32F2);
-        #t}
-    [#else]
-            #t#tHAL_RTCEx_BKUPWrite(&hrtc,RTC_BKP_DR0,0x32F2);
-        #t}
-    [/#if]
-[#else]
+[#if bz36245]                                                           
+    #n
+    #t/* USER CODE BEGIN Check_RTC_BKUP */
+    #t#t
+    #t/* USER CODE END Check_RTC_BKUP */
+    #n
 [/#if]
+[/#list]
+
+
 
 [/#macro]
 [#-- End macro generateConfigModelListCode --]
@@ -856,36 +1024,59 @@
                         [/#if]
                     [/#list]
                     [#if !exist]  [#-- if exist --]                  
-                    #t${argument.typeName} ${argument.name};                        
+                    #t${argument.typeName} ${argument.name} = {0};                        
                       [#assign myListOfLocalVariables = myListOfLocalVariables + " "+ argument.name]
                       [#assign resultList = myListOfLocalVariables]
                     [/#if][#-- if exist --]
                     [/#if][#-- if global --]
                 [#else][#-- if context?? --]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
             [/#if][#-- if argument.context?? --]
-
+[#if configModel1.ipName!="ETH"]
             [#-- Array type --]
             [#list argument.argument as subArg] [#-- list subArg --]
-                [#if subArg.genericType=="Array" && subArg.context!="globalConst"] [#-- if genericType == "Array" --] 
+                [#if subArg.genericType=="Array" && subArg.context!="globalConst" && sunArg.context!="globalInit"] [#-- if genericType == "Array" --] 
                     ${subArg.typeName} ${subArg.name}[${subArg.arraySize}] ; 
                 [/#if] [#-- if genericType == "Array" --]
                 [#if subArg.genericType =="struct"]
-                    [#list subArg.argument as subArg1] [#-- list subArg1 --] 
-                        [#if subArg1.genericType=="Array" && subArg1.context!="globalConst"] [#-- if genericType == "Array" --]
+                    [#-- array inside struct is not considered as an array but as values
+                    [#list subArg.argument as subArg1] [#-- list subArg1 -]
+                        [#if subArg1.genericType=="Array" && subArg1.context!="globalConst" && subArg.context!="globalInit"] [#-- if genericType == "Array" -]
                             [#if subArg1.value?? && subArg1.value!="__NULL"]
                                 #t ${subArg1.typeName} ${subArg1.name}[${subArg1.arraySize}] ;
                             [/#if]
+                        [/#if] [#-- if genericType == "Array" -]
+                    [/#list]
+                    --]
+                [/#if]
+            [/#list] [#-- list subArg --]
+[/#if]
+
+[#if configModel1.ipName=="ETH"]
+	   [#-- Array type --]
+                       [#list argument.argument as subArg] [#-- list subArg --]
+                [#if subArg.genericType=="Array"] [#-- if genericType == "Array" --]
+                    ${subArg.typeName} ${subArg.name}[${subArg.arraySize}] ; 
+                [/#if] [#-- if genericType == "Array" --]
+                [#if subArg.genericType =="struct"]
+                    [#list subArg.argument as subArg1] [#-- list subArg1 --]
+                        [#if subArg1.genericType=="Array"] [#-- if genericType == "Array" --]
+                           #t static ${subArg1.typeName} ${subArg1.name}[${subArg1.arraySize}]; 
                         [/#if] [#-- if genericType == "Array" --]
                     [/#list]
                 [/#if]
             [/#list] [#-- list subArg --]
+		[/#if]
            [#else][#-- if non struct --]
+                [#if argument.genericType=="Array"] [#-- if genericType == "Array" --]
+                    #t${argument.typeName} ${argument.name}[${argument.arraySize}] ;
+                [#else]
                 [#if argument.context??][#-- if argument.context?? --]
 
                 [#else][#-- if context?? --]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
             [/#if]
+                [/#if][#-- if genericType == "Array" --]
             [/#if][#-- if struct --]
         [/#list][#-- list method.arguments --]
         [/#if]
@@ -903,8 +1094,10 @@
             [#if tabN==2]#t#t[#else]#t#t#t[/#if]/* Enable EXTI Line 18 for USB wakeup */
         [/#if]
     [#else]
-        [#if FamilyName=="STM32L0"]
+        [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"|| FamilyName=="STM32G4"]
             [#if tabN==2]#t#t[#else]#t#t#t[/#if]/* Enable EXTI Line 18 for USB wakeup */
+        [#elseif FamilyName=="STM32WB"]
+            [#if tabN==2]#t#t[#else]#t#t#t[/#if]/* Enable EXTI Line 28 for USB wakeup */
         [#else]
             [#if tabN==2]#t#t[#else]#t#t#t[/#if]/* Enable EXTI Line 20 for USB wakeup */
         [/#if]
@@ -1002,28 +1195,29 @@ ${bufferType} ${bufferName}[${bufferSize}];
     [#if method.status=="OK"][#assign writeConfigComments=true][/#if]
 [/#list]
 [#if writeConfigComments]
-[#if configModel.comments??] #t#t/**${configModel.comments?replace("#t","#t#t")} #n#t#t*/[/#if]
+[#if configModel.comments??]#t#t/**${configModel.comments?replace("#t","#t#t")}#n#t#t*/[/#if]
 [/#if]
     [#list methodList as method][#assign args = ""]	      
         [#if method.status=="OK"]
                 [#if method.arguments??]
                     [#list method.arguments as fargument][#compress]
-                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
+                    [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if][/#compress] 
                     [#if fargument.genericType == "struct"]
                         [#if fargument.context??]
                             [#if fargument.context=="global"]
-                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA"]
+                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || config.ipName=="BDMA1"]
                                     [#assign instanceIndex = "_"+ configModel.dmaRequestName?lower_case]
                                 [#else]
                                    [#-- [#assign instanceIndex = inst?replace(name,"")]--]
                                    [#if index??][#assign instanceIndex = index][#else][#if name??][#assign instanceIndex = inst?replace(name,"")][/#if][/#if]
-                                   [#if configModel.ipName=="DFSDM"]
+                                   [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                         [#assign instanceIndex = ""]
                                    [/#if]
                                 [/#if]
                             [/#if]
                         [/#if]                     
-                        [#if instanceIndex??&&fargument.context=="global"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
+                        [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"][#if fargument.status!="NULL"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#assign arg = "" + adr + fargument.name][#else][#assign arg = "NULL"][/#if][/#if]
                         [#-- [#assign arg = "" + adr + fargument.name] --]
                         [#if ((!method.name?contains("Init")&&fargument.context=="global")||(fargument.optional=="output"))]
                         [#else]
@@ -1031,12 +1225,12 @@ ${bufferType} ${bufferName}[${bufferSize}];
                             [#if argument.genericType != "struct"]
                                 [#if argument.mandatory]
                                 [#if argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"]
+                                    [#if instanceIndex??&&fargument.context=="global"&& fargument.optional!="output"]
                                         [#assign argValue=argument.value?replace("$Index",instanceIndex)]
                                     [#else]
                                         [#assign argValue=argument.value]
                                     [/#if][#-- if global --]
-                                    [#if argument.genericType=="Array" && argument.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if argument.genericType=="Array" && argument.context!="globalConst" && argument.context!="globalInit"][#-- if genericType=Array --]
                                     [#if argument.arraySeparator?? && argument.arraySeparator!=""]
                                             [#assign valList = argument.value?split(argument.arraySeparator)]     
                                         [#else]
@@ -1051,9 +1245,9 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                     [/#if] [#-- if genericType=Array --]
                                             
                                     [#if argument.value!="" && argument.value!="N/A"]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
                                     [#else]
-                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
+                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
                                     [/#if]                                                                     
                                     [/#if]
                                     [#else] [#-- else argument.mandatory--]
@@ -1062,13 +1256,13 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                               [#-- calculate the value of Instance argument if contains $Index --]
                                                 [#if  (argument.value?? && argument.value!="__NULL") && (argument.value?contains("$Index"))]
                                                     [#assign instanceValue=argument.value?replace("$Index",index)]
-                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${instanceValue};
+                                                [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${instanceValue};
                                                 [#else]
-                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value?? && argument.value!="__NULL"]${argument.value};[#else]${inst};[/#if]
+                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value?? && argument.value!="__NULL"]${argument.value};[#else]${inst};[/#if]
                                                 [/#if]
                                           [#else]
                                               [#if argument.status=="KO"]
-                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
+                                                   [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
                                               [/#if]
                                               [#if argument.value?? && argument.value!="__NULL"]
                                                    [#if argument.value!="N/A"][#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};  [/#if]
@@ -1082,8 +1276,8 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                 [#if argument2.value?? && argument2.value!="__NULL"][#assign argValue=argument2.value][#else] [#assign argValue=""][/#if]
                                 [#if argument2.mandatory]
                                     [#if argument2.value?? && argument2.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
-                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst"][#-- if genericType=Array --] 
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument2.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument2.value][/#if]
+                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst" && argument2.context!="globalInit"][#-- if genericType=Array --] 
                                         [#if argument2.arraySeparator?? && argument2.arraySeparator!=""]
                                         [#assign valList = argument2.value?split(argument2.arraySeparator)]     
                                         [#else]
@@ -1097,17 +1291,17 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                         [#assign argValue="&"+argument2.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument2.genericType=="Array" && argument2.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument2.genericType=="Array" && (argument2.context=="globalConst" || argument2.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument2.typeName +" *)"+argument2.name]
                                     [/#if]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument2.status=="KO"]
-                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                     [/#if]
                                     [#if argument2.status=="OK"]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                     [/#if]
                                 [/#if][#-- if argument.mandatory --]
 [#else]
@@ -1115,8 +1309,8 @@ ${bufferType} ${bufferName}[${bufferSize}];
  [#if argument3.value?? && argument3.value!="__NULL"][#assign argValue=argument3.value][#else] [#assign argValue=""][/#if]
                                 [#if argument3.mandatory]
                                     [#if argument3.value?? && argument3.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
-                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst"][#-- if genericType=Array --] 
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument3.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument3.value][/#if]
+                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst" && argument3.context!="globalInit"][#-- if genericType=Array --] 
                                         [#if argument3.arraySeparator?? && argument3.arraySeparator!=""]
                                             [#assign valList = argument3.value?split(argument3.arraySeparator)]     
                                         [#else]
@@ -1130,17 +1324,17 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                         [#assign argValue="&"+argument3.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument3.genericType=="Array" && argument3.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument3.genericType=="Array" && (argument3.context=="globalConst" || argument3.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument3.typeName +" *)"+argument3.name]
                                     [/#if]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};                                    
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};                                    
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument3.status=="KO"]
-                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+                                        [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
                                     [/#if]
                                     [#if argument3.status=="OK"]
-                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
+                                    [#if nTab==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name}.${argument3.name} = ${argValue};
                                     [/#if]
                                 [/#if][#-- if argument.mandatory --]
 [/#list]
@@ -1184,7 +1378,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n
             [#-- [/#if] --]
@@ -1196,7 +1390,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n
                 [/#if]			
@@ -1206,36 +1400,41 @@ ${bufferType} ${bufferName}[${bufferSize}];
             [#if method.arguments??]			
                 [#list method.arguments as fargument]
                     [#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
                     [#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
-                                        [#if fargument.context??]                   
+                        [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name]
+                                [#if fargument.cast??] [#assign arg = fargument.cast + arg][/#if]
+                        [/#if]
+                                        [#if fargument.context?? && fargument.optional!="output"]                   
                                             [#if fargument.context=="global"]
                                                 [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA"]
                                                 [#assign instanceIndex = "_"+ configModel.dmaRequestName?lower_case]
                                                 [#else]
                                                 [#assign instanceIndex = inst?replace(name,"")]
-                                                [#if configModel.ipName=="DFSDM"]
+                                                [#if configModel.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                                     [#assign instanceIndex = ""]
                                                 [/#if]
                                                 [/#if]
                                             [/#if]
                                         [/#if]              
-                        [#if instanceIndex??&&fargument.context=="global"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "" + adr + fargument.name][/#if]
+                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign arg = "" + adr + fargument.name + instanceIndex][#else][#assign arg = "" + adr + fargument.name][/#if]
                         [#if (!method.name?contains("Init")&&fargument.context=="global")]
                         [#else]
                         [#list fargument.argument as argument]	
                                 [#if argument.genericType != "struct"]
                                 [#if argument.mandatory && argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument.value][/#if]
-                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument.value][/#if]
+                                    [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
                                  [#else]
                                     [#if argument.name=="Instance"]
-                                        [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${inst};
+                                        [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${inst};
                                     [/#if]                                
                                 [/#if]
                             [#else]
                             [#list argument.argument as argument1]
                                 [#if argument1.mandatory && argument1.value?? && argument1.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#assign argValue=argument1.value?replace("$Index",instanceIndex)][#else][#assign argValue=argument1.value][/#if]
                                 [#if nTab==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
                                 [/#if]
                             [/#list]
@@ -1256,7 +1455,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n
                         [/#if]
@@ -1274,24 +1473,30 @@ ${bufferType} ${bufferName}[${bufferSize}];
 [#if CLmethod??]
 [#--assign CLmethod = argumentRef.refMethod--]
         [#if CLmethod.status=="OK"]
-                [#if CLmethod.arguments??]
+
+                [#if CLmethod.arguments??][#assign intArgs = ""]
                     [#list CLmethod.arguments as fargument][#compress]
-                    [#if fargument.addressOf] [#local adr = "&"][#else ][#local adr = ""][/#if][/#compress] 
+                    [#if fargument.addressOf] [#local adr = "&"][#else ][#local adr = ""][/#if]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if][/#compress] 
                     [#if fargument.genericType == "struct"]{
-                        [#if fargument.context??]
+                         [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name] 
+                                [#if fargument.cast??] [#assign arg = fargument.cast + arg][/#if]
+                        [/#if]
+                        [#if fargument.context?? && fargument.optional!="output"]
                             [#if fargument.context=="global"]
                                 [#if config.ipName=="DMA" || config.ipName=="BDMA"]
                                     [#local instanceIndex = "_"+ config.dmaRequestName?lower_case]
                                 [#else]
                                    [#-- [#local instanceIndex = instRef?replace(name,"")]--]
                                    [#if indexRef??][#local instanceIndex = indexRef][#else][#if name??][#local instanceIndex = instRef?replace(name,"")][/#if][/#if]
-                                                [#if configModelRef.ipName=="DFSDM"]
+                                                [#if configModelRef.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                                     [#local instanceIndex = ""]
                                                 [/#if]
                                 [/#if]
                             [/#if]
                         [/#if]                     
-                        [#if instanceIndex??&&fargument.context=="global"][#if fargument.status!="NULL"][#local arg = "" + adr + fargument.name + instanceIndex][#else][#local arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#local arg = "" + adr + fargument.name][#else][#local arg = "NULL"][/#if][/#if]
+                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#if fargument.status!="NULL"][#local arg = "" + adr + fargument.name + instanceIndex][#else][#local arg = "NULL"][/#if][#else][#if  fargument.status!="NULL"][#local arg = "" + adr + fargument.name][#else][#local arg = "NULL"][/#if][/#if]
                         [#-- [#local arg = "" + adr + fargument.name] --]
                         [#if ((!CLmethod.name?contains("Init")&&fargument.context=="global")||(fargument.optional=="output"))]
                         [#else]
@@ -1301,12 +1506,12 @@ ${bufferType} ${bufferName}[${bufferSize}];
                             [#if argument.genericType != "struct"]
                                 [#if argument.mandatory]
                                 [#if argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]
                                         [#local argValue=argument.value?replace("$Index",instanceIndex)]
                                     [#else]
                                         [#local argValue=argument.value]
                                     [/#if][#-- if global --]
-                                    [#if argument.genericType=="Array" && argument.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if argument.genericType=="Array" && argument.context!="globalConst" && argument.context!="globalInit"][#-- if genericType=Array --]
                                     [#if argument.arraySeparator?? && argument.arraySeparator!=""]
                                         [#local valList = argument.value?split(argument.arraySeparator)]     
                                     [#else]
@@ -1324,20 +1529,20 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                         [#local argValue="&"+argument.name]                                    
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument.genericType=="Array" && argument.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument.genericType=="Array" && (argument.context=="globalConst" || argument.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument.typeName +" *)"+argument.name]
                                     [/#if]
                                     [#if argument.value!="" && argument.value!="N/A"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name +"." +instanceIndex][#else][#local varName=fargument.name][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local varName=fargument.name +"." +instanceIndex][#else][#local varName=fargument.name][/#if]
                                         [#local indicator = varName+"."+argument.name+" = "+argValue+" "]
                                         [#local indicatorName = varName+"."+argument.name]
-                                        [#if !listofDeclaration?contains(indicator)][#-- if not repeted --]  
-                                            [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#local varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};                                        
+                                        [#if !listofDeclaration?contains(indicator)][#-- if not repeted --] 
+                                            [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local varName=fargument.name +"." +instanceIndex]${fargument.name}${instanceIndex}[#else][#local varName=fargument.name]${fargument.name}[/#if].${argument.name} = ${argValue};                                        
                                             [#local listofDeclaration = listofDeclaration?replace(indicatorName+" =","")]
                                             [#local listofDeclaration = listofDeclaration +", "+ varName+"."+argument.name+" = "+argValue+" "]                                                                                 
                                         [/#if]
                                     [#else]
-                                    [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
+                                    [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value!="N/A"]${argValue}[/#if];
                                     [/#if]                                                                     
                                     [/#if]
                                     [#else] [#-- else argument.mandatory--]
@@ -1357,7 +1562,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
 [#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name+instanceIndex][#else][#local varName=fargument.name][/#if] [#if argument.value?? && argument.value!="__NULL"][#local argv =argument.value][#else][#local argv=instRef][/#if]
                                                    [#local indicator = varName+"."+argument.name+" = "+argv+" "]
                                                    [#if !listofDeclaration?contains(indicator)] [#-- if not repeted --]
-                                                    [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value?? && argument.value!="__NULL"]${argument.value};[#else]${instRef};[/#if]
+                                                    [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = [#if argument.value?? && argument.value!="__NULL"]${argument.value};[#else]${instRef};[/#if]
                                                             [#local listofDeclaration = listofDeclaration +", "+ indicator]
 
                                                             [#if index1 == fargument.argument?size]
@@ -1368,10 +1573,10 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                                 [/#if]
                                           [#else]
                                               [#if argument.status=="KO"]
-                                                   [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
+                                                   [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};                                        
                                               [/#if]
                                               [#if argument.value?? && argument.value!="__NULL"]
-                                                   [#if argument.value!="N/A"][#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};  [/#if]
+                                                   [#if argument.value!="N/A"][#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argument.value};  [/#if]
  [#if index1 == fargument.argument?size]
 #n
                                                             [/#if]
@@ -1386,8 +1591,8 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                 [#if argument2.value?? && argument2.value!="__NULL"][#local argValue=argument2.value][#else] [#local argValue=""][/#if]
                                 [#if argument2.mandatory]
                                     [#if argument2.value?? && argument2.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#local argValue=argument2.value?replace("$Index",instanceIndex)][#else][#local argValue=argument2.value][/#if]
-                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst"][#-- if genericType=Array --]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local argValue=argument2.value?replace("$Index",instanceIndex)][#else][#local argValue=argument2.value][/#if]
+                                    [#if argument2.genericType=="Array" && argument2.context!="globalConst" && argument2.context!="globalInit"][#-- if genericType=Array --]
                                         [#if argument2.arraySeparator?? && argument2.arraySeparator!=""]
                                         [#local valList = argument2.value?split(argument2.arraySeparator)]     
                                         [#else]
@@ -1405,13 +1610,13 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                         [#local argValue="&"+argument2.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument2.genericType=="Array" && argument2.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument2.genericType=="Array" && (argument2.context=="globalConst" || argument2.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument2.typeName +" *)"+argument2.name]
                                     [/#if]
 [#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name +instanceIndex][#else][#local varName=fargument.name][/#if]
                                                     [#local indicator = varName+"."+argument.name+"."+argument2.name+" = "+argValue+" "]
                                                     [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]
-                                                        [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
+                                                        [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};                                    
 
                                                         [#if index2 == argument.argument?size]
 #n [#-- add space line at the end of argument setting --] 
@@ -1421,13 +1626,13 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                     [/#if]
                                [#else] [#-- !argument.mandatory --]
                                     [#if argument2.status=="KO"]
-                                        [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                        [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]//${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                     [/#if]
                                     [#if argument2.status=="OK"]
 [#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name +instanceIndex][#else][#local varName=fargument.name][/#if]
                                          [#local indicator = varName+"."+argument.name+"."+argument2.name+" = "+argValue+" "]
                                          [#if !listofDeclaration?contains(indicator)]  [#-- if not repeted --]   
-                                            [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
+                                            [#if nTabRef==2]#t#t[#else]#t[/#if][#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument2.name} = ${argValue};
                                             [#local listofDeclaration = listofDeclaration +", "+ indicator]                                            
                                          [/#if]
                                     [/#if]
@@ -1437,8 +1642,8 @@ ${bufferType} ${bufferName}[${bufferSize}];
  [#if argument3.value?? && argument3.value!="__NULL"][#local argValue=argument3.value][#else] [#local argValue=""][/#if]
                                 [#if argument3.mandatory]
                                     [#if argument3.value?? && argument3.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#local argValue=argument3.value?replace("$Index",instanceIndex)][#else][#local argValue=argument3.value][/#if]
-                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst"][#-- if genericType=Array --] 
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local argValue=argument3.value?replace("$Index",instanceIndex)][#else][#local argValue=argument3.value][/#if]
+                                    [#if argument3.genericType=="Array" && argument3.context!="globalConst" && argument3.context!="globalInit"][#-- if genericType=Array --] 
                                         [#if argument3.arraySeparator?? && argument3.arraySeparator!=""]
                                             [#local valList = argument3.value?split(argument3.arraySeparator)]     
                                         [#else]
@@ -1456,7 +1661,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                         [#local argValue="&"+argument3.name+"[0]"]
                                     [/#if] [#-- if genericType=Array --]
                                     [#-- if argument is a global array --]
-                                    [#if argument3.genericType=="Array" && argument3.context=="globalConst"][#-- if genericType=Array and gloabl--]                                        
+                                    [#if argument3.genericType=="Array" && (argument3.context=="globalConst" || argument3.context=="globalInit")][#-- if genericType=Array and gloabl--]                                        
                                         [#assign argValue="("+argument3.typeName +" *)"+argument3.name]
                                     [/#if]
 [#if instanceIndex??&&fargument.context=="global"][#local varName=fargument.name +instanceIndex][#else][#local varName=fargument.name][/#if]
@@ -1491,6 +1696,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                         [#if fargument.status=="OK" && fargument.value?? && fargument.value!="__NULL"]
                             [#if name??][#local argIndex = instRef?replace(name,"")]  [/#if]
                                             [#if argIndex??] 
+
                                                 [#local argValue=fargument.value?replace("$Index",argIndex)]
                                                 [#if fargument.returnValue!="true"]
                                                     [#local arg = "" + adr + argValue]
@@ -1498,12 +1704,13 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                             [#else]
                                                 [#if fargument.returnValue!="true"]
                                                     [#local arg = "" + adr + fargument.value]                                                
+
                                                 [/#if]
                                             [/#if]    
-[#else] [#if fargument.status=="NULL"][#local arg = "" + adr + "NULL"] [/#if]                    
+                        [#else] [#if fargument.status=="NULL"][#local arg = "" + adr + "NULL"] [/#if]                    
                         [/#if]
                     [/#if]
-                    [#if args == "" && arg!=""][#local args = args + arg ][#else][#if arg!=""][#local args = args + ', ' + arg][/#if][/#if]
+                    [#if intArgs == "" && arg!=""][#local intArgs = intArgs + arg ][#else][#if arg!=""][#local intArgs = intArgs + ', ' + arg][/#if][/#if]
                     [/#list]
                     [#local retval=""]
             [#list CLmethod.arguments as argument]
@@ -1511,13 +1718,14 @@ ${bufferType} ${bufferName}[${bufferSize}];
                 [#local retval=argument.name]
             [/#if]
             [/#list]
-[#if S_FATFS_SDIO?? && (instRef=="SDIO" || instRef?starts_with("SDMMC"))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--]
+[#list methodList as method]
+[#if (method.callMethod?? && !(method.callMethod)) || (S_FATFS_SDIO?? && (instRef=="SDIO" || instRef?starts_with("SDMMC")))] [#-- if HAL_SD_Init  and SDIO is used with FATFS--]
 [#else]		    
-[#--[#if nTab==2]#t#t[#else]#t[/#if]${CLmethod.name}(${args});#n--]
-[#assign argumentValue = CLmethod.name+"("+args+")"] [#-- New --]
+[#--[#if nTab==2]#t#t[#else]#t[/#if]${CLmethod.name}(${intArgs});#n--]
+[#assign argumentValue = CLmethod.name+"("+intArgs+")"] [#-- New --]
         [#-- delete call method--]
 [/#if]
-
+[/#list]
             [#else]
 [#assign argumentValue = CLmethod.name+"()"]
         [#-- delete call method--]
@@ -1528,37 +1736,38 @@ ${bufferType} ${bufferName}[${bufferSize}];
             [#if CLmethod.arguments??]	
                 [#list CLmethod.arguments as fargument]
                     [#if fargument.addressOf] [#local adr = "&"][#else ] [#local adr = ""][/#if]
-                    [#if fargument.genericType == "struct"][#local arg = "" + adr + fargument.name]
+                    [#if fargument.cast??] [#assign adr = fargument.cast + adr][/#if]
+                        [#if fargument.genericType == "struct"][#local arg = "" + adr + fargument.name]
                                         [#if fargument.context??]                   
                                             [#if fargument.context=="global"]
-                                                [#if config.ipName=="DMA" || config.ipName=="BDMA"]
+                                                [#if config.ipName=="DMA" || config.ipName=="BDMA" || config.ipName=="BDMA1"]
                                                 [#local instanceIndex = "_"+ config.dmaRequestName?lower_case]
                                                 [#else]
                                                [#if name??] [#local instanceIndex = instRef?replace(name,"")][/#if]
-                                                [#if configModelRef.ipName=="DFSDM"]
+                                                [#if configModelRef.ipName=="DFSDM" || configModel.ipName=="MDF" || configModel.ipName=="ADF"]
                                                     [#local instanceIndex = ""]
                                                 [/#if]                
                                                 [/#if]
                                             [/#if]
                                         [/#if]              
-                        [#if instanceIndex??&&fargument.context=="global"][#local arg = "" + adr + fargument.name + instanceIndex][#else][#local arg = "" + adr + fargument.name][/#if]
+                        [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local arg = "" + adr + fargument.name + instanceIndex][#else][#local arg = "" + adr + fargument.name][/#if]
                         [#if (!CLmethod.name?contains("Init")&&fargument.context=="global")]
                         [#else]
                         [#list fargument.argument as argument]	
                                 [#if argument.genericType != "struct"]
                                 [#if argument.mandatory && argument.value?? && argument.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#local argValue=argument.value?replace("$Index",instanceIndex)][#else][#local argValue=argument.value][/#if]
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local argValue=argument.value?replace("$Index",instanceIndex)][#else][#local argValue=argument.value][/#if]
                                     [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${argValue};
                                  [#else]
                                     [#if argument.name=="Instance"]
-                                        [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${instRef};
+                                        [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name} = ${instRef};
                                     [/#if]                                
                                 [/#if]
                             [#else]
                             [#list argument.argument as argument1]
                                 [#if argument1.mandatory && argument1.value?? && argument1.value!="__NULL"]
-                                    [#if instanceIndex??&&fargument.context=="global"][#local argValue=argument1.value?replace("$Index",instanceIndex)][#else][#local argValue=argument1.value][/#if]
-                                [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
+                                    [#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"][#local argValue=argument1.value?replace("$Index",instanceIndex)][#else][#local argValue=argument1.value][/#if]
+                                [#if nTabRef==2]#t#t[#else]#t[/#if]//[#if instanceIndex??&&fargument.context=="global" && fargument.optional!="output"]${fargument.name}${instanceIndex}[#else]${fargument.name}[/#if].${argument.name}.${argument1.name} = ${argValue};
                                 [/#if]
                             [/#list]
                             [/#if]
@@ -1575,11 +1784,11 @@ ${bufferType} ${bufferName}[${bufferSize}];
                                                 [#local arg = "" + adr + fargument.value]                                                
                                             [/#if]
                                         [/#if]
-                    [#if args == ""][#local args = args + arg ]
-                    [#else][#local args = args + ', ' + arg]
+                    [#if intArgs == ""][#local intArgs = intArgs + arg ]
+                    [#else][#local intArgs = intArgs + ', ' + arg]
                                         [/#if]
                                 [/#list]
-                                [#if nTabRef==2]#t#t[#else]#t[/#if]#t//${CLmethod.name}(${args});[#local argumentValue = CLmethod.name+"}("+args+")"]
+                                [#if nTabRef==2]#t#t[#else]#t[/#if]#t//${CLmethod.name}(${intArgs});[#local argumentValue = CLmethod.name+"}("+intArgs+")"]
                         [#else] [#-- if CLmethod without argument --]
 [#assign argumentValue = CLmethod.name+"()"]                            
                                [#--[#if nTabRef==2]#t#t[#else]#t[/#if]${CLmethod.name}();--]
@@ -1609,7 +1818,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
     [#assign nvicExist = false]
     [#if IPData.initServices?? && IPData.initServices.entrySet??]
         [#list IPData.initServices.entrySet() as entry]
-            [#if entry.key=="dma" && !modeName?contains("DFSDM")]
+            [#if entry.key=="dma" && !modeName?contains("DFSDM") && !ipName?starts_with("GPDMA")&& !ipName?starts_with("LPDMA")]
                 [#assign dmaExist = true]
             [/#if]
             [#if entry.key=="nvic" && IPData.initServices.nvic?size!=0 && !modeName?contains("DFSDM_Filter")]
@@ -1621,7 +1830,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
         [/#list]
     [/#if]    
     [#if serviceType=="Init"] 
-        [#if !ipName?contains("I2C")&& !ipName?contains("USB")] [#-- if not I2C --]
+        [#if !ipName?contains("I2C")&& !ipName?contains("USB")&& !ipName?contains("ICACHE")] [#-- if not I2C --]
             [#if IPData.initServices.clock??]
                 [#if IPData.initServices.clock!="none"]
                     [#if FamilyName=="STM32F1" && ipName=="RTC"]
@@ -1636,7 +1845,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                         [/#if]                   
                     [/#if]
 [#if tabN == 2]#t[/#if]#t/* Peripheral clock enable */ 
-                    [#list IPData.initServices.clock?split(';') as clock]    
+                    [#list IPData.initServices.clock?split(';') as clock]
                         [#--[#if ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED++;
                             #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){          
                             #t#t#t${clock?trim}();
@@ -1704,7 +1913,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
 #t[@generateConfigCode ipName=ipName type=serviceType serviceName="dma" instHandler=instHandler tabN=tabN IPData1=IPData/]
     [/#if]
 [#-- bug 322189 Init--]
-[#if ipName?contains("OTG_FS")&&FamilyName=="STM32L4"]
+[#if ipName?contains("OTG_FS")&&(FamilyName=="STM32L4"||FamilyName=="STM32U5")]
 #n#t#t/* Enable VDDUSB */
 #t#tif(__HAL_RCC_PWR_IS_CLK_DISABLED())
 #t#t{
@@ -1748,7 +1957,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
                 [/#list]
                 [#assign lowPower = "no"]
                 [#list IPData.initServices.nvic as initVector]
-                   [#if (instHandler=="hpcd") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")) && USB_INTERRUPT_WAKEUP??))]
+                   [#if (instHandler=="hpcd") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")||(initVector.vector == "USB_LP_IRQn")) && USB_INTERRUPT_WAKEUP??))]
                       [#assign lowPower = "yes"]
                    [/#if]
                 [/#list]
@@ -1785,7 +1994,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
 #t#tHAL_NVIC_SetPriority(${initVector.vector}, ${initVector.preemptionPriority}, ${initVector.subPriority});
 #t#tHAL_NVIC_EnableIRQ(${initVector.vector});
                     [#else]
-                        [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"]
+                        [#if !NVICPriorityGroup??]
 #tNVIC_SetPriority(${initVector.vector}, ${initVector.preemptionPriority});
                         [#else]
 #tNVIC_SetPriority(${initVector.vector}, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),${initVector.preemptionPriority}, ${initVector.subPriority}));
@@ -1848,7 +2057,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
     [#if service??&&service.nvic??&&nvicExist&&service.nvic?size>0]#n#t#t/* ${ipName} interrupt DeInit */[#--#n#t#tHAL_NVIC_DisableIRQ([#if service.nvic.vector??]${service.nvic.vector}[/#if]);--]
 [#list service.nvic as initVector]                
                [#if initVector.shared=="false"]             
-#t#tHAL_NVIC_DisableIRQ(${initVector.vector});#n
+#t#tHAL_NVIC_D isableIRQ(${initVector.vector});#n
                 [#else]
 #t/* USER CODE BEGIN ${ipName}:${initVector.vector} disable */
 #t#t/**
@@ -1882,7 +2091,39 @@ ${bufferType} ${bufferName}[${bufferSize}];
    [#return initServicesList]
 [/#function]
 [#-- End Function getInitServiceMode --]
+[#-- --]
+[#macro getMspPostInit()]
+    [#assign postinitList = ""]
+    [#list IPdatas as IP]  
+    [#list IP.configModelList as instanceData]
+    [#if instanceData.initServices??]
+        [#if instanceData.initServices.gpioOut??]
+            [#list instanceData.initCallBackInitMethodList as initCallBack]
+                [#if initCallBack?contains("PostInit")]
+                [#assign halMode = instanceData.halMode]
+                    [#assign ipName = instanceData.ipName]
+                    [#assign ipInstance = instanceData.instanceName]
+                    [#if halMode!=ipName&&!ipName?contains("TIM")&&!ipName?contains("CEC")]
+                        [#if !postinitList?contains(initCallBack)]
+                        #nvoid ${initCallBack}(${instanceData.halMode}_HandleTypeDef *h${instanceData.halMode?lower_case});
+                        [#assign postinitList = postinitList+" "+initCallBack]
+                        [/#if]
+                    [#else]
+                        [#if !postinitList?contains(initCallBack)]
+                        #nvoid ${initCallBack}([#if ipName?contains("TIM")&&!(ipName?contains("HRTIM")||ipName?contains("LPTIM"))]TIM_HandleTypeDef *htim[#else]${ipName}_HandleTypeDef *h${ipName?lower_case}[/#if]);
+                        [#assign postinitList = postinitList+" "+initCallBack]
+                         [/#if]
+                    [/#if]
+                    [#break] [#-- take only the first PostInit : case of timer--]
+                [/#if]
+            [/#list]
+        [/#if]
+    [/#if]
+    [/#list]
+    [/#list]
+[/#macro]
 
+[#-- --]
 [#-- Function getDeInitServiceMode --]
 [#function getDeInitServiceMode(ipname2, IPData)] [#--IPData = IPConfigModel --]
     [#-- assign initServicesList = {"test0":"test1"}--]
@@ -1920,12 +2161,12 @@ ${bufferType} ${bufferName}[${bufferSize}];
 
 [#if serviceName=="gpio"]
  [#assign instanceIndex =""]
-    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [#if serviceName=="gpioOut"]
  [#assign instanceIndex =""]
 [#if gpioOutService!="empty"]
-    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [/#if]
 [#if serviceName=="dma" && dmaService??]
@@ -1942,7 +2183,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
     [#assign ind=dmaconfig.dmaRequestName?substring(dmaconfig.dmaRequestName?length-1)]
 #tif(${instHandler}->Instance == ${ipName}_Filter${ind}){
 [/#if]
-     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode=type/]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
 
@@ -2015,12 +2256,12 @@ ${bufferType} ${bufferName}[${bufferSize}];
 
 [#if serviceName=="gpio"]
  [#assign instanceIndex =""]
-    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [#if serviceName=="gpioOut"]
  [#assign instanceIndex =""]
 [#if gpioOutService!="empty"]
-    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [/#if]
 [#if serviceName=="dma" && dmaService??]
@@ -2038,7 +2279,7 @@ ${bufferType} ${bufferName}[${bufferSize}];
     [#assign ind=dmaconfig.dmaRequestName?substring(dmaconfig.dmaRequestName?length-1)]
 #tif(${instHandler}->Instance == ${ipName}_Filter${ind}){
 [/#if]
-    [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode=type/]
     [#if IPData1.usedDriver == "HAL" && dmaconfig.usedDriver == "HAL"]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
@@ -2091,3 +2332,24 @@ ${bufferType} ${bufferName}[${bufferSize}];
 
 [/#macro]
 [#-- End macro generateConfigCode --]
+
+[#function getPeriphInstanceName(periph)]
+[#list configs as config]
+  [#assign peripheralParams = config.peripheralParams]
+  [#assign usedIPs = config.usedIPs]
+
+  [#list usedIPs as ip]
+    [#if ip=="SPI1"]
+        [#if peripheralParams.get(ip)??]
+        [#if peripheralParams.get(ip).get("Instance")??]        
+            [#assign instance = peripheralParams.get(ip).get("Instance")]
+            [#return instance]
+        [#else]
+            [#return "NA"]
+        [/#if]
+        [/#if]
+    [/#if]
+  [/#list]
+[/#list]
+[#return "not available"]
+[/#function]

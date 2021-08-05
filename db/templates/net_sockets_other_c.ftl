@@ -1,12 +1,14 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /** 
   ******************************************************************************
   * File Name       : ${name}.h
   * Description     : TCP/IP or UDP/IP networking empty functions
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"

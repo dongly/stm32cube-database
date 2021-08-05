@@ -1,8 +1,275 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <rules>
 
-<!-- A rule is applicable if iocVersion < ruleVersion <= MxUsedDBVersion -->
+<rule name="Rename SubGHz_Phy SUBGHZ_APPLICATION SUBGHZ_PINGPONG to SUBGHZ_ADV_APPLICATION">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>SUBGHZ_PHY.SUBGHZ_APPLICATION</MatcherOnKey>
+        <MatcherPattern>SUBGHZ_PINGPONG</MatcherPattern>
+        <MatchToPattern>SUBGHZ_ADV_APPLICATION</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32WL</ParserCondition>
+    </description>
+</rule>
 
+<rule name="Rename Enabled to IBEACON">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>STM32_WPAN.BT_SIG_BEACON</MatcherOnKey>
+        <MatcherPattern>Enabled</MatcherPattern>
+        <MatchToPattern>CFG_IBEACON</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32WB</ParserCondition>
+    </description>
+</rule>
+
+<rule name="GTZC_S instance for project manager">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>ProjectManager.functionlistsort.*</MatcherOnKey>
+        <MatcherPattern>(.*)-MX_GTZC_Init-GTZC-(.*)</MatcherPattern>
+        <MatchToPattern>$1-MX_GTZC_S_Init-GTZC_S-$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for context M33S">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>CortexM33S.IPs.*</MatcherOnKey>
+        <MatcherPattern>(.*)GTZC(.*)</MatcherPattern>
+        <MatchToPattern>$1GTZC_S$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance value for IP GTZC">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>^GTZC\.(.*)</MatcherOnKey>
+        <MatcherPattern>GTZC(\..*)</MatcherPattern>
+        <MatchToPattern>GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+     </description>
+</rule>
+<rule name="GTZC_S instance for mcu.IP">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>Mcu\.IP\d*</MatcherOnKey>
+        <MatcherPattern>(.*)GTZC(.*)</MatcherPattern>
+        <MatchToPattern>$1GTZC_S$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for VP">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>VP_GTZC.*\.Mode.*</MatcherOnKey>
+        <MatcherPattern>VP_GTZC(.*)</MatcherPattern>
+        <MatchToPattern>VP_GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for signal">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <MatcherOnKey>.*\.Signal</MatcherOnKey>
+        <MatcherPattern>(.*)_VS_GTZC_Enable(.*)</MatcherPattern>
+        <MatchToPattern>$1_S_VS_GTZC_Enable$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+
+<rule name="GTZC_S instance for mcu.Pin">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>Mcu\.Pin\d*</MatcherOnKey>
+        <MatcherPattern>VP_GTZC(.*)</MatcherPattern>
+        <MatchToPattern>VP_GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32WL</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for VP">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>VP_GTZC.*\.Mode.*</MatcherOnKey>
+        <MatcherPattern>VP_GTZC(.*)</MatcherPattern>
+        <MatchToPattern>VP_GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for signal">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>.*\.Signal</MatcherOnKey>
+        <MatcherPattern>(.*)_VS_GTZC_Enable(.*)</MatcherPattern>
+        <MatchToPattern>$1_S_VS_GTZC_Enable$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32U5</ParserCondition>
+    </description>
+</rule>
+
+<rule name="GTZC_S instance for mcu">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>Mcu\.IP\d*</MatcherOnKey>
+        <MatcherPattern>(.*)GTZC(.*)</MatcherPattern>
+        <MatchToPattern>$1GTZC_S$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for mcu.Pin">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>Mcu\.Pin\d*</MatcherOnKey>
+        <MatcherPattern>VP_GTZC(.*)</MatcherPattern>
+        <MatchToPattern>VP_GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance value for IP GTZC">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>^GTZC\.(.*)</MatcherOnKey>
+        <MatcherPattern>GTZC(\..*)</MatcherPattern>
+        <MatchToPattern>GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+     </description>
+</rule>
+<rule name="GTZC_S instance for project manager">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>ProjectManager.functionlistsort.*</MatcherOnKey>
+        <MatcherPattern>(.*)-MX_GTZC_Init-GTZC-(.*)</MatcherPattern>
+        <MatchToPattern>$1-MX_GTZC_S_Init-GTZC_S-$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for context M33S">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>CortexM33S.IPs.*</MatcherOnKey>
+        <MatcherPattern>(.*)GTZC(.*)</MatcherPattern>
+        <MatchToPattern>$1GTZC_S$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for VP">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>VP_GTZC.*\.Mode.*</MatcherOnKey>
+        <MatcherPattern>VP_GTZC(.*)</MatcherPattern>
+        <MatchToPattern>VP_GTZC_S$1</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+<rule name="GTZC_S instance for signal">
+    <description>
+        <MXDBVersion>DB.6.0.20</MXDBVersion>
+        <MatcherOnKey>.*\.Signal</MatcherOnKey>
+        <MatcherPattern>(.*)_VS_GTZC_Enable(.*)</MatcherPattern>
+        <MatchToPattern>$1_S_VS_GTZC_Enable$2</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32L5</ParserCondition>
+    </description>
+</rule>
+
+<rule name="SPDIFRX instance for mcu">
+    <description>
+        <MXDBVersion>DB.5.0.0</MXDBVersion>
+        <MatcherOnKey>Mcu\.(.*)</MatcherOnKey>
+        <MatcherPattern>(.*)SPDIFRX(.*)</MatcherPattern>
+        <MatchToPattern>$1SPDIFRX1$2</MatchToPattern> 
+        <ParserCondition>STM32H7</ParserCondition>  
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Rename Tracer Mode">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <MatcherOnKey>(.*)_traceremb_usart3\.Mode</MatcherOnKey>
+        <MatcherPattern>TRACER_EMB</MatcherPattern>
+        <MatchToPattern>TRACER_EMB_USART3</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>		
+    </description>
+</rule>
+
+<rule name="SPDIFRX instance value for IP SPDIFRX">
+    <description>
+        <MXDBVersion>DB.5.0.0</MXDBVersion>
+        <MatcherOnKey>^SPDIFRX\.(.*)</MatcherOnKey>
+        <MatcherPattern>SPDIFRX(\..*)</MatcherPattern>
+        <MatchToPattern>SPDIFRX1$1</MatchToPattern>   
+        <ParserCondition>STM32H7</ParserCondition>  
+        <SeparatorOnValue>,</SeparatorOnValue>
+     </description>
+</rule>
+
+<rule name="SPDIFRX instance for signal">
+    <description>
+        <MXDBVersion>DB.5.0.0</MXDBVersion>
+        <MatcherOnKey>.*\.Signal</MatcherOnKey>
+        <MatcherPattern>(.*)SPDIFRX(.*)</MatcherPattern>
+        <MatchToPattern>$1SPDIFRX1$2</MatchToPattern>   
+        <ParserCondition>STM32H7</ParserCondition>  
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+
+<rule name="SPDIFRX instance for project manager">
+    <description>
+        <MXDBVersion>DB.5.0.0</MXDBVersion>
+        <MatcherOnKey>ProjectManager.functionlistsort.*</MatcherOnKey>
+        <MatcherPattern>(.*)_SPDIFRX_(.*)</MatcherPattern>
+        <MatchToPattern>$1SPDIFRX1$2</MatchToPattern>   
+        <ParserCondition>STM32H7</ParserCondition>  
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="SPDIFRX instance for project manager">
+    <description>
+        <MXDBVersion>DB.5.0.0</MXDBVersion>
+        <MatcherOnKey>ProjectManager.functionlistsort.*</MatcherOnKey>
+        <MatcherPattern>(.*)-SPDIFRX-(.*)</MatcherPattern>
+        <MatchToPattern>$1SPDIFRX1$2</MatchToPattern>   
+        <ParserCondition>STM32H7</ParserCondition>  
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+
+<!-- A rule is applicable if iocVersion < ruleVersion <= MxUsedDBVersion -->
+<rule name="ADC Scan  fix with FW F7">
+    <description>
+        <MXDBVersion>DB.5.0.30</MXDBVersion>
+        <MatcherOnKey>ADC.*ScanConvMode</MatcherOnKey>
+        <MatcherPattern>^ENABLE$</MatcherPattern>
+        <MatchToPattern>ADC_SCAN_ENABLE</MatchToPattern>   
+        <ParserCondition>STM32F7</ParserCondition>
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="ADC Scan  fix with FW F7">
+    <description>
+        <MXDBVersion>DB.5.0.30</MXDBVersion>
+        <MatcherOnKey>ADC.*ScanConvMode</MatcherOnKey>
+        <MatcherPattern>^DISABLE$</MatcherPattern>
+        <MatchToPattern>ADC_SCAN_DISABLE</MatchToPattern>   
+        <ParserCondition>STM32F7</ParserCondition>
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
 <rule name="Rename Comp Signal">
     <description>
         <MXDBVersion>DB.4.0.100</MXDBVersion>
@@ -589,6 +856,20 @@
     </description>
 </rule>
 
+
+<rule name="Change Default Value for ADC Clock Prescaler G0 family">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>ADC[1-4]*\..*</MatcherOnKey>
+        <MatcherPattern>ClockPrescaler</MatcherPattern>
+        <MatchToPattern>ADC_CLOCK_SYNC_PCLK_DIV4</MatchToPattern>
+        <ParserCondition>(STM32G0 &amp; DIE466)</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+
+
 <rule name="Change Default Value for ADC ExternalTrigConv L4 family">
     <description>
         <MXDBVersion>DB.4.0.180</MXDBVersion>
@@ -1021,6 +1302,104 @@
         <SeparatorOnValue>,</SeparatorOnValue>
     </description>
 </rule>
+<rule name="Rename AES DataEncryptionTypesList to Algorithm">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>AES.*</MatcherOnKey>
+        <MatcherPattern>DataEncryptionTypesList</MatcherPattern>
+        <MatchToPattern>Algorithm</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>DIE470</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename TDESECB to CRYP_TDES_ECB">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>TDESECB</MatcherPattern>
+        <MatchToPattern>CRYP_TDES_ECB</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename TDESCBC to CRYP_TDES_CBC">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>TDESCBC</MatcherPattern>
+        <MatchToPattern>CRYP_TDES_CBC</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename DESECB to CRYP_DES_ECB">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>DESECB</MatcherPattern>
+        <MatchToPattern>CRYP_DES_ECB</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename DESCBC to CRYP_DES_CBC">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>DESCBC</MatcherPattern>
+        <MatchToPattern>CRYP_DES_CBC</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename AESECB to CRYP_AES_ECB">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>AESECB</MatcherPattern>
+        <MatchToPattern>CRYP_AES_ECB</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename AESCBC to CRYP_AES_CBC">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>AESCBC</MatcherPattern>
+        <MatchToPattern>CRYP_AES_CBC</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
+<rule name="Rename AESCTR to CRYP_AES_CTR">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>AESCTR</MatcherPattern>
+        <MatchToPattern>CRYP_AES_CTR</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule><rule name="Rename AESGCM to CRYP_AES_GCM">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>AESGCM</MatcherPattern>
+        <MatchToPattern>CRYP_AES_GCM</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule><rule name="Rename AESCCM to CRYP_AES_CCM">
+    <description>
+        <MXDBVersion>DB.5.0.1</MXDBVersion>
+        <MatcherOnKey>CRYP.Algorithm</MatcherOnKey>
+        <MatcherPattern>AESCCM</MatcherPattern>
+        <MatchToPattern>CRYP_AES_CCM</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+        <ParserCondition>STM32F4|STM32F7</ParserCondition>
+    </description>
+</rule>
 <!-- rename can val -->
 
 
@@ -1358,4 +1737,863 @@
 	<ParserCondition>STM32H7</ParserCondition>
     </description>
 </rule>
+
+<rule name="USART TxPinLevelInvertParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).TxPinLevelInvertParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_TXINV_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_TXINV_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART RxPinLevelInvertParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).RxPinLevelInvertParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_RXINV_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_RXINV_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART DataInvertParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).DataInvertParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_DATAINV_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_DATAINV_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART SwapParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).SwapParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_SWAP_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_SWAP_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART OverrunDisableParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).OverrunDisableParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_OVERRUN_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_OVERRUN_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART DMADisableonRxErrorParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).DMADisableonRxErrorParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_DMA_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_DMA_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USART MSBFirstParam Mode">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>USART(.*).MSBFirstParam</MatcherOnKey>
+        <MatcherPattern>(.*)_ADVFEATURE_MSBFIRST_(.*)</MatcherPattern>
+        <MatchToPattern>ADVFEATURE_MSBFIRST_$2</MatchToPattern>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+
+<rule name="Update MwName for USB_DEVICE">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <MatcherOnKey>ProjectManager.functionlistsort.*</MatcherOnKey>
+        <MatcherPattern>(.*)MX_USB_DEVICE_Init(.*)</MatcherPattern>
+        <MatchToPattern>MX_Usb_Device_Init</MatchToPattern>   
+        <ParserCondition>STM32WB</ParserCondition>
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+
+<rule name="Change PWR_Regulator_Voltage_Scale Default Value for RCC  H7 family">
+    <description>
+        <MXDBVersion>DB.5.0.10</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>PWR_Regulator_Voltage_Scale</MatcherPattern>
+        <MatchToPattern>PWR_REGULATOR_VOLTAGE_SCALE1</MatchToPattern>   
+        <ParserCondition>STM32H7</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="UART/USART IPParameter rename Prescaler parameter to ClockPrescaler">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <MatcherOnKey>U(.*)ART(.*).IPParameters</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32H7</ParserCondition>
+        <MatcherCondition>Prescaler=PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="UART/USART Prescaler rename Prescaler parameter to ClockPrescaler">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <MatcherOnKey>U(.*)ART(.*)\.Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <MatcherCondition>Prescaler=PRESCALER_DIV(.*)</MatcherCondition>
+        <ParserCondition>STM32H7</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="TIM1CLockSelection">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <MatcherOnKey>RCC.(.*)</MatcherOnKey>
+        <MatcherPattern>TIM1CLockSelection</MatcherPattern>
+        <MatchToPattern>TIM1CLockSelectionVirtual</MatchToPattern>
+        <ParserCondition>STM32G0</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="TIM15CLockSelection">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <MatcherOnKey>RCC.(.*)</MatcherOnKey>
+        <MatcherPattern>TIM15CLockSelection</MatcherPattern>
+        <MatchToPattern>TIM15CLockSelectionVirtual</MatchToPattern>
+        <ParserCondition>STM32G0</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="align RCC SDMMC3CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SDMMC3CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_SDMMC3CLKSOURCE_HCLK2</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC SDMMC12CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SDMMC12CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_SDMMC12CLKSOURCE_HCLK6</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC QSPICLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>QSPICLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_QSPICLKSOURCE_ACLK</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC QSPICLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>FMCCLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_FMCCLKSOURCE_ACLK</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+ <rule name="align RCC SPI6CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SPI6CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_SPI6CLKSOURCE_PCLK5</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC LPTIM23CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM23CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_LPTIM23CLKSOURCE_PCLK3</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC LPTIM1CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM1CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_LPTIM1CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC USART1CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART1CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_USART1CLKSOURCE_PCLK5</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC USART24CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART24CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_UART24CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC USART6CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART6CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_USART6CLKSOURCE_PCLK2</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC UART78CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>UART78CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_UART78CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC USART35CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART35CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_UART35CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC SPI45CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SPI45CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_SPI45CLKSOURCE_PCLK2</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC I2C46CLockSelection BCLK value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>RCC_I2C46CLKSOURCE_BCLK</MatcherPattern>
+        <MatchToPattern>RCC_I2C46CLKSOURCE_PCLK5</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC SPI45CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SPI45CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_SPI45CLKSOURCE_PCLK2</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC I2C12CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>I2C12CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_I2C12CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC I2C35CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>I2C35CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_I2C35CLKSOURCE_PCLK1</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="align RCC LPTIM45CLockSelection default value on MP1">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM45CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_LPTIM45CLKSOURCE_PCLK3</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Rename DCMI PIXCK signal">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <ParserCondition>(STM32F2&amp;DIE411)|(STM32F4&amp;DIE413)|(STM32F4&amp;DIE419)</ParserCondition>
+        <MatcherOnKey>.*\.Signal</MatcherOnKey>
+        <MatcherPattern>DCMI_PIXCK</MatcherPattern>
+        <MatchToPattern>DCMI_PIXCLK</MatchToPattern>
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change Default Value for I2C46CLockSelection MP1 family">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>I2C46CLockSelection</MatcherPattern>
+        <MatchToPattern>RCC_I2C46CLKSOURCE_PCLK5</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change Default Value for UART for G4, G0 and WB families">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>UART*\..*</MatcherOnKey>
+        <MatcherPattern>WordLength</MatcherPattern>
+        <MatchToPattern>WORDLENGTH_7B</MatchToPattern>   
+        <ParserCondition>STM32G0|STM32G4|STM32WB</ParserCondition>
+        <MatcherCondition>!UART$1_IRDA &amp; !UART$1_LIN</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change Default Value for USART for G4, G0 and WB families">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>USART(.*)\..*</MatcherOnKey>
+        <MatcherPattern>WordLength</MatcherPattern>
+        <MatchToPattern>WORDLENGTH_7B</MatchToPattern>   
+        <ParserCondition>STM32G0|STM32G4|STM32WB</ParserCondition>
+        <MatcherCondition>IPParameters!=(.)*VirtualMode-SmartCard(.)*|(.)*VirtualMode-LIN(.)*</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+
+<rule name="Change Default Value for USART for G4 family">
+    <description>
+        <MXDBVersion>DB.5.0.40</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>UART(.*)\..*</MatcherOnKey>
+        <MatcherPattern>WordLength</MatcherPattern>
+        <MatchToPattern>WORDLENGTH_7B</MatchToPattern>   
+        <ParserCondition>STM32G4</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change USART1CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART1CLockSelection</MatcherPattern>
+        <MatchToPattern>USART1CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change USART2CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART2CLockSelection</MatcherPattern>
+        <MatchToPattern>USART2CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change USART3CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>USART3CLockSelection</MatcherPattern>
+        <MatchToPattern>USART3CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change UART4CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>UART4CLockSelection</MatcherPattern>
+        <MatchToPattern>UART4CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change UART5CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>UART5CLockSelection</MatcherPattern>
+        <MatchToPattern>UART5CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change LPUART1CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPUART1CLockSelection</MatcherPattern>
+        <MatchToPattern>LPUART1CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change LPTIM1CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM1CLockSelection</MatcherPattern>
+        <MatchToPattern>LPTIM1CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change LPTIM2CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM2CLockSelection</MatcherPattern>
+        <MatchToPattern>LPTIM2CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change RCC_MCO1Source refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>RCC_MCO1Source</MatcherPattern>
+        <MatchToPattern>RCC_MCO1SourceVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change LSCOSource1 refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LSCOSource1</MatcherPattern>
+        <MatchToPattern>LSCOSource1Virtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change SMPSCLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SMPSCLockSelection</MatcherPattern>
+        <MatchToPattern>SMPSCLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32WB</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change LPTIM3CLockSelection refparam name for MP1">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>LPTIM3CLockSelection</MatcherPattern>
+        <MatchToPattern>LPTIM3CLockSelectionVirtual</MatchToPattern>   
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change MPCBB* Default Template Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_Template_MPCBB\d*_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>Default_(MPCBB\d*.)_Template</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.$1_NonSecureArea_Choice=Use default memory template from partition_stm32l5xx.h</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change MPCWM* or MPCBB* Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_MPC[WB][MB]\d*_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>(MPC[WB][MB]\d*)_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.$1_NonSecureArea_Choice=from full Secured</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change MPCWM* or MPCBB* No Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_NoMPC[WB][MB]\d*_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>No_(MPC[WB][MB]\d*)_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.$1_NonSecureArea_Choice=from full Not Secured</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZSC IP Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_IP_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>IP_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZSC_Secure_IP_Choice=by Individual Unsecuring from full Secured</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZSC IP No Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_NoIP_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>No_IP_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZSC_Secure_IP_Choice=by Individual Securing from full Not Secured</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZSC IP Privilege Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_IP_Privilege\.Mode</MatcherOnKey>
+        <MatcherPattern>IP_Privilege</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZSC_Privilege_IP_Choice=by Individual Unprivileging from full Privileged</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZSC IP No Privilege Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_NoIP_Privilege\.Mode</MatcherOnKey>
+        <MatcherPattern>No_IP_Privilege</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZSC_Privilege_IP_Choice=by Individual Privileging from full Not Privileged</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZIC IT Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_IT_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>IT_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZIC_Configure_IT_Choice=by Individual Disabling from full Enabled</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change TZIC IT No Secure Mode to Parameters">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>ChangeIPModeToParameter</RuleType>
+        <MatcherOnKey>VP_GTZC_VS_NoIT_Secure\.Mode</MatcherOnKey>
+        <MatcherPattern>No_IT_Secure</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.TZIC_Configure_IT_Choice=by Individual Enabling from full Disabled</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+
+<rule name="Add MPCBB1_NonSecureArea_Start_Address value with referenced to MPCBB1_NonSecureArea_Start value">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>AddParameterValueWithReferencedValue</RuleType>
+        <MatcherOnKey>GTZC\.MPCBB1_NonSecureArea_Start</MatcherOnKey>
+        <MatcherPattern>GTZC\.MPCBB1_NonSecureArea_Start=(.*)</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.MPCBB1_NonSecureArea_Start_Address=(MPCBB1_NonSecureArea_SRAM1_BASE_NS + $1)</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Add MPCBB2_NonSecureArea_Start_Address value with referenced to MPCBB2_NonSecureArea_Start value">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>AddParameterValueWithReferencedValue</RuleType>
+        <MatcherOnKey>GTZC\.MPCBB2_NonSecureArea_Start</MatcherOnKey>
+        <MatcherPattern>GTZC\.MPCBB2_NonSecureArea_Start=(.*)</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.MPCBB2_NonSecureArea_Start_Address=(MPCBB2_NonSecureArea_SRAM2_BASE_NS + $1)</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Add MPCWM1_NonSecureArea*_Start_Address value with referenced to MPCWM1_NonSecureArea*_Start value">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>AddParameterValueWithReferencedValue</RuleType>
+        <MatcherOnKey>GTZC\.MPCWM1_NonSecureArea\d*_Start</MatcherOnKey>
+        <MatcherPattern>GTZC\.MPCWM1_NonSecureArea(\d*)_Start=(.*)</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.MPCWM1_NonSecureArea$1_Start_Address=(MPCWM1_NonSecureArea_OCTOSPI1_BASE + $2)</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Add MPCWM2_NonSecureArea*_Start_Address value with referenced to MPCWM2_NonSecureArea*_Start value">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>AddParameterValueWithReferencedValue</RuleType>
+        <MatcherOnKey>GTZC\.MPCWM2_NonSecureArea\d*_Start</MatcherOnKey>
+        <MatcherPattern>GTZC\.MPCWM2_NonSecureArea(\d*)_Start=(.*)</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.MPCWM2_NonSecureArea$1_Start_Address=(MPCWM2_NonSecureArea_FMC_BANK1 + $2)</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Add MPCWM3_NonSecureArea_Start_Address value with referenced to MPCWM3_NonSecureArea_Start value">
+    <description>
+        <MXDBVersion>DB.5.0.50</MXDBVersion>
+        <RuleType>AddParameterValueWithReferencedValue</RuleType>
+        <MatcherOnKey>GTZC\.MPCWM3_NonSecureArea_Start</MatcherOnKey>
+        <MatcherPattern>GTZC\.MPCWM3_NonSecureArea_Start=(.*)</MatcherPattern>
+        <MatchToPattern>AddedKeys:GTZC.MPCWM3_NonSecureArea_Start_Address=(MPCWM3_NonSecureArea_FMC_BANK3 + $1)</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change Default Value for PLL1UserDefinedConfig">
+    <description>
+        <MXDBVersion>DB.5.0.60</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>PLL1UserDefinedConfig</MatcherPattern>
+        <MatchToPattern>true</MatchToPattern>   
+        <ParserCondition>STM32MP1</ParserCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change GPIO_PuPd Default Value for USART in async mode">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <RuleType>ChangeDefaultGPIOValue</RuleType>
+        <MatcherOnKey>(.*).Mode=Asynchronous</MatcherOnKey>
+        <MatcherPattern>GPIO_PuPd</MatcherPattern>
+        <MatchToPattern>GPIO_PULLUP</MatchToPattern>   
+        <ParserCondition>STM32G0|STM32WB</ParserCondition>
+        <MatcherCondition>Signal=USART(.*)_(.*)X</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change SMPSDivider Default Value">
+    <description>
+        <MXDBVersion>DB.5.0.20</MXDBVersion>
+        <RuleType>ChangeDefaultValue</RuleType>
+        <MatcherOnKey>RCC*\..*</MatcherOnKey>
+        <MatcherPattern>SMPSDivider</MatcherPattern>
+        <MatchToPattern>1</MatchToPattern>   
+        <ParserCondition>STM32WB</ParserCondition>
+        <MatcherCondition>SMPSCLockSelectionVirtual=RCC_SMPSCLKSOURCE_HSI</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="OPAMP">
+    <description>
+        <MXDBVersion>DB.6.0.0</MXDBVersion>
+        <MatcherOnKey>(.*).Signal</MatcherOnKey>
+        <MatcherPattern>OPAMP(.*)_VINM</MatcherPattern>
+        <MatchToPattern>OPAMP$1_VINM0</MatchToPattern>
+        <MatcherCondition>Mode=PGA(.*)</MatcherCondition>
+        <ParserCondition>STM32G4</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32H7">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).IPParameters</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32H7</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32H7">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32H7</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32WB">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).IPParameters</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32WB</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32WB">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32WB</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32G4">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).IPParameters</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32G4</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32G4">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32G4</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32L5">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32L5</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32G4">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).IPParameters</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32WL</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="LPUART IPParameter rename Prescaler parameter to ClockPrescaler for STM32G4">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>LPUART(.*).Prescaler</MatcherOnKey>
+        <MatcherPattern>Prescaler</MatcherPattern>
+        <MatchToPattern>ClockPrescaler</MatchToPattern>
+        <ParserCondition>STM32WL</ParserCondition>
+        <MatcherCondition>Prescaler=UART_PRESCALER_DIV(.*)</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="USB device lib V2.5.3 for L0 rename USBD_SUPPORT_USER_STRING parameter to USBD_SUPPORT_USER_STRING_DESC4">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>USB_DEVICE(.*)</MatcherOnKey>
+        <MatcherPattern>USBD_SUPPORT_USER_STRING</MatcherPattern>
+        <MatchToPattern>USBD_SUPPORT_USER_STRING_DESC</MatchToPattern>
+        <ParserCondition>STM32L0</ParserCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>	
+    </description>
+</rule>
+<rule name="I2SCLockSelection clock entry align">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <MatcherOnKey>RCC\.(.*)</MatcherOnKey>
+        <MatcherPattern>RCC_I2SCLKSOURCE_HSE</MatcherPattern>
+        <MatchToPattern>RCC_I2SCLKSOURCE_HSI</MatchToPattern>
+        <ParserCondition>STM32G4</ParserCondition>
+        <SeparatorOnValue>,</SeparatorOnValue>
+    </description>
+</rule>
+
+<rule name="Assign TIMx context if used as SYS timebase">
+    <description>
+        <MXDBVersion>DB.6.0.10</MXDBVersion>
+        <RuleType>AssignTimToSysContext</RuleType>
+        <MatcherOnKey>VP_SYS(.*)_VS_tim(.+).Mode</MatcherOnKey>
+        <MatcherCondition>Mcu.ContextNb=2</MatcherCondition>
+        <SeparatorOnValue>__No_Separator</SeparatorOnValue>
+        <ParserCondition>STM32H7|STM32L5</ParserCondition>
+     </description>
+</rule>
+<rule name="Change GPIO_Pu Default Value for I2C">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <RuleType>ChangeDefaultI2CGPIOValue</RuleType>
+        <MatcherOnKey>(.*).Mode=I2C</MatcherOnKey>
+        <MatcherPattern>GPIO_Pu</MatcherPattern>
+        <MatchToPattern>GPIO_PULLUP</MatchToPattern>   
+        <MatcherCondition>Signal=I2C(.*)_(.*)</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+<rule name="Change GPIO_Pu Default Value for SMBus">
+    <description>
+        <MXDBVersion>DB.6.0.30</MXDBVersion>
+        <RuleType>ChangeDefaultI2CGPIOValue</RuleType>
+        <MatcherOnKey>(.*).Mode=SMBus(.*)</MatcherOnKey>
+        <MatcherPattern>GPIO_Pu</MatcherPattern>
+        <MatchToPattern>GPIO_PULLUP</MatchToPattern>   
+        <MatcherCondition>Signal=I2C(.*)_(.*)</MatcherCondition>
+        <SeparatorOnValue>.</SeparatorOnValue>
+    </description>
+</rule>
+
 </rules>

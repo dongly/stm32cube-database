@@ -3,6 +3,7 @@
 	<RefParameter Comment="Master List" DefaultValue="" Name="MasterList" Type="list" Visible="false"/>
     <!-- ADC_Settings parameters -->    
     <RefMode Comment="ADC Settings" Group="ADC_Settings" Name="ADC_Settings">
+        <ConfigForMode>ADC_InternalChannelConfig</ConfigForMode>
         <ConfigForMode>ADC_RegularConfig</ConfigForMode>
         <Parameter Name="ClockPrescaler"/>
         <Parameter Name="Resolution"/>
@@ -74,15 +75,17 @@
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
         <Description>Enable or Disable the Discontinuous Conversion Mode</Description>
     </RefParameter>
-	    
-    <!-- Possible values of NbrOfDiscConversion parameter -->
-    <!--<RefParameter Comment="Number Of Discontinuous Conversions" DefaultValue="1" Max="8" Min="1" Name="NbrOfDiscConversion" Type="integer"/>
-    -->   
+
     <!-- Possible values of DMAContinuousRequests parameter -->
     <RefParameter Comment="DMA Continuous Requests" DefaultValue="DISABLE" Group="ADCgroup" Name="DMAContinuousRequests" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
-        <PossibleValue Comment="Enabled" Semaphore="Semaphore_DMAContinuousRequests_Enable" Value="ENABLE"/>
-        <Description>Enable/Disable DMA Continuous Requests</Description>
+        <PossibleValue Comment="Enabled" Value="ENABLE" Action="Disable" Condition="!DMARequest_$IpInstance" Diagnostic="A DMA Request in Circular Mode must be configured in DMA Settings Tab for this ADC instance" />
+        <Description>This parameter is used only when a DMA Request is configured. Else it is not relevant.&lt;br&gt;
+            When the DMA Request for this ADC instance this parameter specifies whether 
+            the DMA requests are performed in one shot mode (DMA transfer stops when number of conversions is reached)
+            or are performed in continuous mode (DMA transfer unlimited, whatever number of conversions).&lt;br&gt;
+            Note: In continuous mode, DMA must be configured in circular mode. Otherwise an overrun will be triggered when DMA buffer maximum pointer is reached.
+        </Description>
     </RefParameter>
 	    
     <!-- Possible values of EOCSelection parameter -->
@@ -198,8 +201,19 @@
         <PossibleValue Comment="Disable the selected rank (selected channel) from sequencer" Value="ADC_RANK_NONE"/>
         <Description>The rank in the regular group sequencer</Description>
     </RefParameter> -->
-	    
-	    
+    <RefParameter Comment="ChannelVREF" DefaultValue="ADC_CHANNEL_VREFINT" Name="ChannelVREF" Type="list" Visible="false">
+      <Condition Expression="VREFSelected$IpInstance" Diagnostic=""/>
+      <PossibleValue Comment="ADC_CHANNEL_VREFINT" Value="ADC_CHANNEL_VREFINT"/>
+    </RefParameter>
+    <RefParameter Comment="ChannelTS" DefaultValue="ADC_CHANNEL_TEMPSENSOR" Name="ChannelTS" Type="list" Visible="false">
+      <Condition Expression="TempSelected$IpInstance" Diagnostic=""/>
+      <PossibleValue Comment="ADC_CHANNEL_TEMPSENSOR" Value="ADC_CHANNEL_TEMPSENSOR"/>
+    </RefParameter>
+    <RefParameter Comment="ChannelVBAT" DefaultValue="ADC_CHANNEL_VBAT" Name="ChannelVBAT" Type="list" Visible="false">
+      <Condition Expression="VBATSelected$IpInstance" Diagnostic=""/>
+      <PossibleValue Comment="ADC_CHANNEL_VBAT" Value="ADC_CHANNEL_VBAT"/>
+    </RefParameter>
+        
     <!-- Possible Value of Channel parameter -->
     <RefParameter Comment="Channel" DefaultValue="" Group="ADCChannel" Name="Channel" Type="list" Visible="true">
         <PossibleValue Comment="Channel 0" Value="ADC_CHANNEL_0"/>
@@ -242,8 +256,8 @@
         <Parameter Name="EnableAnalogWatchDog"/>
         <Parameter Name="WatchdogMode"/>
         <Parameter Name="WatchdogChannel"/>
-        <Parameter Name="HighThreshold"/>
-        <Parameter Name="LowThreshold"/>
+         <Parameter Name="AWD1HighThreshold"/>
+        <Parameter Name="AWD1LowThreshold"/>
         <Parameter Name="ITMode"/>
     </RefMode>
         
@@ -301,35 +315,34 @@
     </RefParameter>
         
     <!-- Possible value of HighThreshold parameter -->
-    <RefParameter Comment="High Threshold" DefaultValue="null" Group="ADCgroup" Name="HighThreshold" Type="list" Visible="false">
+    <RefParameter Comment="High Threshold" DefaultValue="null" Group="ADCgroup" Name="AWD1HighThreshold" Type="list" Visible="false">
         <Condition Diagnostic="" Expression="EnableAnalogWatchDog=false"/>
     </RefParameter>
-    <!-- Possible Value of HighThreshold parameters: Min and Max of this parameter depend on ADC resolution -->
-    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="4095" Min="=LowThreshold" Name="HighThreshold" Type="integer">
+    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="4095" Min="=LowThreshold" Name="AWD1HighThreshold" Type="integer">
         <Condition Diagnostic="" Expression="ADC_RESOLUTION12b_$IpInstance"/>
-        <Description>Configures the ADC analog watchdog High threshold value.</Description>
+        <Description>Configures the ADC analog watchdog High threshold value.</Description> 
     </RefParameter>
-    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="1023" Min="=LowThreshold" Name="HighThreshold" Type="integer">
+    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="1023" Min="=LowThreshold" Name="AWD1HighThreshold" Type="integer">
         <Condition Diagnostic="" Expression="ADC_RESOLUTION10b_$IpInstance"/>
-        <Description>Configures the ADC analog watchdog High threshold value.</Description>
+        <Description>Configures the ADC analog watchdog High threshold value.</Description> 
     </RefParameter>
-    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="255" Min="=LowThreshold" Name="HighThreshold" Type="integer">
+    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="255" Min="=LowThreshold" Name="AWD1HighThreshold" Type="integer">
         <Condition Diagnostic="" Expression="ADC_RESOLUTION8b_$IpInstance"/>
-        <Description>Configures the ADC analog watchdog High threshold value.</Description>
+        <Description>Configures the ADC analog watchdog High threshold value.</Description> 
     </RefParameter>
-    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="63" Min="=LowThreshold" Name="HighThreshold" Type="integer">
+    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="63" Min="=LowThreshold" Name="AWD1HighThreshold" Type="integer">
         <Condition Diagnostic="" Expression="ADC_RESOLUTION6b_$IpInstance"/>
-        <Description>Configures the ADC analog watchdog High threshold value.</Description>
+        <Description>Configures the ADC analog watchdog High threshold value.</Description> 
     </RefParameter>
-    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="4095" Min="=LowThreshold" Name="HighThreshold" Type="integer">
+    <RefParameter Comment="High Threshold" DefaultValue="0" Group="ADCgroup" Max="4095" Min="=LowThreshold" Name="AWD1HighThreshold" Type="integer">
         <Description>Configures the ADC analog watchdog High threshold value.</Description> 
     </RefParameter>
 	    
     <!-- Possible value of LowThreshold parameter -->
-    <RefParameter Comment="Low Threshold" DefaultValue="null" Group="ADCgroup" Name="LowThreshold" Type="list" Visible="false">
+    <RefParameter Comment="Low Threshold" DefaultValue="null" Group="ADCgroup" Name="AWD1LowThreshold" Type="list" Visible="false">
         <Condition Diagnostic="" Expression="EnableAnalogWatchDog=false"/>
     </RefParameter>
-    <RefParameter Comment="Low Threshold" DefaultValue="0" Group="ADCgroup" Max="=HighThreshold" Min="0" Name="LowThreshold" Type="integer">
+    <RefParameter Comment="Low Threshold" DefaultValue="0" Group="ADCgroup" Max="=HighThreshold" Min="0" Name="AWD1LowThreshold" Type="integer">
         <Description>Configures the ADC analog watchdog Low threshold value.</Description>
     </RefParameter>
 	    
@@ -340,7 +353,7 @@
     <RefParameter Comment="Interrupt Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="ITMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Specifies whether the analog watchdog is configured is interrupt mode or in polling mode.</Description>
+        <Description>Specifies whether the analog watchdog is configured in interrupt mode or in polling mode.</Description>
     </RefParameter>
     
     <!-- Not displayed parameters -->
@@ -697,6 +710,7 @@
                 </Mode>
             </ModeLogicOperator>
             <Semaphore>channelSelected$IpInstance</Semaphore>
+            <Semaphore>TempSelected$IpInstance</Semaphore>
         </Mode>
         <Mode Name="IN-Vrefint" UserName="Vrefint Channel">
             <ModeLogicOperator Name="XOR">
@@ -707,6 +721,7 @@
                 </Mode>
             </ModeLogicOperator>
             <Semaphore>channelSelected$IpInstance</Semaphore>
+            <Semaphore>VREFSelected$IpInstance</Semaphore>
         </Mode>
         <Mode Name="IN-Vbat" RemoveCondition="($IpNumber=2)|($IpNumber=3)|($IpNumber=4)|STM32F0x0_Value_Line" UserName="Vbat Channel">
             <ModeLogicOperator Name="XOR">
@@ -717,7 +732,8 @@
                 </Mode>
             </ModeLogicOperator>
             <Semaphore>channelSelected$IpInstance</Semaphore>
-        </Mode>
+            <Semaphore>VBATSelected$IpInstance</Semaphore>
+            </Mode>
     </ModeLogicOperator>
     <Semaphore>$IpInstance_USED</Semaphore>
 	

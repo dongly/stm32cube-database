@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<IP DBVersion="V3.0" IPType="peripheral" Name="SDMMC" Version="sdmmc2_v1_0_Cube" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+<IP
+  xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance"
+  ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd"
+  xmlns="http://mcd.rou.st.com/modules.php?name=mcu"
+  DBVersion="V3.0"
+  IPType="peripheral"
+  Name="SDMMC"
+  Version="sdmmc2_v1_0_Cube">
+
   <About>SDMMC: Secure Digital Input/Output interface</About>
 
   <!-- STM32H7 -->
 
-  <!-- Generic RefParameters for SDMMC --> 
+  <!-- Generic RefParameters for SDMMC -->
   <RefParameter Comment="SDMMC instance" DefaultValue="SDMMC$Index" Name="Instance" Type="list" Visible="false"/>
 
-  <!--
-  <RefParameter Name="ClockEdge" Comment="Clock transition on which the bit capture is made" DefaultValue="SDMMC_CLOCK_EDGE_RISING" Type="list" Group="SDMMC parameters" Visible="false">
-      <Condition Diagnostic="SD Card" Expression="$IpInstance_SD_Card"/>
-      <PossibleValue Value="SDMMC_CLOCK_EDGE_RISING" Comment="Rising transition"/>
-  </RefParameter>
-  -->
   <RefParameter Name="ClockEdge" Comment="Clock transition on which the bit capture is made" DefaultValue="SDMMC_CLOCK_EDGE_RISING" Type="list" Group="SDMMC parameters">
       <PossibleValue Value="SDMMC_CLOCK_EDGE_RISING" Comment="Rising transition"/>
       <PossibleValue Value="SDMMC_CLOCK_EDGE_FALLING" Comment="Falling transition"/>
   </RefParameter>
 
-  <!--
-  <RefParameter Name="ClockPowerSave" Comment="SDMMC Clock output enable or disable when the bus is idle" DefaultValue="SDMMC_CLOCK_POWER_SAVE_DISABLE" Type="list" Group="SDMMC parameters" Visible="false">
-      <Condition Diagnostic="SD Card" Expression="$IpInstance_SD_Card"/>
-      <PossibleValue Value="SDMMC_CLOCK_POWER_SAVE_DISABLE" Comment="Disable the power save for the clock"/>
-  </RefParameter>
-  -->
   <RefParameter Name="ClockPowerSave" Comment="SDMMC Clock output enable when the bus is idle" DefaultValue="SDMMC_CLOCK_POWER_SAVE_DISABLE" Type="list" Group="SDMMC parameters">
       <PossibleValue Value="SDMMC_CLOCK_POWER_SAVE_DISABLE" Comment="Disable the power save for the clock"/>
       <PossibleValue Value="SDMMC_CLOCK_POWER_SAVE_ENABLE" Comment="Enable the power save for the clock"/>
@@ -45,19 +41,32 @@
       <PossibleValue Value="SDMMC_BUS_WIDE_1B" Comment="Bus wide 1-bit data"/>
   </RefParameter>
 
-  <!--
-  <RefParameter Name="HardwareFlowControl" Comment="SDMMC hardware flow control" DefaultValue="SDMMC_HARDWARE_FLOW_CONTROL_DISABLE" Type="list"  Group="SDMMC parameters" Visible="false">
-      <Condition Diagnostic="SD Card" Expression="$IpInstance_SD_Card"/>
-      <PossibleValue Value="SDMMC_HARDWARE_FLOW_CONTROL_DISABLE" Comment="The hardware control flow is disabled"/>
-  </RefParameter>
-  -->
   <RefParameter Name="HardwareFlowControl" Comment="SDMMC hardware flow control" DefaultValue="SDMMC_HARDWARE_FLOW_CONTROL_DISABLE" Type="list"  Group="SDMMC parameters">
       <PossibleValue Value="SDMMC_HARDWARE_FLOW_CONTROL_DISABLE" Comment="The hardware control flow is disabled"/>
       <PossibleValue Value="SDMMC_HARDWARE_FLOW_CONTROL_ENABLE" Comment="The hardware control flow is enabled"/>
   </RefParameter>
 
-  <RefParameter Name="ClockDiv" Comment="SDMMCCLK clock divide factor" DefaultValue="0" Max="255" Min="0" Type="integer" Group="SDMMC parameters">
-    <Description>SDMMC_CK = SDMMCCLK / [CLKDIV + 2]. The output clock frequency can vary between 187 KHz and 24 MHz. It is advised to keep the default ClockDiv value (0) to have a maximum SDMMC_CK frequency of 24 MHz.</Description>
+  <!-- SDMMC_CLKCR CLKDIV[9:0]: Clock divide factor -->
+  <RefParameter Name="ClockDiv" Comment="SDMMC clock divide factor" DefaultValue="0" Max="1023" Min="0" Type="integer" Group="SDMMC parameters">
+    <Description>These bits can only be written when the CPSM and DPSM are not active (CPSMACT = 0 and DPSMACT = 0).&lt;br&gt;This parameter defines the divide factor between the input clock (sdmmc_ker_ck) and the output clock (SDMMC_CK): SDMMC_CK frequency = sdmmc_ker_ck / [2 * CLKDIV].&lt;br&gt;000: SDMMC_CK frequency = sdmmc_ker_ck / 1 (Does not support DDR)&lt;br&gt;001: SDMMC_CK frequency = sdmmc_ker_ck / 2&lt;br&gt;002: SDMMC_CK frequency = sdmmc_ker_ck / 4&lt;br&gt;0xx: etc&lt;br&gt;080: SDMMC_CK frequency = sdmmc_ker_ck / 256&lt;br&gt;xxx: etc&lt;br&gt;3FF: SDMMC_CK frequency = sdmmc_ker_ck / 2046&lt;br&gt;</Description>
+  </RefParameter>
+
+  <RefParameter Name="TransceiverPresent" Comment="Is external transceiver present ?" DefaultValue="SDMMC_TRANSCEIVER_PRESENT" Type="list" Group="SDMMC parameters">
+    <Condition Diagnostic="" Expression="SDMMC1 &amp; (STM32H743I_EVAL | STM32H743I_EVAL2 | STM32H747I_EVAL)"/>
+    <Description>Specificies whether external transceiver is present or not.&lt;br&gt; yes : SDMMC_TRANSCEIVER_PRESENT (default)&lt;br&gt; no : SDMMC_TRANSCEIVER_NOT_PRESENT</Description>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_PRESENT" Comment="yes"/>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_NOT_PRESENT" Comment="no"/>
+  </RefParameter>
+  <RefParameter Name="TransceiverPresent" Comment="Is external transceiver present ?" DefaultValue="SDMMC_TRANSCEIVER_PRESENT" Type="list" Group="SDMMC parameters">
+    <Condition Diagnostic="" Expression="SDMMC2 &amp; STM32H7B3I_EVAL"/>
+    <Description>Specificies whether external transceiver is present or not.&lt;br&gt; yes : SDMMC_TRANSCEIVER_PRESENT (default)&lt;br&gt; no : SDMMC_TRANSCEIVER_NOT_PRESENT</Description>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_PRESENT" Comment="yes"/>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_NOT_PRESENT" Comment="no"/>
+  </RefParameter>
+  <RefParameter Name="TransceiverPresent" Comment="Is external transceiver present ?" DefaultValue="SDMMC_TRANSCEIVER_NOT_PRESENT" Type="list" Group="SDMMC parameters">
+    <Description>Specificies whether external transceiver is present or not.&lt;br&gt; yes : SDMMC_TRANSCEIVER_PRESENT&lt;br&gt; no : SDMMC_TRANSCEIVER_NOT_PRESENT (default)</Description>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_NOT_PRESENT" Comment="no"/>
+    <PossibleValue Value="SDMMC_TRANSCEIVER_PRESENT" Comment="yes"/>
   </RefParameter>
 
   <!-- RefMode for SD-1-bit -->
@@ -68,6 +77,7 @@
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="SD_1_bit_auto_dir_voltage_converter" Comment="SD 1 bit with auto dir voltage converter" HalMode="SD">
@@ -77,6 +87,7 @@
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="SD_1_bit_dir_voltage_converter" Comment="SD 1 bit with dir voltage converter" HalMode="SD">
@@ -86,66 +97,73 @@
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <!-- RefMode for SD-4-bits-Wide-bus -->
   <RefMode Name="SD_4_bits_Wide_bus" Comment="SD 4 bits Wide bus" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="SD_4_bits_Wide_bus_auto_dir_voltage_converter" Comment="SD 4 bits Wide bus with auto dir voltage converter" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="SD_4_bits_Wide_bus_dir_voltage_converter" Comment="SD 4 bits Wide bus with dir voltage converter" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="mmc_1_bit" Comment="MMC 1 bit" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="mmc_4_bits_Wide_bus" Comment="MMC 4 bits" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
-      <ConfigForMode>MMC_WideBus_Config</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <RefMode Name="mmc_8_bits_Wide_bus" Comment="MMC 8 bits" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
-      <ConfigForMode>MMC_WideBus_Config</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="TransceiverPresent"/>
   </RefMode>
 
   <ModeLogicOperator Name="OR">
@@ -163,6 +181,7 @@
         <Mode Name="SD_1_bit_auto_dir_voltage_converter" UserName="SD 1 bit with auto dir voltage converter">
           <Semaphore>$IpInstance_SD_Card</Semaphore>
           <Semaphore>$IpInstance_Bus1Bit</Semaphore>
+          <Semaphore>$IpInstance_voltage_converter</Semaphore>
           <SignalLogicalOp Name="AND">
             <Signal Name="CK"/>
             <Signal Name="CKIN"/>
@@ -173,6 +192,7 @@
         <Mode Name="SD_1_bit_dir_voltage_converter" UserName="SD 1 bit with dir voltage converter">
           <Semaphore>$IpInstance_SD_Card</Semaphore>
           <Semaphore>$IpInstance_Bus1Bit</Semaphore>
+          <Semaphore>$IpInstance_voltage_converter</Semaphore>
           <SignalLogicalOp Name="AND">
             <Signal Name="CK"/>
             <Signal Name="CKIN"/>
@@ -197,6 +217,7 @@
         <Mode Name="SD_4_bits_Wide_bus_auto_dir_voltage_converter" UserName="SD 4 bits Wide bus with auto dir voltage converter">
           <Semaphore>$IpInstance_SD_Card</Semaphore>
           <Semaphore>$IpInstance_Bus4Bits</Semaphore>
+          <Semaphore>$IpInstance_voltage_converter</Semaphore>
           <SignalLogicalOp Name="AND">
             <Signal Name="CK"/>
             <Signal Name="CKIN"/>
@@ -210,6 +231,7 @@
         <Mode Name="SD_4_bits_Wide_bus_dir_voltage_converter" UserName="SD 4 bits Wide bus with dir voltage converter">
           <Semaphore>$IpInstance_SD_Card</Semaphore>
           <Semaphore>$IpInstance_Bus4Bits</Semaphore>
+          <Semaphore>$IpInstance_voltage_converter</Semaphore>
           <SignalLogicalOp Name="AND">
             <Signal Name="CK"/>
             <Signal Name="CKIN"/>
@@ -258,6 +280,7 @@
           </SignalLogicalOp>
         </Mode>
       </ModeLogicOperator>
+      <Semaphore>$IpInstance</Semaphore>
     </Mode>
   </ModeLogicOperator>
   <RefSignal IOMode="AlternateFunctionPushPullHighSpeedDefault" Name="CK"/>

@@ -268,7 +268,7 @@
         <PossibleValue Comment="None" Value="UART_HWCONTROL_NONE"/>
     </RefParameter>
 	
-    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="list">
+    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="uniqueElementList">
         <Condition Diagnostic="" Expression="STM32F1"/>
         <PossibleValue Comment="16 Samples" Value="UART_OVERSAMPLING_16"/>
     </RefParameter>
@@ -335,7 +335,7 @@
     <RefParameter Comment="Prescaler" DefaultValue="10" Group="Advanced Parameters" Max="255" Min="1" Name="Prescaler" Type="integer"/>
 	
     <!-- Calculate Speed, based on Prescaler Value on SmartCard Mode -->
-    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="4000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
+    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="5000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
 		
     <!-- Specifics RefParameters for SmartCard Mode Only -->
     <RefParameter Comment="NAck if Parity Error" DefaultValue="SMARTCARD_NACK_DISABLE" Group="Advanced Parameters" Name="NACKState" Type="list">
@@ -525,8 +525,8 @@
 			<ModeLogicOperator Name="XOR">
 				<Mode Name="Asynchronous">
 					<SignalLogicalOp Name="AND">
-						<Signal IOMode="AlternateFunctionPushPullPULLUP" Name="RX"/>
-						<Signal IOMode="AlternateFunctionPushPullPULLUP" Name="TX"/>
+						<Signal Name="RX"/>
+						<Signal Name="TX"/>
 					</SignalLogicalOp>
 					<Semaphore>$IpInstance_Asynchronous</Semaphore>
 					<Semaphore>Asynchronous</Semaphore>
@@ -541,7 +541,7 @@
 				</Mode>
 				<Mode Name="Half_duplex(single_wire_mode)" UserName="Single Wire (Half-Duplex)">
 					<SignalLogicalOp Name="AND">
-						<Signal IOMode="AlternateFunctionOpenDrain" Name="TX"/>
+						<Signal IOMode="AlternateFunctionOpenDrainAndPushPullDefaultOD" Name="TX"/>
 					</SignalLogicalOp>
 				</Mode>
 				<Mode Name="Multiprocessor_communication" UserName="Multiprocessor Communication">
@@ -566,13 +566,13 @@
 				</Mode>
 				<Mode Name="SmartCard">
 					<SignalLogicalOp Name="AND">
-						<Signal IOMode="AlternateFunctionOpenDrain" Name="TX"/>
+						<Signal IOMode="AlternateFunctionOpenDrainAndPushPullDefaultOD" Name="TX"/>
 					</SignalLogicalOp>
 					<Semaphore>$IpInstance_SmartCard</Semaphore>
 				</Mode>
 				<Mode Name="SmartCard_With_Clock" UserName="SmartCard with Card Clock">
 					<SignalLogicalOp Name="AND">
-						<Signal IOMode="AlternateFunctionOpenDrain" Name="TX"/>
+						<Signal IOMode="AlternateFunctionOpenDrainAndPushPullDefaultOD" Name="TX"/>
 						<Signal Name="CK"/>
 					</SignalLogicalOp>
 					<Semaphore>$IpInstance_SmartCard</Semaphore>
@@ -623,6 +623,6 @@
     <RefSignal IOMode="AlternateFunctionPushPull" Name="CK"/>
     <RefSignal IOMode="AlternateFunctionPushPull" Name="CTS"/>
     <RefSignal IOMode="AlternateFunctionPushPull" Name="RTS"/>
-    <RefSignal IOMode="AlternateFunctionPushPull" Name="RX"/>
-    <RefSignal IOMode="AlternateFunctionPushPull" Name="TX"/>
+    <RefSignal IOMode="AlternateFunctionOpenDrainAndPushPullDefaultPP" Name="RX"/>
+    <RefSignal IOMode="AlternateFunctionOpenDrainAndPushPullDefaultPP" Name="TX"/>
 </IP>

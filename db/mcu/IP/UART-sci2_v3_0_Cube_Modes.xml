@@ -8,7 +8,9 @@
     <RefParameter Comment="Baud Rate" DefaultValue="115200" Group="Basic Parameters" Max="115200" Min="115200" Name="BaudRate" Type="integer" Unit="Bits/s" Visible="false">
         <Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
     </RefParameter>
-	
+    <RefParameter Comment="Baud Rate" DefaultValue="921600" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s">
+        <Condition Diagnostic="" Expression="TRACEREMB_$IpInstance"/>
+    </RefParameter>
     <RefParameter Comment="Baud Rate" DefaultValue="115200" Group="Basic Parameters" Max="9000000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s" Visible="true"/>
 		
 	
@@ -16,6 +18,7 @@
 	
     <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
         <Condition Diagnostic="" Expression="$IpInstance_IRDA"/>
+        <PossibleValue Comment="7 Bits (including Parity)" Semaphore="$IpInstance_Uart_7B" Value="WORDLENGTH_7B"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
         <PossibleValue Comment="9 Bits (including Parity)" Value="WORDLENGTH_9B"/>
     </RefParameter>
@@ -25,7 +28,7 @@
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
     </RefParameter>
 	
-    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_7B" Group="Basic Parameters" Name="WordLength" Type="list">
+    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
         <PossibleValue Comment="7 Bits (including Parity)" Semaphore="$IpInstance_Uart_7B" Value="WORDLENGTH_7B"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
         <PossibleValue Comment="9 Bits (including Parity)" Value="WORDLENGTH_9B"/>
@@ -39,7 +42,11 @@
         <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; WordLength=WORDLENGTH_9B"/>
         <PossibleValue Comment="9 Bits (including Parity)" Value="IRDA_WORDLENGTH_9B"/>
     </RefParameter>
-    <RefParameter Comment="Word Length" DefaultValue="UART_WORDLENGTH_7B" Group="Basic Parameters" Name="IrdaWordLength" Type="list">
+    <RefParameter Comment="Word Length" DefaultValue="IRDA_WORDLENGTH_7B" Group="Basic Parameters" Name="IrdaWordLength" Type="list">
+        <Condition Diagnostic="" Expression="WordLength=WORDLENGTH_7B"/>
+        <PossibleValue Comment="7 Bits (including Parity)" Value="IRDA_WORDLENGTH_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Word Length" DefaultValue="UART_WORDLENGTH_7B" Group="Basic Parameters" Name="UartWordLength" Type="list">
         <Condition Diagnostic="" Expression="WordLength=WORDLENGTH_7B"/>
         <PossibleValue Comment="7 Bits (including Parity)" Value="UART_WORDLENGTH_7B"/>
     </RefParameter>
@@ -143,7 +150,7 @@
         <PossibleValue Comment="None" Value="UART_HWCONTROL_NONE"/>
     </RefParameter>
 	
-    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="list">
+    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="uniqueElementList">
         <Condition Diagnostic="" Expression="$IpInstance_LIN"/>
         <PossibleValue Comment="16 Samples" Value="UART_OVERSAMPLING_16"/>
     </RefParameter>
@@ -164,10 +171,27 @@
     </RefParameter>
 	
     <!-- Address for MultiProcessor --> 
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="63" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_7B"/>
+    </RefParameter>
     <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="127" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_8B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="255" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_9B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
         <Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
     </RefParameter>
     <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+    
+    <!-- Specifics RefParameters for MultiProcessor Only. Adress length -->
+    <RefParameter Comment="Wake-Up Method" DefaultValue="UART_ADDRESS_DETECT_4B" Group="Advanced Parameters" Name="AddressLength" Type="list">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <PossibleValue Comment="4 Bits" Value="UART_ADDRESS_DETECT_4B"/>
+        <PossibleValue Comment="7 Bits" Value="UART_ADDRESS_DETECT_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Method" DefaultValue="null" Group="Advanced Parameters" Name="AddressLength" Type="list" Visible="false"/>
 	
 
     <!--Specifics RefParameters for LIN. Line BreakLength -->
@@ -191,78 +215,127 @@
         <Condition Diagnostic="" Expression="$IpInstance_IRDA"/>
     </RefParameter>
 
-    <RefParameter Comment="Prescaler" DefaultValue="PRESCALER_DIV1" Group="Advanced Parameters" Name="Prescaler" Type="list">
-        <PossibleValue Comment="clock /1 " Value="PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /2 " Value="PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /4 " Value="PRESCALER_DIV4"/>
-        <PossibleValue Comment="clock /6 " Value="PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /8 " Value="PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /10 " Value="PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /12 " Value="PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /16 " Value="PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /32 " Value="PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /64 " Value="PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /128 " Value="PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /256 " Value="PRESCALER_DIV256"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="PRESCALER_DIV1" Group="Advanced Parameters" Name="ClockPrescaler" Type="list">
+        <PossibleValue Comment="1" Value="PRESCALER_DIV1"/>
+        <PossibleValue Comment="2" Value="PRESCALER_DIV2"/>
+        <PossibleValue Comment="4" Value="PRESCALER_DIV4"/>
+        <PossibleValue Comment="6" Value="PRESCALER_DIV6"/>
+        <PossibleValue Comment="8" Value="PRESCALER_DIV8"/>
+        <PossibleValue Comment="10" Value="PRESCALER_DIV10"/>
+        <PossibleValue Comment="12" Value="PRESCALER_DIV12"/>
+        <PossibleValue Comment="16" Value="PRESCALER_DIV16"/>
+        <PossibleValue Comment="32" Value="PRESCALER_DIV32"/>
+        <PossibleValue Comment="64" Value="PRESCALER_DIV64"/>
+        <PossibleValue Comment="128" Value="PRESCALER_DIV128"/>
+        <PossibleValue Comment="256" Value="PRESCALER_DIV256"/>
+    </RefParameter>
+    
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV1" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV1"/>
+        <PossibleValue Comment="1" Value="IRDA_PRESCALER_DIV1"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV2" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV2"/>
+        <PossibleValue Comment="2" Value="IRDA_PRESCALER_DIV2"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV4" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV4"/>
+        <PossibleValue Comment="4" Value="IRDA_PRESCALER_DIV4"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV6" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV6"/>
+        <PossibleValue Comment="6" Value="IRDA_PRESCALER_DIV6"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV8" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV8"/>
+        <PossibleValue Comment="8" Value="IRDA_PRESCALER_DIV8"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV10" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV10"/>
+        <PossibleValue Comment="10" Value="IRDA_PRESCALER_DIV10"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV12" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV12"/>
+        <PossibleValue Comment="12" Value="IRDA_PRESCALER_DIV12"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV16" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV16"/>
+        <PossibleValue Comment="16" Value="IRDA_PRESCALER_DIV16"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV32" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV32"/>
+        <PossibleValue Comment="32" Value="IRDA_PRESCALER_DIV32"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV64" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV64"/>
+        <PossibleValue Comment="64" Value="IRDA_PRESCALER_DIV64"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV128" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV128"/>
+        <PossibleValue Comment="128" Value="IRDA_PRESCALER_DIV128"/>
+    </RefParameter>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV256" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="$IpInstance_IRDA &amp; ClockPrescaler=PRESCALER_DIV256"/>
+        <PossibleValue Comment="256" Value="IRDA_PRESCALER_DIV256"/>
     </RefParameter>
 
-    <RefParameter Comment="Prescaler" DefaultValue="USART_PRESCALER_DIV1" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /1 " Value="UART_PRESCALER_DIV1"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV1" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV1"/>
+        <PossibleValue Comment="1" Value="UART_PRESCALER_DIV1"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV2" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /2 " Value="UART_PRESCALER_DIV2"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV2" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV2"/>
+        <PossibleValue Comment="2" Value="UART_PRESCALER_DIV2"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV4" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV4"/>            
-        <PossibleValue Comment="clock /4 " Value="UART_PRESCALER_DIV4"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV4" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV4"/>
+        <PossibleValue Comment="4" Value="UART_PRESCALER_DIV4"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV6" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /6 " Value="UART_PRESCALER_DIV6"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV6" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV6"/>
+        <PossibleValue Comment="6" Value="UART_PRESCALER_DIV6"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV8" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /8 " Value="UART_PRESCALER_DIV8"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV8" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV8"/>
+        <PossibleValue Comment="8" Value="UART_PRESCALER_DIV8"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV10" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /10 " Value="UART_PRESCALER_DIV10"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV10" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV10"/>
+        <PossibleValue Comment="10" Value="UART_PRESCALER_DIV10"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV12" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /12 " Value="UART_PRESCALER_DIV12"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV12" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV12"/>
+        <PossibleValue Comment="12" Value="UART_PRESCALER_DIV12"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV16" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /16 " Value="UART_PRESCALER_DIV16"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV16" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV16"/>
+        <PossibleValue Comment="16" Value="UART_PRESCALER_DIV16"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV32" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /32 " Value="USART_PRESCALER_DIV32"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV32" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV32"/>
+        <PossibleValue Comment="32" Value="UART_PRESCALER_DIV32"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV64" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /64 " Value="UART_PRESCALER_DIV64"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV64" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV64"/>
+        <PossibleValue Comment="64" Value="UART_PRESCALER_DIV64"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV128" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /128 " Value="UART_PRESCALER_DIV128"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV128" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV128"/>
+        <PossibleValue Comment="128" Value="UART_PRESCALER_DIV128"/>
     </RefParameter>
-    <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV256" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
-        <Condition Diagnostic="" Expression="Prescaler=PRESCALER_DIV256"/>
-        <PossibleValue Comment="clock /256 " Value="UART_PRESCALER_DIV256"/>
+    <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV256" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
+        <Condition Diagnostic="" Expression="ClockPrescaler=PRESCALER_DIV256"/>
+        <PossibleValue Comment="256" Value="UART_PRESCALER_DIV256"/>
     </RefParameter>
 	
     <!-- Advanceds features -->
 	
     <RefParameter Comment="UART Advanced Features" DefaultValue="UART_ADVFEATURE_NO_INIT" Group="Advanced Features" Name="AdvFeatureInit" Type="list" Visible="false">
-        <Condition Diagnostic="" Expression="!($IpInstance_TxPinLevelInvertENABLE|$IpInstance_RxPinLevelInvertENABLE|$IpInstance_DataInvertENABLE|$IpInstance_SwapENABLE|$IpInstance_OverrunDisableENABLE|$IpInstance_DMADisableonRxErrorENABLE|$IpInstance_MSBFirstENABLE)"/>
+        <Condition Diagnostic="" Expression="!($IpInstance_TxPinLevelInvertENABLE|$IpInstance_RxPinLevelInvertENABLE|$IpInstance_DataInvertENABLE|$IpInstance_SwapENABLE|$IpInstance_OverrunDisableENABLE|$IpInstance_DMADisableonRxErrorENABLE|$IpInstance_MSBFirstENABLE|$IpInstance_UART_AutoBaudRate_Enable)"/>
         <PossibleValue Comment="" Semaphore="$IpInstance_ADVFEATURE_NO_INIT" Value="UART_ADVFEATURE_NO_INIT"/>
     </RefParameter>
 		
-    <RefParameter Comment="UART Advanced Features" DefaultValue="+IsTxPinLevelInvert+|IsRxPinLevelInvert+|IsDataInvert+|IsSwap+|IsOverrunDisable+|IsDMADisableonRxError+|IsMSBFirst" Name="AdvFeatureInit" Type="list" Visible="false"/>
+    <RefParameter Comment="UART Advanced Features" DefaultValue="+IsTxPinLevelInvert+|IsRxPinLevelInvert+|IsDataInvert+|IsSwap+|IsOverrunDisable+|IsDMADisableonRxError+|IsMSBFirst+|IsAutoBaudRateMode" Name="AdvFeatureInit" Type="list" Visible="false"/>
 	
     <!-- TxPinLevelInvert -->
 	     
@@ -426,16 +499,24 @@
         <PossibleValue Comment="SMARTCARD" Value="UART_ADVFEATURE_MSBFIRST_INIT"/>
     </RefParameter>
     <RefParameter Comment="" DefaultValue="" Group="Advanced Features" Name="IsMSBFirst" Type="list" Visible="false"/>
-    <!-- -->
+    
+    <!-- Auto Baudrate -->
     <RefParameter Comment="Auto Baudrate Mode arg" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_ENABLE" Group="Advanced Features" Name="AutoBaudRateEnable" Type="list" Visible="false">
         <Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
         <PossibleValue Comment="Enable" Value="UART_ADVFEATURE_AUTOBAUDRATE_ENABLE"/>
     </RefParameter>
     <RefParameter Comment="Auto Baudrate Mode arg" DefaultValue="null" Group="Advanced Features" Name="AutoBaudRateEnable" Type="list" Visible="false"/>
+    
     <RefParameter Comment="Auto Baudrate" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_DISABLE" Group="Advanced Features" Name="AutoBaudRateEnableParam" Type="list">
         <PossibleValue Comment="Disable" Value="UART_ADVFEATURE_AUTOBAUDRATE_DISABLE"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_UART_AutoBaudRate_Enable" Value="UART_ADVFEATURE_AUTOBAUDRATE_ENABLE"/>
     </RefParameter>
+    
+    <RefParameter Comment="" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_INIT" Group="Advanced Features" Name="IsAutoBaudRateMode" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
+        <PossibleValue Comment="" Value="UART_ADVFEATURE_AUTOBAUDRATE_INIT"/>
+    </RefParameter>
+    <RefParameter Comment="" DefaultValue="" Group="Advanced Features" Name="IsAutoBaudRateMode" Type="list" Visible="false"/>
 	
 	
     <RefParameter Comment="Auto Baudrate Mode" DefaultValue="UART_ADVFEATURE_AUTOBAUDRATE_ONSTARTBIT" Group="Advanced Features" Name="AutoBaudRateMode" Type="list">
@@ -496,7 +577,7 @@
         <PossibleValue Comment="half full configuration "     Value="UART_TXFIFO_THRESHOLD_1_2"/>
     </RefParameter>
     <RefParameter Comment="Txfifo Threshold" DefaultValue="UART_TXFIFO_THRESHOLD_3_4" Group="Advanced Parameters" Name="UartTXFIFOThreshold" Type="list">
-        <Condition Diagnostic="" Expression="TXFIFOThreshold=TXFIFO_THRESHOLD_3QUARTERSFULLL"/>
+        <Condition Diagnostic="" Expression="TXFIFOThreshold=TXFIFO_THRESHOLD_3QUARTERSFULL"/>
         <PossibleValue Comment="3 quarts full configuration " Value="UART_TXFIFO_THRESHOLD_3_4"/>
     </RefParameter>
     <RefParameter Comment="Txfifo Threshold" DefaultValue="UART_TXFIFO_THRESHOLD_7_8" Group="Advanced Parameters" Name="UartTXFIFOThreshold" Type="list">
@@ -541,6 +622,70 @@
         <Condition Diagnostic="" Expression="RXFIFOThreshold=RXFIFO_THRESHOLD_FULL"/>
         <PossibleValue Comment="RXFIFO becomes Full " Value="UART_RXFIFO_THRESHOLD_8_8"/>
     </RefParameter>
+    
+    <!-- Autonomous Mode with Parameters __begin -->
+    <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_DISABLE" Group="Advanced Parameters" Name="AutonomousMode" Type="list">
+        <Condition Diagnostic="" Expression="STM32U5 &amp; $IpInstance_Asynchronous &amp; !$IpInstance_FlowControl"/>
+        <PossibleValue Comment="Disable " Value="AUTONOMOUS_MODE_DISABLE"/>
+        <PossibleValue Comment="Enable " Value="AUTONOMOUS_MODE_ENABLE"/>
+    </RefParameter>
+    <RefParameter Comment="Autonomous Mode" DefaultValue="null" Group="Advanced Parameters" Name="AutonomousMode" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="!STM32U5"/>
+    </RefParameter>
+         
+    <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_ENABLE" Name="AutonomousModeState" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+        <PossibleValue Comment="Enable " Value="UART_AUTONOMOUS_MODE_ENABLE"/>
+    </RefParameter>    
+    <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_DISABLE" Name="AutonomousModeState" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_DISABLE"/>
+        <PossibleValue Comment="Disable " Value="UART_AUTONOMOUS_MODE_DISABLE"/>
+    </RefParameter>
+    
+    <RefParameter Comment="     Trigger Polarity" DefaultValue="null" Group="Advanced Parameters" Name="TriggerPolarity" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+    </RefParameter>	    
+    <RefParameter Comment="     Trigger Polarity" DefaultValue="UART_TRIG_POLARITY_RISING" Group="Advanced Parameters" Name="TriggerPolarity" Type="list">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+        <PossibleValue Comment="RISING" Value="UART_TRIG_POLARITY_RISING"/>
+        <PossibleValue Comment="FALLING" Value="UART_TRIG_POLARITY_FALLING"/>
+    </RefParameter>
+    
+    <RefParameter Comment="     Trigger Selection" DefaultValue="null" Group="Advanced Parameters" Name="TriggerSelection" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+    </RefParameter>    
+    <RefParameter Comment="     Trigger Selection" DefaultValue="UART_GPDMA1_CH0_TCF_TRG" Group="Advanced Parameters" Name="TriggerSelection" Type="list">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+        <PossibleValue Comment="UART GPDMA1 channel0" Value="UART_GPDMA1_CH0_TCF_TRG"/>
+        <PossibleValue Comment="UART GPDMA1 channel1" Value="UART_GPDMA1_CH1_TCF_TRG"/>
+        <PossibleValue Comment="UART GPDMA1 channel2" Value="UART_GPDMA1_CH2_TCF_TRG"/>
+        <PossibleValue Comment="UART GPDMA1 channel3" Value="UART_GPDMA1_CH3_TCF_TRG"/>
+        <PossibleValue Comment="UART EXTI line 6" Value="UART_EXTI_LINE6_TRG"/>
+        <PossibleValue Comment="UART EXTI line 9" Value="UART_EXTI_LINE9_TRG"/>
+        <PossibleValue Comment="UART LPTIM1 out" Value="UART_LPTIM1_OUT_TRG"/>
+        <PossibleValue Comment="UART LPTIM2 out" Value="UART_LPTIM2_OUT_TRG"/>
+        <PossibleValue Comment="UART COMP1 out" Value="UART_COMP1_OUT_TRG"/>
+        <PossibleValue Comment="UART COMP2 out" Value="UART_COMP2_OUT_TRG"/>
+        <PossibleValue Comment="UART RTC alarm" Value="UART_RTC_ALRA_TRG"/>
+        <PossibleValue Comment="UART RTC wakeup" Value="UART_RTC_WUT_TRG"/>
+    </RefParameter>
+    
+    <RefParameter Comment="     Data Size" DefaultValue="null" Group="Advanced Parameters" Name="DataSize" Type="integer" Visible="false">
+        <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+    </RefParameter>   
+    <RefParameter Comment="     Data Size" DefaultValue="0" Group="Advanced Parameters" Name="DataSize" Min="0" Type="integer">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+    </RefParameter>
+    
+    <RefParameter Comment="     Idle Frame" DefaultValue="null" Group="Advanced Parameters" Name="IdleFrame" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+    </RefParameter>     
+    <RefParameter Comment="     Idle Frame" DefaultValue="UART_IDLE_FRAME_DISABLE" Group="Advanced Parameters" Name="IdleFrame" Type="list">
+        <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+        <PossibleValue Comment="Enable" Value="UART_IDLE_FRAME_ENABLE"/>
+        <PossibleValue Comment="Disable" Value="UART_IDLE_FRAME_DISABLE"/>
+    </RefParameter>
+    <!-- Autonomous Mode  __end. -->
 
 
     <RefMode Abstract="true" Name="usartBasic">
@@ -561,7 +706,7 @@
         <Parameter Name="Mode"/>
         <Parameter Name="OverSampling"/>
         <Parameter Name="OneBitSampling"/>
-        <Parameter Name="Prescaler"/>
+        <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>
         <Parameter Name="TXFIFOThreshold"/>
         <Parameter Name="RXFIFOThreshold"/>
@@ -590,10 +735,17 @@
         <Parameter Name="Mode"/>
         <Parameter Name="OverSampling"/>
         <Parameter Name="OneBitSampling"/>
-        <Parameter Name="Prescaler"/>
+        <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>
         <Parameter Name="TXFIFOThreshold"/>
         <Parameter Name="RXFIFOThreshold"/>
+        <!-- Autonomous Mode -->
+        <Parameter Name="AutonomousMode"/>
+        <Parameter Name="TriggerPolarity"/>
+        <Parameter Name="TriggerSelection"/>
+        <Parameter Name="DataSize"/>
+        <Parameter Name="IdleFrame"/>
+
         <!-- Advanced Features -->
         <Parameter Name="AutoBaudRateEnableParam"/>
         <Parameter Name="AutoBaudRateMode"/>
@@ -619,7 +771,7 @@
         <Parameter Name="Mode"/>
         <Parameter Name="OverSampling"/>
         <Parameter Name="OneBitSampling"/>
-        <Parameter Name="Prescaler"/>
+        <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>
         <Parameter Name="TXFIFOThreshold"/>
         <Parameter Name="RXFIFOThreshold"/>
@@ -637,6 +789,7 @@
 		
     <!-- RefMode for 'MultiProcessor Communication' UART -->
     <RefMode BaseMode="usartBasic" HalMode="UART" Name="Multiprocessor_communication">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_IDLELINE"/>
         <ConfigForMode>Uart_MultiProcessor_Init</ConfigForMode>
         <!-- Basic Parameters -->
 	  
@@ -650,7 +803,39 @@
         <Parameter Name="OneBitSampling"/>
         <Parameter Name="WakeUpMethod"/>
         <Parameter Name="Address"/>
-        <Parameter Name="Prescaler"/>
+        <Parameter Name="AddressLength"/>
+        <Parameter Name="ClockPrescaler"/>
+        <Parameter Name="FIFOMode"/>
+        <Parameter Name="TXFIFOThreshold"/>
+        <Parameter Name="RXFIFOThreshold"/>
+        <!-- Advanced Features -->
+        <Parameter Name="AutoBaudRateEnableParam"/>
+        <Parameter Name="AutoBaudRateMode"/>
+        <Parameter Name="TxPinLevelInvertParam"/>
+        <Parameter Name="RxPinLevelInvertParam"/>
+        <Parameter Name="DataInvertParam"/>
+        <Parameter Name="SwapParam"/>
+        <Parameter Name="OverrunDisableParam"/>
+        <Parameter Name="DMADisableonRxErrorParam"/>
+        <Parameter Name="MSBFirstParam"/>
+    </RefMode>
+    <RefMode BaseMode="usartBasic" HalMode="UART" Name="Multiprocessor_communication">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <ConfigForMode>Uart_MultiProcessor_Ex_Init</ConfigForMode>
+        <!-- Basic Parameters -->
+	  
+        <Parameter Name="WordLength"/>
+        <Parameter Name="Parity"/>
+        <Parameter Name="StopBits"/>
+        <Parameter Name="HwFlowCtl"/>
+        <!--  Advanced Parameters -->
+        <Parameter Name="Mode"/>
+        <Parameter Name="OverSampling"/>
+        <Parameter Name="OneBitSampling"/>
+        <Parameter Name="WakeUpMethod"/>
+        <Parameter Name="Address"/>
+        <Parameter Name="AddressLength"/>
+        <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>
         <Parameter Name="TXFIFOThreshold"/>
         <Parameter Name="RXFIFOThreshold"/>
@@ -680,7 +865,7 @@
         <Parameter Name="OverSampling"/>
         <Parameter Name="OneBitSampling"/>
         <Parameter Name="BreakDetectLength"/>
-        <Parameter Name="Prescaler"/>
+        <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>
         <Parameter Name="TXFIFOThreshold"/>
         <Parameter Name="RXFIFOThreshold"/>
@@ -705,8 +890,9 @@
         <Parameter Name="Parity"/>
         <!-- Advanced Parameters -->
         <Parameter Name="Mode"/>
-        <Parameter Name="PowerMode"/>
         <Parameter Name="Prescaler"/>
+        <Parameter Name="PowerMode"/>
+        <Parameter Name="ClockPrescaler"/>
     </RefMode>
 	
     <!-- RefModes for Harwdware Flow Control -->

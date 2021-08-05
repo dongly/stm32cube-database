@@ -1,15 +1,16 @@
-
 [#ftl]
 [#assign s = name]
 [#assign temp = s?replace(".","__")]
 [#assign inclusion_protection = temp?upper_case]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   *  FatFs - FAT file system module configuration file  R0.11 (C)ChaN, 2015
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 #ifndef _FFCONF
 #define _FFCONF 32020	/* Revision ID */
@@ -18,6 +19,7 @@
 / Additional user header to be used  
 /-----------------------------------------------------------------------------*/
 [#assign usbhInUse = 0]
+#include "main.h"
 #include "${FamilyName?lower_case}xx_hal.h"
 [#list SWIPdatas as SWIP]  
 [#if SWIP.defines??]
@@ -335,7 +337,7 @@ extern ${variable.value} ${variable.name};
 /  number is bound to the same physical drive number and only an FAT volume found on
 /  the physical drive will be mounted. When multi-partition feature is enabled (1),
 /  each logical drive number is bound to arbitrary physical drive and partition
-/  listed in the VolToPart[]. Also f_fdisk() funciton will be available. */
+/  listed in the VolToPart[]. Also f_fdisk() function will be available. */
 
 #define _MIN_SS    ${valueMinSectorSize}  /* 512, 1024, 2048 or 4096 */
 #define _MAX_SS    ${valueMaxSectorSize}  /* 512, 1024, 2048 or 4096 */

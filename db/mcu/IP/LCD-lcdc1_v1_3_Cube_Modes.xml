@@ -147,10 +147,10 @@
         <PossibleValue Comment="Enable" Value="LCD_HIGHDRIVE_1" Semaphore="HDEnable"/>
     </RefParameter>
 	
-    <RefParameter Comment="Multiplex mode" DefaultValue="LCD_MUXSEGMENT_ENABLE" Name="MuxSegment" Type="uniqueElementList" Group="Basic Parameters" Visible="false">
+    <!--RefParameter Comment="Multiplex mode" DefaultValue="LCD_MUXSEGMENT_ENABLE" Name="MuxSegment" Type="uniqueElementList" Group="Basic Parameters" Visible="false">
         <Condition Diagnostic="Multiplex mode is enabled" Expression="DIE447"/>
         <PossibleValue Comment="Enable" Value="LCD_MUXSEGMENT_ENABLE"/>       
-    </RefParameter> 
+    </RefParameter--> 
 	<RefParameter Comment="Multiplex mode" DefaultValue="LCD_MUXSEGMENT_ENABLE" Name="MuxSegment" Type="uniqueElementList" Group="Basic Parameters" >
         <Condition Diagnostic="Multiplex mode is enabled" Expression="$IpInstance_Multiplex"/>
         <PossibleValue Comment="Enable" Value="LCD_MUXSEGMENT_ENABLE"/>       
@@ -248,6 +248,7 @@
 	
     <RefMode Name="Static">
         <ConfigForMode>Lcd_Init</ConfigForMode>
+        
         <ConfigForMode>VLCD_CAPA_CONFIG</ConfigForMode>
 		
         <Parameter Name="Prescaler"/>
@@ -527,7 +528,7 @@
         </Mode>
 
         <Mode Name="VLCD1">
-            <Condition Expression="LCD_USED &amp;(Bias4) " Diagnostic="Bias Selector mode should be selected first "/>
+            <Condition Expression="LCD_USED &amp;(Bias3|Bias4) " Diagnostic="Bias Selector mode should be selected first "/>
             <ModeLogicOperator Name="OR">
                 <Mode Name="VLCD1">
                     <SignalLogicalOp Name="AND">
@@ -549,7 +550,7 @@
         </Mode>
 		
         <Mode Name="VLCD3">
-            <Condition Expression="LCD_USED &amp;(Bias3|Bias4) " Diagnostic="Bias Selector mode should be selected first "/>
+            <Condition Expression="LCD_USED &amp;(Bias4) " Diagnostic="Bias Selector mode should be selected first "/>
             <ModeLogicOperator Name="OR">
                 <Mode Name="VLCD3">
                     <SignalLogicalOp Name="AND">
@@ -564,7 +565,7 @@
 		
 		
 		
-        <Mode Name="Multiplex Mode" RemoveCondition="((STM32L0&amp;!DIE447))" >
+        <Mode Name="Multiplex Mode" RemoveCondition="((STM32L0&amp;!DIE447&amp;!DIE417))" >
             <Condition Expression="($IpInstance|$IpInstance_8COM) &amp; !static " Diagnostic="$IpInstance mode should be selected first " />
 
             <Semaphore>$IpInstance_Multiplex</Semaphore>

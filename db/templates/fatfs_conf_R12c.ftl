@@ -2,13 +2,15 @@
 [#assign s = name]
 [#assign temp = s?replace(".","__")]
 [#assign inclusion_protection = temp?upper_case]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   *  FatFs - Generic FAT file system module  R0.12c (C)ChaN, 2017
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 #ifndef _FFCONF
 #define _FFCONF 68300	/* Revision ID */
@@ -17,39 +19,80 @@
 / Additional user header to be used  
 /-----------------------------------------------------------------------------*/
 [#assign usbhInUse = 0]
+[#assign includeGenericBspForSD = 0]
+[#assign includeGenericBspForSDRAM = 0]
+[#assign includeGenericBspForSRAM = 0]
+[#assign includeBspForUSBH = 0]
+[#assign customBSPSRAM = 0]    [#-- on G4, not need to include bsp_driver_sram.h when custom BSP is chosen --]
+[#assign customBSPSD = 0]  [#-- on L5, not need to include bsp_driver_sd.h when a board is chosen 9will use the BSP of the board --]
+[#assign cmsisrtosInUse = 0]
+
+#include "main.h"
 #include "${FamilyName?lower_case}xx_hal.h"
+[#compress]
 [#list SWIPdatas as SWIP]
 [#if SWIP.defines??]
 [#list SWIP.defines as definition]
-[#if definition.name="_FS_FATFS_SDIO"]
+[#if definition.name="_FS_FATFS_SDIO"]   [#-- SD Card mode is selected --]
 [#if definition.value="1"]
-#include "bsp_driver_sd.h"
+[#assign includeGenericBspForSD = 1]
 [/#if]
 [/#if]
-[#if definition.name="_FS_FATFS_SDRAM"]
+[#if definition.name="_FS_FATFS_SDRAM"]  [#-- SDRAM mode is selected --]
 [#if definition.value="1"]
-#include "bsp_driver_sdram.h"
+[#assign includeGenericBspForSDRAM = 1]
 [/#if]
 [/#if]
-[#if definition.name="_FS_FATFS_SRAM"]
+[#if definition.name="_FS_FATFS_SRAM"]   [#-- SRAM mode is selected --]
 [#if definition.value="1"]
-#include "bsp_driver_sram.h"
+[#assign includeGenericBspForSRAM = 1]
 [/#if]
 [/#if]
-[#if definition.name="_FS_FATFS_USB"]
+[#if definition.name="_FS_FATFS_USB"]    [#-- USB Disk mode is selected --]
 [#if definition.value="1"]
-#include "usbh_core.h"
-#include "usbh_msc.h"
 [#assign usbhInUse = 1]
+[#assign includeBspForUSBH = 1]
+[/#if]
+[/#if]
+[#if definition.name="SRAM_BSP_CODE"]
+[#if definition.value="1"]                [#-- can occur on G4 --] 
+[#assign customBSPSRAM = 1]
+[/#if]
+[/#if]
+[#if definition.name="SD_BSP_CODE"]
+[#if definition.value="1"]                [#-- can occur on L5 --] 
+[#assign customBSPSD = 1]
 [/#if]
 [/#if]
 [#if definition.name="_FS_REENTRANT"]
 [#if definition.value="1"]
-#include "cmsis_os.h"    /* _FS_REENTRANT set to 1 */
+[#assign cmsisrtosInUse = 1]    [#-- Should change with FreeRTOS Native mode when it comes --] 
 [/#if] 
 [/#if]
 [/#list]
 [/#if]
+
+[#if includeGenericBspForSD == 1]
+[#if customBSPSD == 0]
+#include "bsp_driver_sd.h"
+[/#if]
+[/#if]
+[#if includeGenericBspForSDRAM == 1]
+#include "bsp_driver_sdram.h"
+[/#if]
+[#if includeGenericBspForSRAM == 1]
+[#if customBSPSRAM == 0]
+#include "bsp_driver_sram.h"       [#-- on G4, not needed when CUSTOM BSP is chosen --]  
+[/#if]       
+[/#if]
+[#if includeBspForUSBH == 1]
+#include "usbh_core.h"
+#include "usbh_msc.h"
+[/#if]
+[#if cmsisrtosInUse == 1]
+#include "cmsis_os.h"    /* _FS_REENTRANT set to 1 and CMSIS API chosen */
+[/#if]
+
 
 [#if includes??]
 [#list includes as include]
@@ -175,6 +218,8 @@ extern ${variable.value} ${variable.name};
 [/#if]
 
 [/#list]
+[/#compress]
+
 
 /*-----------------------------------------------------------------------------/
 / Function Configurations
@@ -324,7 +369,7 @@ extern ${variable.value} ${variable.name};
 /  number and only an FAT volume found on the physical drive will be mounted.
 /  When multi-partition is enabled (1), each logical drive number can be bound to
 /  arbitrary physical drive and partition listed in the VolToPart[]. Also f_fdisk()
-/  funciton will be available. */
+/  function will be available. */
 #define _MIN_SS    ${valueMinSectorSize}  /* 512, 1024, 2048 or 4096 */
 #define _MAX_SS    ${valueMaxSectorSize}  /* 512, 1024, 2048 or 4096 */
 /* These options configure the range of sector size to be supported. (512, 1024,
@@ -409,11 +454,19 @@ extern ${variable.value} ${variable.name};
 /  SemaphoreHandle_t and etc.. A header file for O/S definitions needs to be
 /  included somewhere in the scope of ff.h. */
 
+[#-- In R0.12c, definitions that depend on FreeRTOS state (enabled/disabled) --]
+[#if cmsisrtosInUse == 1]
+/* define the ff_malloc ff_free macros as FreeRTOS pvPortMalloc and vPortFree macros */
+#if !defined(ff_malloc) && !defined(ff_free)
+#define ff_malloc  pvPortMalloc
+#define ff_free  vPortFree
+[#else]
 /* define the ff_malloc ff_free macros as standard malloc free */
 #if !defined(ff_malloc) && !defined(ff_free)
 #include <stdlib.h>
 #define ff_malloc  malloc
 #define ff_free  free
+[/#if]
 #endif
 
 #endif /* _FFCONF */

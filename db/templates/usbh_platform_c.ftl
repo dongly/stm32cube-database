@@ -1,13 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbh_platform.c
 
   * @brief          : This file implements the USB platform
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#-- BspIpDatas is a list of SWIPconfigModel --]  
 [#assign instNameFS = ""]
@@ -15,11 +17,11 @@
 
 [#assign IpNameFS = ""]
 [#assign IpInstanceFS = ""]
-[#assign I2CRegFS = ""]
+[#assign I2CRegFS = "0"]
 [#assign I2CAddrFS = ""]
 [#assign IpNameHS = ""]
 [#assign IpInstanceHS = ""]
-[#assign I2CRegHS = ""]
+[#assign I2CRegHS = "0"]
 [#assign I2CAddrHS = ""]
 
 [#list BspIpDatas as SWIP] 
@@ -35,10 +37,7 @@
 		[/#if]	
 		[#if variables.name?contains("I2CAddr")]
 			[#assign I2CAddrFS = variables.value]
-		[/#if]
-		[#if variables.name?contains("I2CReg")]
-			[#assign I2CRegFS = variables.value]
-		[/#if]		
+		[/#if]				
 		[/#list]
 	[/#if]
 [/#if]
@@ -55,9 +54,6 @@
 		[/#if]	
 		[#if variables.name?contains("I2CAddr")]
 			[#assign I2CAddrHS = variables.value]
-		[/#if]
-		[#if variables.name?contains("I2CReg")]
-			[#assign I2CRegHS = variables.value]
 		[/#if]		
 		[/#list]
 	[/#if]
@@ -93,8 +89,8 @@ extern ${IpNameHS}_HandleTypeDef h${IpInstanceHS?lower_case};
   * @brief  Drive VBUS.
   * @param  state : VBUS state
   *          This parameter can be one of the these values:
-  *           - 0 : VBUS Active
-  *           - 1 : VBUS Inactive
+  *           - 1 : VBUS Active
+  *           - 0 : VBUS Inactive
   */
 void MX_DriverVbusFS(uint8_t state)
 { 
@@ -115,7 +111,9 @@ void MX_DriverVbusFS(uint8_t state)
   HAL_GPIO_WritePin(${IpNameFS},${IpInstanceFS},(GPIO_PinState)data);
 [#else] 
   [#if IpNameFS?contains("I2C")]
+  /* USER CODE BEGIN PREPARE_I2C_REG_VBUS_FS */
   uint8_t Component_Reg  = ${I2CRegFS};
+  /* USER CODE END PREPARE_I2C_REG_VBUS_FS */
   HAL_StatusTypeDef status = HAL_OK;
   [/#if]   
   [#if IpNameFS?contains("I2C")]
@@ -144,8 +142,8 @@ void MX_DriverVbusFS(uint8_t state)
   * @brief  Drive VBUS.
   * @param  state : VBUS state
   *          This parameter can be one of the these values:
-  *          - 0 : VBUS Active
-  *          - 1 : VBUS Inactive
+  *          - 1 : VBUS Active
+  *          - 0 : VBUS Inactive
   */
 void MX_DriverVbusHS(uint8_t state)
 { 
@@ -166,7 +164,9 @@ void MX_DriverVbusHS(uint8_t state)
   HAL_GPIO_WritePin(${IpNameHS},${IpInstanceHS},(GPIO_PinState)data);
 [#else] 
   [#if IpNameHS?contains("I2C")]
+  /* USER CODE BEGIN PREPARE_I2C_REG_VBUS_HS */
   uint8_t Component_Reg  = ${I2CRegHS};
+  /* USER CODE END PREPARE_I2C_REG_VBUS_HS */
   HAL_StatusTypeDef status = HAL_OK;
   [/#if]   
   [#if IpNameHS?contains("I2C")]

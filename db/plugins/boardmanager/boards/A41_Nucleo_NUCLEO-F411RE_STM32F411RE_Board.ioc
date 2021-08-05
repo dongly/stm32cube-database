@@ -1,6 +1,6 @@
 #MicroXplorer Configuration settings - do not modify
 File.Version=6
-KeepUserPlacement=true
+KeepUserPlacement=false
 Mcu.Family=STM32F4
 Mcu.IP0=NVIC
 Mcu.IP1=RCC
@@ -106,4 +106,5 @@ RCC.VCOOutputFreq_Value=336000000
 RCC.VcooutputI2S=96000000
 SH.GPXTI13.0=GPIO_EXTI13
 SH.GPXTI13.ConfNb=1
+board=NUCLEO-F411RE
 boardIOC=true

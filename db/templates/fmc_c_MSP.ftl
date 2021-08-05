@@ -271,7 +271,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != HAL_OK)
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n                        
 		  [#else][#--if method.arguments??--]
@@ -282,7 +282,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != HAL_OK)
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n
       [/#if][#--if method.arguments??--]
@@ -357,7 +357,7 @@
                     [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                     [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != HAL_OK)
                     [#if nTab==2]#t#t[#else]#t[/#if]{
-                    [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                    [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                     [#if nTab==2]#t#t[#else]#t[/#if]}
                 [/#if]#n
       [/#if]
@@ -541,7 +541,7 @@
   [#list service.variables as variable] [#-- variables declaration --]
     [#if v?contains(variable.name)]
     [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} ={0};
       [#assign v = v + " " + variable.name]
     [/#if]
   [/#list]
@@ -550,6 +550,41 @@
 #t#treturn;
 #t}
 #t${mspinitvar} = 1;
+
+
+[#assign listOfLocalVariables =""]
+    [#assign resultList =""]
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+        [#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+        [#list pclockConfig.configs as config] [#--list1--]
+            [@common.getLocalVariable configModel1=config listOfLocalVariables=listOfLocalVariables resultList=resultList/]
+            [#assign listOfLocalVariables =resultList]
+        [/#list]
+    [/#if]
+[/#if]
+[/#list]
+#n
+[#assign clockInst=""]
+
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=""  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+#n
+    [/#if]
+[/#if]
+
+[/#list]
 [#assign ipHandler = "h" + ipvar.ipName?lower_case]
 
 [@generateServiceCode ipName=ipvar.ipName serviceType="Init" modeName=ipvar.ipName instHandler=ipHandler tabN=1/]
@@ -600,7 +635,7 @@
     [#assign words = instanceList?word_list]
     [#-- declare Variable GPIO_InitTypeDef once --]
     [#assign v = ""]
-    [#list words as inst] [#-- loop on ip instances datas --] 
+    [#list words as inst] [#-- loop on ip instances data --] 
       [#assign services = getInitServiceMode(inst)]
       [#if services.gpio??]
         [#assign service=services.gpio]

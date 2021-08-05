@@ -13,7 +13,11 @@
         <Parameter Name="DMAAccessMode"/>
         <Parameter Name="TwoSamplingDelay"/>
     </RefMode>
-
+     <RefParameter Comment="TrigAuto" DefaultValue="2" Group="ADCgroup"  Name="TrigAuto" Type="integer" Visible="false">
+      <Condition Diagnostic="" Expression=" (AutoInjected_$IpInstance) | (ExternalTrigInjecConv = ADC_INJECTED_SOFTWARE_START)"/>
+    </RefParameter>
+    <RefParameter Comment="TrigAuto" DefaultValue="1" Group="ADCgroup"  Name="TrigAuto" Type="integer" Visible="false">
+    </RefParameter>
     <RefParameter Comment="Mode" DefaultValue="null" Group="ADCs_Common_Settings" Name="Mode" Type="list" Visible="false">
         <Condition Diagnostic="" Expression="(ADC1_Exist|ADC_Exist)&amp;(!ADC2_Exist)"/>
     </RefParameter>
@@ -223,7 +227,7 @@
             
     <RefParameter Comment="Scan Conversion Mode" DefaultValue="ADC_SCAN_ENABLE" Group="ADCgroup" Name="ScanConvMode" Type="list">
         <Condition Diagnostic="" Expression="(NbrOfConversion&gt;1&amp;EnableRegularConversion=ENABLE)|(InjNumberOfConversion&gt;1&amp;EnableInjectedConversion=ENABLE)"/>
-        <PossibleValue Comment="Enabled" Value="ADC_SCAN_ENABLE"/>
+        <PossibleValue Comment="Enabled" Value="ADC_SCAN_ENABLE" Semaphore="ScanConvMode_$IpInstance"/>
         <Description>Enable or Disable the Scan Conversion Mode</Description>
     </RefParameter>
     <RefParameter Comment="Scan Conversion Mode" DefaultValue="ADC_SCAN_DISABLE" Group="ADCgroup" Name="ScanConvMode" Type="list">
@@ -257,7 +261,10 @@
         <PossibleValue Action="Disable" Comment="Enabled" Condition="DiscontinuousConvMode = ENABLE" Diagnostic="Continuous and Discontinuous modes could not be used at the same time" Value="ENABLE"/>
         <Description>Enable or Disable the Continuous Conversion Mode</Description>
     </RefParameter>
-	    
+	    <RefParameter Comment="Discontinuous Conversion Mode" DefaultValue="DISABLE" Name="DiscontinuousConvMode" Type="list">
+        <Condition Diagnostic="Discontinuous mode is used only if Scan Mode is enabled" Expression="ScanConvMode=ADC_SCAN_DISABLE"/>
+        <PossibleValue Comment="Disabled" Value="DISABLE"/>
+    </RefParameter>
     <!-- Possible values of DiscontinuousConvMode parameter -->
     <RefParameter Comment="Discontinuous Conversion Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="DiscontinuousConvMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
@@ -274,8 +281,13 @@
     <!-- Possible values of DMAContinuousRequests parameter -->
     <RefParameter Comment="DMA Continuous Requests" DefaultValue="DISABLE" Group="ADCgroup" Name="DMAContinuousRequests" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
-        <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Enable/Disable DMA Continuous Requests</Description>
+        <PossibleValue Comment="Enabled" Value="ENABLE" Action="Disable" Condition="!DMARequest_$IpInstance" Diagnostic="A DMA Request in Circular Mode must be configured in DMA Settings Tab for this ADC instance" />
+        <Description>This parameter is used only when a DMA Request is configured. Else it is not relevant.&lt;br&gt;
+            When the DMA Request for this ADC instance this parameter specifies whether 
+            the DMA requests are performed in one shot mode (DMA transfer stops when number of conversions is reached)
+            or are performed in continuous mode (DMA transfer unlimited, whatever number of conversions).&lt;br&gt;
+            Note: In continuous mode, DMA must be configured in circular mode. Otherwise an overrun will be triggered when DMA buffer maximum pointer is reached.
+        </Description>
     </RefParameter>
 	    
     <!-- Possible values of EOCSelection parameter -->
@@ -298,8 +310,27 @@
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
         <Description>Specifies the usage of Low Power Auto Wait Mode: new conversion start only when the previous conversion (for regular group) or previous sequence (for injected group) has been treated by user software.</Description>
     </RefParameter>
-  
+     <RefParameter Comment="Channel_Rank1" DefaultValue="0x0000" Group="ADCChannel" Name="Rank1_Channel" Type="String" Visible="false"/>
+    <RefParameter Comment="Channel_Rank2" DefaultValue="0x0000" Group="ADCChannel" Name="Rank2_Channel" Type="String" Visible="false"/>
+    <RefParameter Comment="Channel_Rank3" DefaultValue="0x0000" Group="ADCChannel" Name="Rank3_Channel" Type="String" Visible="false"/>
+    <RefParameter Comment="Channel_Rank4" DefaultValue="0x0000" Group="ADCChannel" Name="Rank4_Channel" Type="String" Visible="false"/>
     
+    
+    <RefMode Abstract="true" Comment="Injected Queue Enable" Group="ADC_Injected_ConversionMode" Name="ADC_Injected_Queue_Enable">
+        <Condition Diagnostic="" Expression="!(InjNumberOfConversion = 0)"/>
+        <ConfigForMode>ADC_InjectedQueueEnable</ConfigForMode>
+         <Parameter Name="EnableRegularConversion"/>
+        <Parameter Name="NbrOfConversionFlag"/>
+        <Parameter Name="NbrOfConversion"/>
+        <Parameter Name="ExternalTrigConv"/>
+        <Parameter Name="ExternalTrigConvEdge"/>
+        <Parameter Name="SequencerNbRanks"/>
+    </RefMode>
+    
+    <RefMode Abstract="true" Comment="Injected Queue Disable" Group="ADC_Injected_ConversionMode" Name="ADC_Injected_Queue_Disable">
+        <Condition Diagnostic="" Expression="!(InjNumberOfConversion = 0)"/>
+        <ConfigForMode>ADC_InjectedQueueDisable</ConfigForMode>
+    </RefMode>
     <!-- RefMode of ADC_Regular_ConversionMode -->
     <RefMode Abstract="true" Comment="Regular Conversion Settings" Group="ADC_Regular_ConversionMode" Name="ADC_Regular_ConversionMode">
         <Parameter Name="EnableRegularConversion"/>
@@ -307,6 +338,9 @@
         <Parameter Name="NbrOfConversion"/>
         <Parameter Name="ExternalTrigConv"/>
         <Parameter Name="ExternalTrigConvEdge"/>
+        <Parameter Name="SequencerNbRanks"/>
+
+        
     </RefMode>
     <RefParameter Comment="Enable Regular Conversions" DefaultValue="ENABLE" Group="ADC_Regular_ConversionMode" Name="EnableRegularConversion" Type="list">
         <PossibleValue Comment="Enable" Value="ENABLE"/>
@@ -454,6 +488,7 @@
         <Parameter Name="Channel"/>
         <Parameter Name="SingleDiff"/>
         <Parameter Name="SamplingTime"/>
+        <Parameter Name="SamplingTimeOPAMP"/>
         <Parameter Name="OffsetNumber"/>
         <Parameter Name="Offset"/>
         <Parameter Name="RegHighThreshold"/>
@@ -590,6 +625,23 @@
     </RefParameter>
 			    
     <!-- Possible Value of SamplingTime parameters  -->
+    <RefParameter Name="FHzSyncCLK" Comment="Sync Clock AHB value" Type="" DefaultValue="=RCC:AHBFreq_Value" Visible="false"/>
+    <RefParameter Name="FHzAsyncCLK" Comment="Async Clock ADC value" Type="" DefaultValue="=RCC:ADC12outputFreq_Value" Visible="false"/>
+    <RefParameter Name="FHzADCClock" Comment="" Type="" DefaultValue="=FHzAsyncCLK" Visible="false">
+        <Condition Expression="ClockPrescaler=ADC_CLOCK_ASYNC_DIV1" Diagnostic=""/>
+    </RefParameter>
+    <RefParameter Name="FHzADCClock" Comment="" Type="" DefaultValue="=FHzSyncCLK" Visible="false">
+        <Condition Expression="ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV1" Diagnostic=""/>
+    </RefParameter>
+    <RefParameter Name="FHzADCClock" Comment="" Type="" DefaultValue="=FHzSyncCLK/2" Visible="false">
+        <Condition Expression="ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV2" Diagnostic=""/>
+    </RefParameter>
+    <RefParameter Name="FHzADCClock" Comment="" Type="" DefaultValue="=FHzSyncCLK/4" Visible="false">
+        <Condition Expression="ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4" Diagnostic=""/>
+    </RefParameter>
+    <RefParameter Name="FHzADCClock" Comment="" Type="" DefaultValue="=FHzAsyncCLK" Visible="false"/>
+
+
     <RefParameter Comment="Sampling Time" DefaultValue="ADC_SAMPLETIME_1CYCLE_5" Group="ADCChannel" Name="SamplingTime" Type="list">
         <PossibleValue Comment="1.5 Cycles" Value="ADC_SAMPLETIME_1CYCLE_5"/>
         <PossibleValue Comment="2.5 Cycles" Value="ADC_SAMPLETIME_2CYCLES_5"/>
@@ -600,6 +652,17 @@
         <PossibleValue Comment="181.5 Cycles" Value="ADC_SAMPLETIME_181CYCLES_5"/>
         <PossibleValue Comment="601.5 Cycles" Value="ADC_SAMPLETIME_601CYCLES_5"/>
         <Description>Regular Channel x sampling time selection</Description>
+    </RefParameter>
+    <RefParameter Comment="Sampling Time" DefaultValue="ADC_SAMPLETIME_1CYCLE_5" Group="ADCChannel" Name="SamplingTimeOPAMP" Type="list">
+        <PossibleValue Comment="1.5 Cycles" Value="ADC_SAMPLETIME_1CYCLE_5" Condition="((FHzADCClock/1.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="2.5 Cycles" Value="ADC_SAMPLETIME_2CYCLES_5" Condition="((FHzADCClock/2.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="4.5 Cycles" Value="ADC_SAMPLETIME_4CYCLES_5" Condition="((FHzADCClock/4.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="7.5 Cycles" Value="ADC_SAMPLETIME_7CYCLES_5" Condition="((FHzADCClock/7.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="19.5 Cycles" Value="ADC_SAMPLETIME_19CYCLES_5" Condition="((FHzADCClock/19.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="61.5 Cycles" Value="ADC_SAMPLETIME_61CYCLES_5" Condition="((FHzADCClock/61.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="181.5 Cycles" Value="ADC_SAMPLETIME_181CYCLES_5" Condition="((FHzADCClock/181.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="601.5 Cycles" Value="ADC_SAMPLETIME_601CYCLES_5" Condition="((FHzADCClock/601.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <Description>Regular Channel x sampling time selection with contrainst on OPAMP connection</Description>
     </RefParameter>
 			    
     <RefParameter Comment="Single-ended or differential" DefaultValue="ADC_SINGLE_ENDED" Group="ADCgroup" Name="SingleDiff" Type="list" Visible="false">
@@ -649,6 +712,7 @@
         <Parameter Name="QueueInjectedContext"/>
         <Parameter Name="AutoInjectedConv"/>
         <Parameter Name="InjectedDiscontinuousConvMode"/>
+        <Parameter Name="TrigAuto"/>
     </RefMode>
 		    
     <!--  -->
@@ -765,11 +829,13 @@
     <!-- Possible Value of ExternalTrigInjecConvEdge parameter -->
     <RefParameter Comment="External Trigger Conversion Edge" DefaultValue="null" Group="ADCgroup" Name="ExternalTrigInjecConvEdge" Type="list" Visible="false">
         <Condition Diagnostic="" Expression="(EnableInjectedConversion=DISABLE) | (InjNumberOfConversion=0) | ((($IpNumber=2) | (($IpNumber=4)))  &amp; !(Mode=ADC_MODE_INDEPENDENT)) "/>
-    </RefParameter>   
-    <RefParameter Comment="External Trigger Conversion Edge" DefaultValue="ADC_EXTERNALTRIGINJECCONV_EDGE_NONE" Group="ADCgroup" Name="ExternalTrigInjecConvEdge" Type="list">
-        <Condition Diagnostic="" Expression=" (AutoInjected_$IpInstance) | (ExternalTrigInjecConv = ADC_INJECTED_SOFTWARE_START)"/>
-        <PossibleValue Comment="None" Value="ADC_EXTERNALTRIGINJECCONV_EDGE_NONE"/>
-        <Description>You cannot configure a trigger because the Auto Injected mode is selected.</Description>
+    </RefParameter>  
+    <RefParameter Comment="External Trigger Conversion Edge" DefaultValue="null" Group="ADCgroup" Name="ExternalTrigInjecConvEdge" Type="list" Visible="false">
+        <Condition Diagnostic="" Expression="(EnableInjectedConversion=DISABLE) | (InjNumberOfConversion=0) | ((($IpNumber=2) | (($IpNumber=4)))  &amp; !(Mode=ADC_MODE_INDEPENDENT)) "/>
+    </RefParameter> 
+   
+    <RefParameter Comment="SequencerNbRanks" DefaultValue="1" Group="ADCgroup" Name="SequencerNbRanks" Type="integer">
+        <Description>Data offset for regular channel</Description>
     </RefParameter>
     <RefParameter Comment="External Trigger Conversion Edge" DefaultValue="ADC_EXTERNALTRIGINJECCONV_EDGE_RISING" Group="ADCgroup" Name="ExternalTrigInjecConvEdge" Type="list">
         <PossibleValue Comment="Trigger detection on the rising edge" Value="ADC_EXTERNALTRIGINJECCONV_EDGE_RISING"/>
@@ -794,7 +860,7 @@
     </RefParameter> -->
     <RefParameter Comment="Injected Conversion Mode" DefaultValue="None" Group="ADCgroup" Name="InjectedConvMode" Type="list">
         <PossibleValue Comment="None" Value="None"/>
-        <PossibleValue Comment="Discontinuous Mode" Semaphore="InjectedDiscontinuous_$IpInstance" Value="Discontinuous"/>
+        <PossibleValue Comment="Discontinuous Mode" Semaphore="InjectedDiscontinuous_$IpInstance" Value="Discontinuous" Action="Disable" Condition="!(ScanConvMode_$IpInstance) | (ContinuousMode_$IpInstance)" Diagnostic="Discontinuous mode is used only if sequencer is enabled (parameter 'ScanConvMode').Discontinuous mode can be enabled only if continuous mode is disabled."/>
         <PossibleValue Action="Disable" Comment="Auto Injected Mode" Condition="DiscontinuousConvMode = ENABLE" Diagnostic="It is not possible to use both auto-injected mode and discontinuous mode simultaneously" Semaphore="AutoInjected_$IpInstance" Value="AutoInjected"/>
         <Description>Injected Conversion Mode selection</Description>
     </RefParameter>
@@ -832,6 +898,7 @@
         <Parameter Name="InjectedRank"/>
         <Parameter Name="InjectedChannel"/>
         <Parameter Name="InjectedSamplingTime"/>
+        <Parameter Name="InjectedSamplingTimeOPAMP"/>
         <Parameter Name="InjectedSingleDiff"/>
         <Parameter Name="InjectedOffsetNumber"/>
         <Parameter Name="InjectedOffset"/>
@@ -847,6 +914,7 @@
         <Parameter Name="InjectedRank"/>
         <Parameter Name="InjectedChannel"/>
         <Parameter Name="InjectedSamplingTime"/>
+        <Parameter Name="InjectedSamplingTimeOPAMP"/>
         <Parameter Name="InjectedSingleDiff"/>
         <Parameter Name="InjectedOffsetNumber"/>
         <Parameter Name="InjHighThreshold"/>
@@ -912,6 +980,18 @@
         <PossibleValue Comment="601.5 Cycles" Value="ADC_SAMPLETIME_601CYCLES_5"/>
         <Description>Regular Channel x sampling time selection</Description>
     </RefParameter>
+    <RefParameter Comment="Sampling Time" DefaultValue="ADC_SAMPLETIME_1CYCLE_5" Group="ADCChannel" Name="InjectedSamplingTimeOPAMP" Type="list">
+        <PossibleValue Comment="1.5 Cycles" Value="ADC_SAMPLETIME_1CYCLE_5" Condition="((FHzADCClock/1.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="2.5 Cycles" Value="ADC_SAMPLETIME_2CYCLES_5" Condition="((FHzADCClock/2.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="4.5 Cycles" Value="ADC_SAMPLETIME_4CYCLES_5" Condition="((FHzADCClock/4.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="7.5 Cycles" Value="ADC_SAMPLETIME_7CYCLES_5" Condition="((FHzADCClock/7.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="19.5 Cycles" Value="ADC_SAMPLETIME_19CYCLES_5" Condition="((FHzADCClock/19.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="61.5 Cycles" Value="ADC_SAMPLETIME_61CYCLES_5" Condition="((FHzADCClock/61.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="181.5 Cycles" Value="ADC_SAMPLETIME_181CYCLES_5" Condition="((FHzADCClock/181.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <PossibleValue Comment="601.5 Cycles" Value="ADC_SAMPLETIME_601CYCLES_5" Condition="((FHzADCClock/601.5)&gt;2500000)"   Diagnostic="ADC sampling time when reading the OPAMP output cannot be faster as 400ns" />
+        <Description>Regular Channel x sampling time selection with contrainst on OPAMP connection</Description>
+    </RefParameter>
+
 			    
     <RefParameter Comment="Single-ended or differential" DefaultValue="null" Group="ADCgroup" Name="InjectedSingleDiff" Type="list" Visible="false">
         <Condition Diagnostic="In case of usage of channels on injected group, ADC frequency should be low than AHB clock frequency /4 for resolution 12 or 10 bits, AHB clock frequency /3 for resolution 8 bits, AHB clock frequency /2 for resolution 6 bits." Expression="EnableInjectedConversion=DISABLE"/>
@@ -1214,7 +1294,7 @@
     <RefParameter Comment="Interrupt Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="AWD1ITMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Specifies whether the analog watchdog is configured is interrupt mode or in polling mode.</Description>
+        <Description>Specifies whether the analog watchdog is configured in interrupt mode or in polling mode.</Description>
     </RefParameter>	
 
     <!-- WatchDog2 parameters -->
@@ -1295,7 +1375,7 @@
     <RefParameter Comment="Interrupt Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="AWD2ITMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Specifies whether the analog watchdog is configured is interrupt mode or in polling mode.</Description>
+        <Description>Specifies whether the analog watchdog is configured in interrupt mode or in polling mode.</Description>
     </RefParameter>
     
     <RefMode Comment="Analog Watchdog 3" Group="WatchDog3" Name="Analog Watchdog 3">
@@ -1365,7 +1445,7 @@
     <RefParameter Comment="Interrupt Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="AWD3ITMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Specifies whether the analog watchdog is configured is interrupt mode or in polling mode.</Description>
+        <Description>Specifies whether the analog watchdog is configured in interrupt mode or in polling mode.</Description>
     </RefParameter>
 
 
@@ -1658,12 +1738,12 @@
             <PossibleValue>ADC_CHANNEL_VOPAMP1</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP1-Single-Ended">
+    <RefMode Comment="" Name="IN3-OPAMP1-Single-Ended">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP1-Differential">
+    <RefMode Comment="" Name="IN3-OPAMP1-Differential">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
@@ -1674,22 +1754,22 @@
             <PossibleValue>ADC_CHANNEL_VOPAMP2</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP2-Single-Ended">
+    <RefMode Comment="" Name="IN3-OPAMP2-Single-Ended">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP2-Differential">
+    <RefMode Comment="" Name="IN3-OPAMP2-Differential">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP2-10-Single-Ended">
+    <RefMode Comment="" Name="IN10-OPAMP2-Single-Ended">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_10</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP2-10-Differential">
+    <RefMode Comment="" Name="IN10-OPAMP2-Differential">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_10</PossibleValue>
         </Parameter>
@@ -1700,12 +1780,12 @@
             <PossibleValue>ADC_CHANNEL_VOPAMP3</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP3-Single-Ended">
+    <RefMode Comment="" Name="IN1-OPAMP3-Single-Ended">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_1</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP3-Differential">
+    <RefMode Comment="" Name="IN1-OPAMP3-Differential">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_1</PossibleValue>
         </Parameter>
@@ -1716,12 +1796,12 @@
             <PossibleValue>ADC_CHANNEL_VOPAMP4</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP4-Single-Ended">
+    <RefMode Comment="" Name="IN3-OPAMP4-Single-Ended">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
     </RefMode>
-    <RefMode Comment="" Name="IN-OPAMP4-Differential">
+    <RefMode Comment="" Name="IN3-OPAMP4-Differential">
         <Parameter Name="Channel">
             <PossibleValue>ADC_CHANNEL_3</PossibleValue>
         </Parameter>
@@ -1764,7 +1844,7 @@
                         <Signal Name="IN1"/>
                     </SignalLogicalOp>
                 </Mode>
-                <Mode Name="IN-OPAMP3-Differential" RemoveCondition="!($IpNumber=3) | !OPAMP3_Exist" UserName="OPAMP3 Output Differential">
+                <Mode Name="IN1-OPAMP3-Differential" RemoveCondition="!($IpNumber=3) | !OPAMP3_Exist" UserName="OPAMP3 Output Differential">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT3"/>
                         <Signal Name="IN2"/>
@@ -1772,7 +1852,7 @@
                     <Semaphore>IN1DiffUsed_$IpInstance</Semaphore>
                     <Condition Diagnostic="" Expression="OPAMP3_OUTPUT_SELECTED_AS_ADC_INPUT"/>
                 </Mode>
-                <Mode Name="IN-OPAMP3-Single-Ended" RemoveCondition="!($IpNumber=3) | !OPAMP3_Exist" UserName="OPAMP3 Output Single-ended">
+                <Mode Name="IN1-OPAMP3-Single-Ended" RemoveCondition="!($IpNumber=3) | !OPAMP3_Exist" UserName="OPAMP3 Output Single-ended">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT3"/>
                     </SignalLogicalOp>
@@ -1845,7 +1925,7 @@
                 </Mode>
 				
                 <!-- Je dois retourner à ce problème !!!!!!! use STM32F302VCT target  !($IpNumber=1) &amp; !OPAMP1_Exist -->
-                <Mode Name="IN-OPAMP1-Differential" RemoveCondition="!($IpNumber=1) | !OPAMP1_Exist" UserName="OPAMP1 Output Differential">
+                <Mode Name="IN3-OPAMP1-Differential" RemoveCondition="!($IpNumber=1) | !OPAMP1_Exist" UserName="OPAMP1 Output Differential">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT1"/>
                         <Signal Name="IN4"/> 
@@ -1854,13 +1934,13 @@
                     <Semaphore>IN3DiffUsed_$IpInstance</Semaphore>
                     <Condition Diagnostic="Available only if OPAMP1 is used and Channel4 not already used" Expression="OPAMP1_OUTPUT_SELECTED_AS_ADC_INPUT &amp;!IN4Used_$IpInstance"/>
                 </Mode>
-                <Mode Name="IN-OPAMP1-Single-Ended" RemoveCondition="!($IpNumber=1) | !OPAMP1_Exist" UserName="OPAMP1 Output Single-Ended">
+                <Mode Name="IN3-OPAMP1-Single-Ended" RemoveCondition="!($IpNumber=1) | !OPAMP1_Exist" UserName="OPAMP1 Output Single-Ended">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT1"/>
                     </SignalLogicalOp>
                     <Condition Diagnostic="Available only if OPAMP1 is used" Expression="OPAMP1_OUTPUT_SELECTED_AS_ADC_INPUT"/>
                 </Mode>					
-                <Mode Name="IN-OPAMP2-Differential" RemoveCondition="!($IpNumber=2) | !OPAMP2_Exist" UserName="OPAMP2 Output Differential">
+                <Mode Name="IN3-OPAMP2-Differential" RemoveCondition="!($IpNumber=2) | !OPAMP2_Exist" UserName="OPAMP2 Output Differential">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT2"/>
                         <Signal Name="IN4"/>
@@ -1868,13 +1948,13 @@
                     <Semaphore>IN3DiffUsed_$IpInstance</Semaphore>
                     <Condition Diagnostic="Available only if OPAMP2 is used and Channel4 not already used" Expression="OPAMP2_OUTPUT_SELECTED_AS_ADC_INPUT &amp;!IN4Used_$IpInstance"/>
                 </Mode>
-                <Mode Name="IN-OPAMP2-Single-Ended" RemoveCondition="!($IpNumber=2) | !OPAMP2_Exist" UserName="OPAMP2 Output Single-Ended">
+                <Mode Name="IN3-OPAMP2-Single-Ended" RemoveCondition="!($IpNumber=2) | !OPAMP2_Exist" UserName="OPAMP2 Output Single-Ended">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT2"/>
                     </SignalLogicalOp>
                     <Condition Diagnostic="Available only if OPAMP2 is used" Expression="OPAMP2_OUTPUT_SELECTED_AS_ADC_INPUT"/>
                 </Mode>
-                <Mode Name="IN-OPAMP4-Differential" RemoveCondition="!($IpNumber=4) | !OPAMP4_Exist" UserName="OPAMP4 Output Differential">
+                <Mode Name="IN3-OPAMP4-Differential" RemoveCondition="!($IpNumber=4) | !OPAMP4_Exist" UserName="OPAMP4 Output Differential">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT4"/>
                         <Signal Name="IN4"/>
@@ -1882,7 +1962,7 @@
                     <Semaphore>IN3DiffUsed_$IpInstance</Semaphore>
                     <Condition Diagnostic="Available only if OPAMP4 is used and Channel4 not already used" Expression="OPAMP4_OUTPUT_SELECTED_AS_ADC_INPUT &amp;!IN4Used_$IpInstance"/>
                 </Mode>
-                <Mode Name="IN-OPAMP4-Single-Ended" RemoveCondition="!($IpNumber=4) | !OPAMP4_Exist" UserName="OPAMP4 Output Single-Ended">
+                <Mode Name="IN3-OPAMP4-Single-Ended" RemoveCondition="!($IpNumber=4) | !OPAMP4_Exist" UserName="OPAMP4 Output Single-Ended">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT4"/>
                     </SignalLogicalOp>
@@ -2042,7 +2122,7 @@
                         <Signal Name="IN10"/>
                     </SignalLogicalOp>
                 </Mode>
-                <Mode Name="IN-OPAMP2-10-Differential" RemoveCondition="(!($IpNumber=1) &amp; !OPAMP2_Exist) | !DIE439" UserName="OPAMP2 Output Differential"> <!-- DIE439= 302x8/x6 & 301x6/x8 -->
+                <Mode Name="IN10-OPAMP2-Differential" RemoveCondition="(!($IpNumber=1) &amp; !OPAMP2_Exist) | !DIE439" UserName="OPAMP2 Output Differential"> <!-- DIE439= 302x8/x6 & 301x6/x8 -->
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT2"/>
                         <Signal Name="IN11"/>
@@ -2050,7 +2130,7 @@
                     <Semaphore>IN10DiffUsed_$IpInstance</Semaphore>
                     <Condition Diagnostic="Available only if OPAMP2 is used OR Channel11 is not already used" Expression="OPAMP2_OUTPUT_SELECTED_AS_ADC_INPUT|!IN11Used_$IpInstance"/>
                 </Mode>
-                <Mode Name="IN-OPAMP2-10-Single-Ended" RemoveCondition="(!($IpNumber=1) &amp; !OPAMP2_Exist) | !DIE439" UserName="OPAMP2 Output Single-Ended">
+                <Mode Name="IN10-OPAMP2-Single-Ended" RemoveCondition="(!($IpNumber=1) &amp; !OPAMP2_Exist) | !DIE439" UserName="OPAMP2 Output Single-Ended">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_OUT2"/>
                     </SignalLogicalOp>
@@ -2212,9 +2292,9 @@
         </Mode>
 		
         <!-- OPAMP inputs -->
-        <Mode Name="IN-OPAMP1" RemoveCondition="!(($IpNumber=1)&amp;OPAMP1_Exist)" UserName="VOPAMP1 Channel"> <!-- DIE422 = 302xC/xB & 303xB/xC & 358xC |STM32F301|!DIE422 -->
+        <Mode Name="IN-OPAMP1" RemoveCondition="!(($IpNumber=1)&amp;OPAMP1_Exist)" UserName="VRefOpamp1 Channel"> <!-- DIE422 = 302xC/xB & 303xB/xC & 358xC |STM32F301|!DIE422 -->
             <ModeLogicOperator Name="XOR">
-                <Mode Name="IN-OPAMP1" UserName="VOPAMP1 Channel">
+                <Mode Name="IN-OPAMP1" UserName="VRefOpamp1 Channel">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_INTERNAL1"/>
                     </SignalLogicalOp>
@@ -2223,9 +2303,9 @@
             <Condition Diagnostic="Available only if OPAMP1 is used" Expression="OPAMP1_OUTPUT_SELECTED_AS_ADC_INPUT"/>
             <Semaphore>channelSelected$IpInstance</Semaphore>
         </Mode>
-        <Mode Name="IN-OPAMP2" RemoveCondition="!(($IpNumber=2)&amp;OPAMP2_Exist)|STM32F301" UserName="VOPAMP2 Channel">
+        <Mode Name="IN-OPAMP2" RemoveCondition="!(($IpNumber=2)&amp;OPAMP2_Exist)|STM32F301" UserName="VRefOpamp2 Channel">
             <ModeLogicOperator Name="XOR">
-                <Mode Name="IN-OPAMP2" UserName="VOPAMP2 Channel">
+                <Mode Name="IN-OPAMP2" UserName="VRefOpamp2 Channel">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_INTERNAL2"/>
                     </SignalLogicalOp>
@@ -2234,9 +2314,9 @@
             <Condition Diagnostic="Available only if OPAMP2 is used" Expression="OPAMP2_OUTPUT_SELECTED_AS_ADC_INPUT"/>
             <Semaphore>channelSelected$IpInstance</Semaphore>
         </Mode>
-        <Mode Name="IN-OPAMP3" RemoveCondition="!(($IpNumber=3)&amp;OPAMP3_Exist)|STM32F301" UserName="VOPAMP3 Channel">
+        <Mode Name="IN-OPAMP3" RemoveCondition="!(($IpNumber=3)&amp;OPAMP3_Exist)|STM32F301" UserName="VRefOpamp3 Channel">
             <ModeLogicOperator Name="XOR">
-                <Mode Name="IN-OPAMP3" UserName="VOPAMP3 Channel">
+                <Mode Name="IN-OPAMP3" UserName="VRefOpamp3 Channel">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_INTERNAL3"/>
                     </SignalLogicalOp>
@@ -2245,9 +2325,9 @@
             <Condition Diagnostic="Available only if OPAMP3 is used" Expression="OPAMP3_OUTPUT_SELECTED_AS_ADC_INPUT"/>
             <Semaphore>channelSelected$IpInstance</Semaphore>
         </Mode>
-        <Mode Name="IN-OPAMP4" RemoveCondition="!(($IpNumber=4)&amp;OPAMP4_Exist)|STM32F301" UserName="VOPAMP4 Channel">
+        <Mode Name="IN-OPAMP4" RemoveCondition="!(($IpNumber=4)&amp;OPAMP4_Exist)|STM32F301" UserName="VRefOpamp4 Channel">
             <ModeLogicOperator Name="XOR">
-                <Mode Name="IN-OPAMP4" UserName="VOPAMP4 Channel">
+                <Mode Name="IN-OPAMP4" UserName="VRefOpamp4 Channel">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="OPAMP_INTERNAL4"/>
                     </SignalLogicalOp>
@@ -2258,9 +2338,9 @@
         </Mode>
 		
         <!-- Triggers Mode -->
-        <Mode Name="Conversion-Trigger" UserName="Conversion Trigger">
+        <Mode Name="Conversion-Trigger" UserName="EXTI Conversion Trigger" >
             <ModeLogicOperator Name="XOR">
-                <Mode Name="Injected-Conversion-Trigger" UserName="Injected Conversion Trigger">
+                <Mode Name="Injected-Conversion-Trigger" UserName="Injected Conversion Trigger"  RemoveCondition="($IpNumber=3) | ($IpNumber=4)">
                     <SignalLogicalOp Name="AND">
                         <Signal Name="EXTI15"/>
                     </SignalLogicalOp>
@@ -2283,7 +2363,7 @@
                     <Semaphore>RegularExternalTrigger_$IpInstance</Semaphore>
                     <Condition Diagnostic="Available only if at least one channel is selected" Expression="channelSelected$IpInstance"/>
                 </Mode>
-                <Mode Name="RegularAndInjected-Conversion-Trigger" UserName="Regular and Injected Conversion Trigger">
+                <Mode Name="RegularAndInjected-Conversion-Trigger" UserName="Regular and Injected Conversion Trigger"  RemoveCondition="($IpNumber=3) | ($IpNumber=4)">
                     <Condition Diagnostic="" Expression="(USE_ADC1)|(USE_ADC2)"/>
                     <SignalLogicalOp Name="AND">
                         <Signal Name="EXTI11"/>

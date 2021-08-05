@@ -1,16 +1,24 @@
 [#ftl]
+[#if cpucore!="" && (contextFolder=="" || contextFolder=="/")]    
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * File Name          : ${FamilyName?lower_case}xx_hal_msp.c
-  * Description        : This file provides code for the MSP Initialization 
-  *                      and de-Initialization codes.
+  * @file         ${FamilyName?lower_case}xx_hal_msp.c
+  * @brief        This file provides code for the MSP Initialization 
+  *               and de-Initialization codes.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
-/* Includes ------------------------------------------------------------------*/
-#include "${FamilyName?lower_case}xx_hal.h"
+/* USER CODE END Header */
 
+/* Includes ------------------------------------------------------------------*/
+#include "${main_h}"
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
 [#function list_contains string_list element]
   [#list string_list?split(" ") as string_element]
     [#if string_element == element]
@@ -20,23 +28,61 @@
   [#return false]
 [/#function]
 [#compress]
+[#assign cmp = false]
 [#-- Add global dma Handler --]
 [#list IPdatas as IP]  
 [#list IP.configModelList as instanceData]
-    [#if instanceData.dmaHandel??]
+    [#assign instName = instanceData.instanceName]
+    [#if !(instName?starts_with("GPDMA")) && !(instName?starts_with("LPDMA")) && instanceData.dmaHandel??]
         [#list instanceData.dmaHandel as dHandle]
             extern ${dHandle};#n
+            [#assign cmp = true] [#-- Flag to check if DMA is used--]
         [/#list]
+
     [/#if]
 [/#list]
 [/#list]
-extern void _Error_Handler(char *, int);
+
 [/#compress]
+#n
+
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN TD */
+
+/* USER CODE END TD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN Define */
+ 
+/* USER CODE END Define */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN Macro */
+
+/* USER CODE END Macro */
+
+/* Private variables ---------------------------------------------------------*/
+/* USER CODE BEGIN PV */
+
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+/* USER CODE BEGIN PFP */
+
+/* USER CODE END PFP */
+
+/* External functions --------------------------------------------------------*/
+/* USER CODE BEGIN ExternalFunctions */
+
+/* USER CODE END ExternalFunctions */
 
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
 [#if isHALUsed??]
+[#-- PostInit declaration --]         
+[@common.getMspPostInit/]
 /**
 #t* Initializes the Global MSP.
 #t*/
@@ -53,16 +99,35 @@ void HAL_MspInit(void)
             [@common.getLocalVariableList instanceData=config/] 
 [/#list]
 [/#if]
+[#if pwrConfig??]
+[#list pwrConfig as config]
+ [#assign listOfLocalVariables =""]
+        [#assign resultList =""] 	
+            [@common.getLocalVariableList instanceData=config/] 
+[/#list]
+[/#if]
+#n
+[#if vrefbufConfig??]
+[#list vrefbufConfig as config]
+ [#assign listOfLocalVariables =""]
+        [#assign resultList =""] 	
+            [@common.getLocalVariableList instanceData=config/] 
+[/#list]
+[/#if]
 #n
 [#if clock??]
     [#list clock as clk]
-        [#if clk!=""]#t${clk}();[/#if]
+        [#if clk!="none"]
+            [#if clk!=""]#t${clk}[#if !clk?contains('(')]()[/#if];[/#if]
+        [/#if]
     [/#list]
 [/#if]
 #n
 
   [#if NVICPriorityGroup??]
+[#if (!NVICPriorityGroupDefValue?? &&NVICPriorityGroup!="NVIC_PRIORITYGROUP_4") || (NVICPriorityGroupDefValue?? && NVICPriorityGroup!=NVICPriorityGroupDefValue)]
 #tHAL_NVIC_SetPriorityGrouping(${NVICPriorityGroup});#n
+[/#if]
   [/#if]
 
 [#-- configure system interrupts (RCC, systick, ...) --]
@@ -70,23 +135,36 @@ void HAL_MspInit(void)
 [#assign systemHandlers = false]
 [#assign firstSystemInterrupt = true]
 [#assign firstPeripheralInterrupt = true]
-[#list systemVectors as initVector] 
+[#list systemVectors as initVector]  
 [#if initVector.systemHandler=="true"]
 [#assign systemHandlers = true]
 [#if firstSystemInterrupt]
 [#assign firstSystemInterrupt = false]
 #t/* System interrupt init*/
+[#--if NVICPriorityGroup??]
+[#if (FamilyName=="STM32WL" && McuDualCore??)]
+#tHAL_NVIC_SetPriorityGrouping(${NVICPriorityGroup});#n
+#t/* Update SystemCoreClock variable */
+  #tSystemCoreClockUpdate();
+[/#if]
+  [/#if--]
 [/#if]
 [#elseif firstPeripheralInterrupt]
 [#assign firstPeripheralInterrupt = false]
 [#if systemHandlers]
 #n
 [/#if]
+
 #t/* Peripheral interrupt init */
 [/#if]
+
 [#if initVector.codeInMspInit]
+    [#if initVector.systemHandler=="false" || initVector.preemptionPriority!="0" || initVector.subPriority!="0"]
+    [#if initVector.vector!="SysTick_IRQn"]
     #t/* ${initVector.vector} interrupt configuration */
     #tHAL_NVIC_SetPriority(${initVector.vector}, ${initVector.preemptionPriority}, ${initVector.subPriority});
+    [/#if]
+    [/#if]
     [#if initVector.systemHandler=="false"]
       #tHAL_NVIC_EnableIRQ(${initVector.vector});
     [/#if]
@@ -98,6 +176,20 @@ void HAL_MspInit(void)
 [#if systemConfig??]
 [#list systemConfig as config]
 [@common.generateConfigModelListCode configModel=config inst="SYS"  nTab=1 index=""/]
+[/#list]
+[/#if]
+#n
+[#-- pwr configuration --]
+[#if pwrConfig??]
+[#list pwrConfig as config]
+[@common.generateConfigModelListCode configModel=config inst="PWR"  nTab=1 index=""/]
+[/#list]
+[/#if]
+#n
+[#-- vrefbuf configuration --]
+[#if vrefbufConfig??]
+[#list vrefbufConfig as config]
+[@common.generateConfigModelListCode configModel=config inst="VREFBUF"  nTab=1 index=""/]
 [/#list]
 [/#if]
 #n
@@ -158,6 +250,23 @@ void HAL_MspInit(void)
    [#return initServicesList]
 [/#function]
 [#-- End Function getInitServiceMode --]
+
+[#-- *************************************** --]
+[#-- Function getIPCore --]
+[#function getIPCore(ipname1)]
+    [#-- assign initServicesList = {"test0":"test1"}--]
+    [#assign initServicesList = ""]
+    [#list ipvar.configModelList as instanceData]
+        [#if instanceData.halInstanceName==ipname1]
+            [#assign coreName = ""]
+            [#if instanceData.core??]
+                [#return instanceData.core]
+            [/#if]
+        [/#if]
+    [/#list]
+   [#return coreName]
+[/#function]
+[#-- End Function getIPCore --]
 
 [#-- *************************************** --]
 
@@ -275,10 +384,42 @@ void HAL_MspInit(void)
 [/#macro]
 [#-- macro getLocalVariable of a config End--]
 
+
+[#function getLocalVariableCLK configModel1]
+[#if configModel1.methods??] 
+    [#assign methodList1 = configModel1.methods]
+[#else]
+    [#assign methodList1 = configModel1.libMethod]
+[/#if]
+[#assign clkVariables = ""]
+    [#list methodList1 as method][#-- list methodList1 --]
+        [#list method.arguments as argument][#-- list method.arguments --]
+            [#if argument.genericType == "struct"]
+                [#if argument.context??]
+                    [#if argument.context!="global"&&argument.status!="WARNING"&&argument.status!="NULL"] [#-- if !global --]
+                        [#if clkVariables==""]
+                            [#assign clkVariables = argument.typeName + " "+ argument.name]
+                        [#else]
+                            [#assign clkVariables = clkVariables+"/"+ argument.typeName + " "+ argument.name]
+                        [/#if]
+                    [/#if]
+                [/#if]
+            [/#if]
+        [/#list][#-- list method.arguments --]
+    [/#list][#-- list methodList1 --]
+[#return clkVariables]
+[/#function]
+[#-- Function getLocalVariableCLK of a config End--]
+
 [#-- *************************************** --]
 
 [#-- macro generateConfigModelCode --]
-[#macro generateConfigModelCode configModel inst nTab index]
+[#macro generateConfigModelCode configModel inst nTab index mode]
+[#if configModel.clockEnableMacro?? && mode=="Init"] [#-- Enable Port clock --]
+    [#list configModel.clockEnableMacro as clkmacroList]	
+            [#if clkmacroList?trim!=""][#if nTab==2]#t#t[#else]#t[/#if]${clkmacroList}[#if !clkmacroList?contains('(')]()[/#if];[/#if]
+    [/#list]
+[/#if] 
 [#if configModel.methods??] [#-- if the pin configuration contains a list of LibMethods--]
     [#assign methodList = configModel.methods]
 [#else] [#assign methodList = configModel.libMethod]
@@ -297,9 +438,12 @@ void HAL_MspInit(void)
                     [#list method.arguments as fargument][#compress]
                     [#if fargument.addressOf] [#assign adr = "&"][#else ][#assign adr = ""][/#if][/#compress] 
                     [#if fargument.genericType == "struct"]
-                        [#if fargument.context??]
+                         [#if fargument.optional == "output"]
+                                [#assign arg = "" + adr + fargument.name]                             
+                        [/#if]
+                        [#if fargument.context?? && fargument.optional!="output"]
                             [#if fargument.context=="global"]
-                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || configModel.ipName=="MDMA"]
+                                [#if configModel.ipName=="DMA" || configModel.ipName?starts_with("BDMA") || configModel.ipName=="MDMA"]
                                     [#if configModel.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
                                         [#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
                                     [#else]
@@ -439,7 +583,7 @@ void HAL_MspInit(void)
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n                                    
 		[#else]
@@ -450,7 +594,7 @@ void HAL_MspInit(void)
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n                             
                 [/#if]			
@@ -461,9 +605,12 @@ void HAL_MspInit(void)
 				[#list method.arguments as fargument]
 					[#if fargument.addressOf] [#assign adr = "&"][#else ] [#assign adr = ""][/#if]
 					[#if fargument.genericType == "struct"][#assign arg = "" + adr + fargument.name]
-                                        [#if fargument.context??]                   
+                                            [#if fargument.optional == "output"]
+                                                [#assign arg = "" + adr + fargument.name]
+                                            [/#if]
+                                        [#if fargument.context?? && fargument.optional!="output"]                   
                                             [#if fargument.context=="global"]
-                                                [#if configModel.ipName=="DMA" || configModel.ipName=="BDMA" || configModel.ipName=="MDMA"]
+                                                [#if configModel.ipName=="DMA" || configModel.ipName?starts_with("BDMA") || configModel.ipName=="MDMA"]
                                                     [#if configModel.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
                                                         [#assign instanceIndex = "_"+ configModel.instanceName?lower_case]
                                                     [#else]
@@ -520,7 +667,7 @@ void HAL_MspInit(void)
                                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != [#if method.returnHAL == "true"]HAL_OK[#else]${method.returnHAL}[/#if])
                                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler();
                                 [#if nTab==2]#t#t[#else]#t[/#if]}
                             [/#if]#n                                 
                         [/#if]
@@ -558,12 +705,12 @@ void HAL_MspInit(void)
    
 [#if serviceName=="gpio"]
  [#assign instanceIndex =""]
-    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [#if serviceName=="gpioOut" && service.gpioOut??]
  [#assign instanceIndex =""]
 [#if gpioOutService!="empty"]
-    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index=""/]
+    [@generateConfigModelCode configModel=gpioOutService inst=ipName nTab=tabN index="" mode=type/]
 [/#if]
 [/#if]
 [#if serviceName=="dma" && dmaService??]
@@ -579,10 +726,11 @@ void HAL_MspInit(void)
 [#--workAround DFSDM--]
  [#assign ind="" ]
 [#if dmaCurrentRequest?contains("dfsdm")]
-    [#assign ind=dmaconfig.dmaRequestName?substring(dmaconfig.dmaRequestName?length-1)]
+    [#assign reqName  = dmaconfig.dmaRequestName?replace("_ON_BDMA1","")]
+    [#assign ind=reqName?substring(reqName?length-1)]
 #tif(${instHandler}->Instance == ${ipName}_Filter${ind}){
 [/#if]
-     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+     [@generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode=type/]
         
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
@@ -608,6 +756,8 @@ void HAL_MspInit(void)
            #t#t   HAL_SD_ReadBlocks_DMA or HAL_SD_WriteBlocks_DMA. */
            [/#if]
         [/#if]   [#-- if more than one dma handler--]  
+
+[#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
         [#list dmaconfig.dmaHandel as dmaH]
             [#if dmaconfig.dmaRequestName==""] [#-- if dma request name different from instanceName: case of I2S1 for example --]
                 #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.instanceName?lower_case});
@@ -615,8 +765,9 @@ void HAL_MspInit(void)
             #t#t__HAL_LINKDMA(${instHandler},${dmaH},${getDmaHandlePrefix(dmaconfig)}_${dmaconfig.dmaRequestName?lower_case});
             [/#if]
         [/#list]
+[/#if]
 [#if dmaCurrentRequest?contains("dfsdm")]
-    #t}
+#t}
 [/#if]
 #n
     [/#list] [#-- list dmaService as dmaconfig --]
@@ -690,10 +841,10 @@ void HAL_MspInit(void)
                 [#list initService.clock?split(';') as clock][#-- debug ${ipvar.clkCommonResource}--]
                     [#if ipvar.usedDriver?contains("HAL") && ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED++;
                     #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){          
-                        #t#t#t${clock?trim}();
+                        #t#t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
                     [#if ipvar.usedDriver?contains("HAL") && ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]  
                     [#else]
-                        #t#t${clock?trim}();
+                        #t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
                     [/#if]        
                 [/#list]
             [/#if]
@@ -736,7 +887,15 @@ void HAL_MspInit(void)
     [/#if]
     
 [#if gpioExist]
+    [#-- MPU use case: add test on CONFIG_MASTER_MODE define for instance used on A7 --]
+    [#assign core = getIPCore(ipName)]
+    [#if FamilyName=="STM32MP1"]
+        [#-- #if defined (CONFIG_MASTER_MODE) --]
+    [/#if]
 #t[@generateConfigCode ipName=ipName type=serviceType serviceName="gpio" instHandler=instHandler tabN=tabN/]
+    [#if FamilyName=="STM32MP1"]
+      [#--  #endif --]
+    [/#if]
 [/#if]
 [#-- if I2C clk_enable should be after GPIO Init Begin --]
     [#if serviceType=="Init" && (ipName?contains("I2C")||(ipName?contains("USB")))] 
@@ -746,10 +905,10 @@ void HAL_MspInit(void)
                 [#list initService.clock?split(';') as clock]
                     [#if ipvar.usedDriver?contains("HAL") &&  ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED++;
                     #t#tif(${clock?trim?replace("__","")?replace("_ENABLE","")}_ENABLED==1){          
-                        #t#t#t${clock?trim}();
+                        #t#t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
                     [#if ipvar.usedDriver?contains("HAL") &&  ipvar.clkCommonResource.entrySet()?contains(clock?trim)]#t#t}[/#if]  
                     [#else]
-                        #t#t${clock?trim}();
+                        #t#t${clock?trim}[#if !clock?contains('(')]()[/#if];
                     [/#if]        
                 [/#list]
             [/#if]
@@ -762,7 +921,7 @@ void HAL_MspInit(void)
 
     [#if serviceType=="Init"] 
 [#-- bug 322189 Init--]
-[#if ipName?contains("OTG_FS")&&FamilyName=="STM32L4"]
+[#if ipName?contains("OTG_FS")&&(FamilyName=="STM32L4"||FamilyName=="STM32U5") || Line.equals("STM32G0x1") && ipName?contains("USB_DRD_FS")]
 #n#t#t/* Enable VDDUSB */
   #t#tif(__HAL_RCC_PWR_IS_CLK_DISABLED())
   #t#t{
@@ -808,7 +967,7 @@ void HAL_MspInit(void)
                 [/#list]
                 [#assign lowPower = "no"]
                 [#list initService.nvic as initVector]
-                   [#if (instHandler=="hpcd") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")) && USB_INTERRUPT_WAKEUP??))]
+                   [#if (instHandler=="hpcd") && (initVector.vector?contains("WKUP") || initVector.vector?contains("WakeUp") || (((initVector.vector == "USB_IRQn")||(initVector.vector == "OTG_FS_IRQn")||(initVector.vector == "USB_LP_IRQn")) && USB_INTERRUPT_WAKEUP??))]
                       [#assign lowPower = "yes"]
                    [/#if]
                 [/#list]
@@ -837,10 +996,12 @@ void HAL_MspInit(void)
                         #t#t#t/* Enable EXTI Line 18 for USB wakeup */
                         [/#if]
                     [#else]
-                        [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"]
+                        [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"|| FamilyName=="STM32G4"]
                             #t#t#t/* Enable EXTI Line 18 for USB wakeup */
+                        [#elseif FamilyName=="STM32WB"]
+                            #t#t#t/* Enable EXTI Line 28 for USB wakeup */
                         [#else]
-                            #t#t#t/* Enable EXTI Line 20 for USB wakeup */                            
+                            #t#t#t/* Enable EXTI Line 20 for USB wakeup */
                         [/#if]
                     [/#if]
                     [#if FamilyName=="STM32F3"||FamilyName=="STM32L1"]
@@ -979,7 +1140,7 @@ void HAL_MspInit(void)
     [#assign nvicExist = false]
     [#if initService?? && initService.entrySet??]
     [#list initService.entrySet() as entry]
-        [#if entry.key=="dma"  && modeName?contains("DFSDM_Filter")]
+        [#if entry.key=="dma"  && (modeName?contains("DFSDM_Filter"))]
         [#assign dmaExist = true]
         [/#if]
         [#if entry.key=="nvic" && initService.nvic?size!=0 && modeName?contains("DFSDM_Filter")]
@@ -1040,10 +1201,10 @@ static uint32_t ${entry.value}=0;
 
 [#assign initServicesList = {"test0":"test1"}]
 [#-- Section2: Msp Init --]
-[#if ipvar.initCallBacks??]
+[#if ipvar.initCallBacksForMsp??]
 [#compress]
 [#assign DFSDM_var = "false"]
-[#list ipvar.initCallBacks.entrySet() as entry]
+[#list ipvar.initCallBacksForMsp.entrySet() as entry]
 [#assign instanceList = entry.value] 
 [#assign mode=entry.key?replace("_MspInit","")?replace("MspInit","")?replace("_BspInit","")?replace("HAL_","")]
 
@@ -1057,16 +1218,21 @@ static uint32_t ${entry.value}=0;
     [/#list]
 [#assign DFSDM_var = "true"]
 [/#if]
-
+[#compress]
+/**
+  * @brief ${mode} MSP Initialization
+  *        This function configures the hardware resources used in this example
+  * @param h${mode?lower_case}: ${mode} handle pointer
+  * @retval None
+  */
+[/#compress]
 [#-- #nvoid HAL_${mode}_MspInit(${mode}_HandleTypeDef* h${mode?lower_case}){--] 
 [#if !mode?contains("TIM")||mode?contains("LPTIM")||mode?contains("HRTIM")]
 #nvoid ${entry.key}(${mode}_HandleTypeDef* h${mode?lower_case})
 {
-#n
 [#else]
 #nvoid ${entry.key}(TIM_HandleTypeDef* h${mode?lower_case})
 {
-#n
 [/#if]
 [#--Check if the Msp init will be empty start--] 
     [#assign mspIsEmpty="yes"] 
@@ -1107,17 +1273,26 @@ static uint32_t ${entry.value}=0;
 [#-- declare Variable GPIO_InitTypeDef once --]
        [#assign v = ""]
 [#assign mspExist="false"]
-[#list words as inst] [#-- loop on ip instances datas --] 
+[#list words as inst] [#-- loop on ip instances data --] 
     [#assign services = getInitServiceMode(inst)]
     [#if services.gpio??][#assign service=services.gpio]
+
+
+[#if FamilyName=="STM32MP1"]
+       [#-- #if defined (CONFIG_MASTER_MODE) --]
+    [/#if]
            [#list service.variables as variable] [#-- variables declaration --]
                [#if v?contains(variable.name)]
                [#-- no matches--]
                [#else]
-   #t${variable.value} ${variable.name};
+   #t${variable.value} ${variable.name} = {0};
                    [#assign v = v + " "+ variable.name/]	
                [/#if]	
-           [/#list]  
+           [/#list]
+
+[#if FamilyName=="STM32MP1"]
+      [#--  #endif --]
+    [/#if]
     [/#if]
 [/#list]
 [#-- add local variables for HAL_DMAEx_ConfigMuxSync --]
@@ -1145,58 +1320,160 @@ static uint32_t ${entry.value}=0;
 [#-- --]
 
 [#if mspIsEmpty=="no"]
-    
+
+[#if IP.ipName==ipvar.ipName]
+    [#assign listOfLocalVariables = ""]
+    [#assign  resultList  = ""]
+    [#list IP.configModelList as instanceData]
+    [#assign  halMode  = getHalMode(IP.ipName)]
+        [#if instanceData.initServices?? && halMode==instanceData.halMode]
+            [#if instanceData.initServices.pclockConfig??]
+
+                [#list instanceData.initServices.pclockConfig.configs as config] [#--list1--]
+                    [#assign listOfLocalVariables = getLocalVariableCLK(config)]
+[#if listOfLocalVariables !="" ]
+                    [#if resultList == ""]
+                        [#list  listOfLocalVariables?split("/") as variable]
+                            #t${variable} = {0};
+                            [#if resultList == ""]
+                                [#assign resultList = variable]
+                            [#else]
+                                [#assign resultList = resultList + ":"+ variable]
+                            [/#if]
+                        [/#list]
+                    [#else]
+                        [#list  listOfLocalVariables?split(":") as variable]                
+                            [#assign  dup  = ""]
+                            [#list  resultList?split(":") as v]
+                                [#if v == variable]
+                                    [#assign  dup  = "yes"]
+                                [/#if]
+                            [/#list]
+                            [#if dup != "yes"]
+                                #t${variable} = {0};
+                                [#assign resultList = resultList + ":"+ variable]
+                            [/#if]
+                        [/#list]
+                    [/#if]
+[/#if]
+                [/#list]
+
+            [/#if]
+        [/#if]
+    [/#list]
+[/#if]
+
+
+
+  
     [#if  words[0].contains("DFSDM")]
         [#assign word0 = words[0]]  
-            [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+            [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
                 #tif(${words[0]}_Init == 0)             
             [#else]
             #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if](${words[0]}_Init == 0))   
             [/#if]
             #t{
-    [#else]    
-        [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]
-            #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})      
-            #t{ 
+    [#else] 
+        [#assign word0 = words[0]]
+        [#if  word0.contains("ADF")||word0.contains("MDF")]
+            #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+            #t{
+        [#else]
+            [#if ipvar.instanceNbre > 1] [#-- IF of IP instances greater than 0--]
+                 [#if !words[0].contains("HASH") &&  !words[0].contains("SUBGHZ")] 
+                #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})  
+                #t{ 
+                [/#if]
+            [/#if]
         [/#if]
     [/#if]
 [#if words?size > 1] [#-- Check if there is more than one ip instance--]    
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 0 */
 
-#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 0 */    
+#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 0 */   
+
+
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[0]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[0]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
+ 
         [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=ipHandler tabN=2/] 
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 1 */  
-[#if  words[0].contains("DFSDM")]
+[#if  words[0]?starts_with("DFSDM")]
 #t${words[0]}_Init++;
 [/#if]
-    #t} 
+
+   #t}
+
     [#assign i = 0]
     [#list words as inst]
     [#if i>0]    
     [#if  inst.contains("DFSDM")]
     [#assign word0 = inst]  
-        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+        [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
             #tif(${inst}_Init == 0)             
         [#else]
              #telse if([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if](${inst}_Init == 0))
         [/#if]
-[#else]
- #telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
-[/#if]
+    [#else]
+         [#if  inst.contains("ADF")||inst.contains("MDF")]
+            [#assign word0 = inst]
+            #telse if[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+        [#else]
+        #telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
+        [/#if]
+    [/#if]
     #t{
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspInit 0 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspInit 0 */
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[i]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[i]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
         [@generateServiceCode ipName=words[i] serviceType="Init" modeName=mode instHandler=ipHandler tabN=2/] 
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspInit 1 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspInit 1 */    
-[#if  words[i].contains("DFSDM")]
+[#if  words[i]?starts_with("DFSDM")]
 #t${words[i]}_Init++;
 [/#if]
+
 #t}
+
         [/#if]
         
 
@@ -1207,14 +1484,37 @@ static uint32_t ${entry.value}=0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 0 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 0 */
+[#list IP.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfig??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfig] [#--list0--]
+[#if pclockConfig.ipName?replace("HDMI_CEC","CEC")==words[0]]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=words[0]  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
     [@generateServiceCode ipName=words[0] serviceType="Init" modeName=mode instHandler=ipHandler tabN=2/] 
     
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspInit 1 */
+[#if  words[0]?starts_with("DFSDM")]
+#t${words[0]}_Init++;
+[/#if]
 [/#if]
 [#if ipvar.instanceNbre > 1 || words[0]?contains("DFSDM")] [#-- IF number of IP instances greater than 0--]
+[#if !words[0].contains("HASH") &&  !words[0].contains("SUBGHZ")]
 #t}
+[/#if]
 [/#if]
 [/#if]
 [#list words as inst] [#-- DMA code for DFSDM --]
@@ -1233,9 +1533,9 @@ static uint32_t ${entry.value}=0;
 [#-- Section2:End --]
 [#-- --]
 [#-- Section2-1: Msp Post Init --]
-[#if ipvar.initCallBacks??]
+[#if ipvar.initCallBacksForMsp??]
 [#compress]
-[#-- Get List of all IP instances to cerate the MspPostInit --]
+[#-- Get List of all IP instances to create the MspPostInit --]
 [#assign DFSDM_var = "false"]
 [#assign instanceMap = ipvar.instances]
 
@@ -1265,13 +1565,11 @@ uint32_t DFSDM_Init = 0;
 [#if (mspIsEmpty1=="no")&&(mode!="TIM")]
 #nvoid HAL_${mode}_MspPostInit(${mode}_HandleTypeDef* h${mode?lower_case})
 {
-#n
 [#else]
 [#if (mspIsEmpty1=="no")&&(mode?contains("TIM"))]
 
 #nvoid HAL_TIM_MspPostInit(TIM_HandleTypeDef* h${mode?lower_case}) 
 {
-#n
 [/#if]
 [/#if]
 
@@ -1280,14 +1578,14 @@ uint32_t DFSDM_Init = 0;
 [#-- declare Variable GPIO_InitTypeDef once --]
 [#assign v = ""]
 [#assign mspExist="false"]
-[#list words as inst] [#-- loop on ip instances datas --] 
+[#list words as inst] [#-- loop on ip instances data--] 
     [#assign services = getInitServiceMode(inst)]
     [#if services?? && services!="" && services.gpioOut??][#assign service=services.gpioOut]
         [#list service.variables as variable] [#-- variables declaration --]
             [#if v?contains(variable.name)]
             [#-- no matches--]
             [#else]
-#t${variable.value} ${variable.name};
+#t${variable.value} ${variable.name} = {0};
                 [#assign v = v + " "+ variable.name/]	
             [/#if]	
         [/#list]  
@@ -1297,16 +1595,23 @@ uint32_t DFSDM_Init = 0;
 
 [#if  words[0]?contains("DFSDM")]
     [#assign word0 = words[0]]  
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
         #tif(${inst}_Init == 0)             
     [#else]
          #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if](${words[0]}_Init == 0))
     [/#if]
     #t{
 [#else]
-    [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]
-        #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})
-        #t{
+    [#assign word0 = words[0]]
+    [#if word0.contains("ADF")||word0.contains("MDF")]
+       #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+    [#else]
+        [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]
+             [#if !words[0].contains("HASH") &&  !words[0].contains("SUBGHZ") ] 
+            #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})
+            #t{
+            [/#if]
+        [/#if]
     [/#if]
 [/#if]
 [#if words?size > 1] [#-- Check if there is more than one ip instance--]    
@@ -1316,20 +1621,27 @@ uint32_t DFSDM_Init = 0;
         [@generateConfigCode ipName=words[0] type="Init" serviceName="gpioOut" instHandler=ipHandler tabN=2/]  
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */
 
-#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */   
-    #t} 
+#n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */  
+[#if !words[0]?contains("HASH") &&  !words[0].contains("SUBGHZ") ] 
+    #t}
+[/#if]
     [#assign i = 0]
     [#list words as inst]
         [#if i>0]   
             [#if  words[i]?contains("DFSDM")]
                 [#assign word0 = words[i]] 
-                [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+                [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
                     #tif(${words[i]}_Init == 0)             
                 [#else]
                      #tif([#if word0.contains("DFSDM1")&& mode=="DFSDM_Channel"](IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Channel"]!(IS_DFSDM1_CHANNEL_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM1")&& mode=="DFSDM_Filter"](IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if][#if word0.contains("DFSDM2")&& mode=="DFSDM_Filter"]!(IS_DFSDM1_FILTER_INSTANCE(h${mode?lower_case}->Instance))&&[/#if](${words[i]}_Init == 0))
                 [/#if]
-            [#else]
-                #telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
+            [#else]   
+                [#assign word0 = words[i]]
+                [#if word0.contains("ADF")||word0.contains("MDF")]                
+                   #telse if[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+                [#else]
+                    #telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
+                [/#if]
             [/#if]
 
             #t{
@@ -1356,7 +1668,9 @@ uint32_t DFSDM_Init = 0;
         #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspPostInit 1 */
     [/#if]
     [#if ipvar.instanceNbre > 1 || words[0]?contains("DFSDM")] [#-- IF number of IP instances greater than 0--]
+          [#if !words[0].contains("HASH") &&  !words[0].contains("SUBGHZ")] 
         #t}   
+        [/#if]
     [/#if]
 [/#if]
 
@@ -1368,26 +1682,32 @@ uint32_t DFSDM_Init = 0;
 [/#if]
 [#-- Section2-1:End --]
 [#-- --]
-[#if ipvar.deInitCallBacks??]
+[#if ipvar.deInitCallBacksForMsp??]
 [#compress]
-[#list ipvar.deInitCallBacks.entrySet() as entry]
+[#list ipvar.deInitCallBacksForMsp.entrySet() as entry]
 [#assign instanceList = entry.value]
 [#assign mode=entry.key?replace("_MspDeInit","")?replace("MspDeInit","")?replace("_BspDeInit","")?replace("HAL_","")]
 [#assign ipHandler = "h" + mode?lower_case]
+[#compress]
+/**
+  * @brief ${mode} MSP De-Initialization
+  *        This function freeze the hardware resources used in this example
+  * @param h${mode?lower_case}: ${mode} handle pointer
+  * @retval None
+  */
+[/#compress]
 [#if !mode?contains("TIM")||mode?contains("LPTIM")||mode?contains("HRTIM")]
 #nvoid ${entry.key}(${mode}_HandleTypeDef* h${mode?lower_case})
 {
-#n
 [#else]
 #nvoid ${entry.key}(TIM_HandleTypeDef* h${mode?lower_case})
 {
-#n
 [/#if]
 [#if mspIsEmpty=="no"]
 [#assign words = instanceList]
 [#if words[0]?contains("DFSDM")]
-[#assign word0 = words[0]]  
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+    [#assign word0 = words[0]]  
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
         #t${words[0]}_Init-- ;
         #tif(${words[0]}_Init == 0)           
     [#else]
@@ -1398,9 +1718,17 @@ uint32_t DFSDM_Init = 0;
     [/#if]
         #t#t{
 [#else]
-    [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--]   
-        #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})
-        #t{
+    [#assign word0 = words[0]]
+    [#if word0.contains("ADF")||word0.contains("MDF")] 
+       #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+       #t{
+    [#else]
+        [#if ipvar.instanceNbre > 1] [#-- IF number of IP instances greater than 0--] 
+            [#if !words[0].contains("HASH")  &&  !words[0].contains("SUBGHZ") ] 
+            #tif(h${mode?lower_case}->Instance==${words[0]?replace("I2S","SPI")})
+            #t{
+            [/#if]
+        [/#if]
     [/#if]
 [/#if]
 [#if words?size > 1] [#-- Check if there is more than one ip instance--]
@@ -1415,16 +1743,21 @@ uint32_t DFSDM_Init = 0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[0]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4")]
-#t#t}
+[#if words[0]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4")]
+ 
+   #t#t}
+
+
 [/#if]
+[#if !words[0]?contains("HASH") &&  !words[0].contains("SUBGHZ") ] 
 #t}
+[/#if]
   [#assign i = 0]
     [#list words as inst]
         [#if i>0]
 [#if words[i]?contains("DFSDM")]
 [#assign word0 = words[i]]  
-    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4"]
+    [#if DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4"]
         #t${words[i]}_Init-- ;
         #tif(${words[i]}_Init == 0)           
     [#else]
@@ -1434,9 +1767,14 @@ uint32_t DFSDM_Init = 0;
         #t#tif((${words[i]}_Init == 0))
     [/#if]
 [#else]
-#telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
+    [#assign word0 = words[i]]
+    [#if word0.contains("ADF")||word0.contains("MDF")]                
+       #tif[#if word0.contains("ADF")](IS_ADF_INSTANCE(h${mode?lower_case}->Instance))[/#if][#if word0.contains("MDF")](IS_MDF_INSTANCE(h${mode?lower_case}->Instance))[/#if]
+    [#else]
+    #telse if(h${mode?lower_case}->Instance==${words[i]?replace("I2S","SPI")})
+    [/#if]
 [/#if]
-[#if words[i]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4")]
+[#if words[i]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4")]
 #t#t{
 [#else]
 #t{
@@ -1451,10 +1789,14 @@ uint32_t DFSDM_Init = 0;
 #t/* USER CODE BEGIN ${words[i]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[i]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[i]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4")]
+[#if words[i]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4")]
+
 #t#t}
+
 [/#if]
+
 #t}
+
 
         [/#if]
         [#assign i = i + 1]
@@ -1473,11 +1815,15 @@ uint32_t DFSDM_Init = 0;
 #t/* USER CODE BEGIN ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
 
 #n#t/* USER CODE END ${words[0]?replace("I2S","SPI")}_MspDeInit 1 */
-[#if words[0]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || FamilyName == "STM32L4")]
+[#if words[0]?contains("DFSDM")&&!(DIE == "DIE451" || DIE == "DIE449" || DIE == "DIE441" || DIE == "DIE450" || DIE == "DIE483" || DIE == "DIE500" || DIE == "DIE472" || FamilyName == "STM32L4")]
+
 #t#t}
+
 [/#if]
 [#if ipvar.instanceNbre >  1 || words[0]?contains("DFSDM")] [#-- IF number of IP instances greater than 0--]
+[#if !words[0]?contains("HASH") &&  !words[0].contains("SUBGHZ") ]
 #t}
+[/#if]
 [/#if]
 [/#if]
 
@@ -1485,31 +1831,24 @@ uint32_t DFSDM_Init = 0;
 [/#if]
 #n}#n
 [#--break--] [#-- use the first msp--]
-[/#list][#--list ipvar.deInitCallBacks.entrySet() as entry--]
+[/#list][#--list ipvar.deInitCallBacksForMsp.entrySet() as entry--]
 [/#compress]
-[/#if][#--if ipvar.deInitCallBacks??--]
+[/#if][#--if ipvar.deInitCallBacksForMsp??--]
 [#-- Section3: End --]
 [/#list]
 #n
 [#-- FMC MSP --]
-[@common.optinclude name=sourceDir+"Src/mx_FMC_MSP.tmp"/]
+[@common.optinclude name=contextFolder+mxTmpFolder+"/mx_fmc_MSP.tmp"/]
 
 [#-- FSMC MSP --]
-[@common.optinclude name=sourceDir+"Src/mx_FSMC_MSP.tmp"/]
+[@common.optinclude name=contextFolder+mxTmpFolder+"/mx_fsmc_MSP.tmp"/]
 
 [#-- SAI MSP --]
-[@common.optinclude name=sourceDir+"Src/sai_msp.tmp"/]
+[@common.optinclude name=contextFolder+mxTmpFolder+"/sai_msp.tmp"/]
 
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

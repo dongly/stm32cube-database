@@ -1,4 +1,10 @@
 [#ftl]
+
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+
 [#function list_contains string_list element]
   [#list string_list?split(" ") as string_element]
     [#if string_element == element]
@@ -34,7 +40,7 @@
   [/#list]
 [/#list]
 
-/** 
+/**
   * Enable DMA controller clock
 [#if variables?? && variables?size > 0]
   * Configure DMA for memory to memory transfers
@@ -43,8 +49,22 @@
 [/#list]
 [/#if]
   */
-static void MX_${ipName}_Init(void) 
+[#list voids as void]
+    [#assign fctname = "MX_"+ipName+"_Init"]
+        [#if void.functionName == fctname]
+            [#if void.isStatic]
+static void MX_${ipName}_Init(void)
+            [#else]
+void MX_${ipName}_Init(void)
+            [/#if]
+        [/#if]
+[/#list]
 {
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+ipName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
 [#if hasLocalVariables]
   /* Local variables */
   [#assign local_variables = ""]
@@ -54,7 +74,7 @@ static void MX_${ipName}_Init(void)
         [#if func_argument.genericType == "struct" && func_argument.context != "global"]
           [#if !list_contains(local_variables, func_argument.name)]
             [#assign local_variables = local_variables + " " + func_argument.name]
-  ${func_argument.typeName} ${func_argument.name};
+  ${func_argument.typeName} ${func_argument.name} = {0};
           [/#if]
         [/#if]
       [/#list]
@@ -114,7 +134,7 @@ static void MX_${ipName}_Init(void)
           [#list method.arguments as func_argument]
             [#assign argument_number = argument_number + 1]
             [#assign func_argument_name = func_argument.name]
-            [#if argument_number == 1]
+            [#if argument_number == 1 && func_argument.context == "global"]
               [#assign func_argument_name = func_argument_name + "_" + configModel.instanceName?lower_case]
             [/#if]
             [#if func_argument.addressOf]
@@ -136,12 +156,12 @@ static void MX_${ipName}_Init(void)
               [#if !struct_argument_already_found]
                 [#list func_argument.argument as argument1]
                   [#if argument1.genericType != "struct"]
-                    [#if argument1.mandatory && argument1.value??]
+                    [#if (argument1.mandatory | argument1.forcedValue??) && argument1.value??]
   ${func_argument_name}.${argument1.name} = ${argument1.value};
                     [/#if]
                   [#else]
                     [#list argument1.argument as argument2]
-                      [#if argument2.mandatory && argument2.value??]
+                      [#if (argument2.mandatory | argument2.forcedValue??) && argument2.value??]
   ${func_argument_name}.${argument1.name}.${argument2.name} = ${argument2.value};
                       [/#if]
                     [/#list]
@@ -164,7 +184,7 @@ static void MX_${ipName}_Init(void)
     [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
   if (${method.name}(${args}) != HAL_OK)
   {
-    _Error_Handler(__FILE__, __LINE__);
+    Error_Handler( );
   }
           [/#if]
         [#else]
@@ -176,7 +196,7 @@ static void MX_${ipName}_Init(void)
     [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
   if (${method.name}() != HAL_OK)
   {
-    _Error_Handler(__FILE__, __LINE__);
+    Error_Handler( );
   }
           [/#if]
         [/#if][#--if method.arguments??--]
@@ -188,7 +208,7 @@ static void MX_${ipName}_Init(void)
           [#list method.arguments as func_argument]
             [#assign argument_number = argument_number + 1]
             [#assign func_argument_name = func_argument.name]
-            [#if argument_number == 1]
+            [#if argument_number == 1 && func_argument.context == "global"]
               [#assign func_argument_name = func_argument_name + "_" + configModel.instanceName?lower_case]
             [/#if]
             [#if func_argument.addressOf]
@@ -200,12 +220,12 @@ static void MX_${ipName}_Init(void)
               [#assign arg = "" + addr + func_argument_name]
               [#list func_argument.argument as argument1]
                 [#if argument1.genericType != "struct"]
-                  [#if argument1.mandatory && argument1.value??]
+                  [#if (argument1.mandatory | argument1.forcedValue??) && argument1.value??]
   //${func_argument_name}.${argument1.name} = ${argument1.value};
                   [/#if]
                 [#else]
                   [#list argument1.argument as argument2]
-                    [#if argument2.mandatory && argument2.value??]
+                    [#if (argument2.mandatory | argument2.forcedValue??) && argument2.value??]
   //${func_argument_name}.${argument1.name}.${argument2.name} = ${argument2.value};
                     [/#if]
                   [/#list]
@@ -244,7 +264,7 @@ static void MX_${ipName}_Init(void)
         [#if initVector.codeInMspInit]
           #t/* ${initVector.vector} interrupt configuration */
           [#if initVector.usedDriver == "LL"]
-            [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"]
+            [#if !NVICPriorityGroup??]
           #tNVIC_SetPriority(${initVector.vector}, ${initVector.preemptionPriority});
             [#else]
           #tNVIC_SetPriority(${initVector.vector}, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),${initVector.preemptionPriority}, ${initVector.subPriority}));

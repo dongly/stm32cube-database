@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file            : ${name?lower_case}.c
@@ -6,9 +7,10 @@
 [#--  * @packageVersion  : ${fwVersion} --]
   * @brief           : This file implements the USB Host
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#-- Create global variables --]
 [#assign includeDone = 0]
@@ -185,6 +187,7 @@
 [#local myInst=inst]
 
         [#list methodList as method]
+            [#-- #if !FREERTOS?? || method.osCall=="PRE_OS" --]
                 [#assign args = ""]
                 [#if method.callBackMethod=="false"]
                 [#if method.status=="OK"]
@@ -226,7 +229,7 @@
                                                 [/#if]
                                                 [#-- [#assign arg = "" + adr + fargument.name] --]
                                                 [#--if (!method.name?contains("Init")&&fargument.context=="global")--]
-                                                [#if (fargument.init=="false")] [#-- MZA add the field init for Argument object, if init is false the intialization of this argument is not done --]
+                                                [#if (fargument.init=="false")] [#-- MZA add the field init for Argument object, if init is false the initialization of this argument is not done --]
                                                         [#-- do Nothing --]
                                                 [#else]
                                                         [#list fargument.argument as argument]
@@ -237,7 +240,7 @@
                                                                                 [#assign AdrMza = ""]
                                                                         [/#if]
                                                                 [/#compress]
-                                                                [#if argument.genericType != "struct"]        tata
+                                                                [#if argument.genericType != "struct"]        
                                                                         [#if argument.mandatory]
                                                                                 [#if instanceIndex??&&fargument.context=="global"]
                                                                                         [#assign argValue=argument.value?replace("$Index",instanceIndex)]
@@ -308,7 +311,10 @@
                                 [/#if]
 
                 [/#list]
-                                [#if nTab==2]#t#t[#else]#t[/#if]${return}${method.name}(${args});#n
+                                #tif (${return}${method.name}(${args}) != USBH_OK)
+								#t{
+								#t#tError_Handler();
+								#t}
                                 [#else]
                     [#if nTab==2]#t#t[#else]#t[/#if]${return}${method.name}();
                                 [/#if]
@@ -373,8 +379,9 @@
             [#else]
             [#if nTab==2]#t#t[#else]#t[/#if]${method.name}()#n;
                         [/#if]
-        [/#if]
+        [#-- /#if --]
 [/#if]
+	[/#if]
     [/#list]
 
 [#assign instanceIndex = ""]

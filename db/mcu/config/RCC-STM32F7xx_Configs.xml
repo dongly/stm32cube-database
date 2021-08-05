@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V4.0" Name="RCC" Version="STM32Cube_FW_F7_V0.1.0" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu file:///C:/Dev_Build8/MicroXplorer/doc/V4/Development/Specifications/db/IP_Configs.xsd">
-       <RefConfig Comment="Configure LSE Drive Capability" Name="HAL_PWR_EnableBkUpAccess">
-                 <IFCondition Expression="LSEOscillator &amp; (LSEUsed=1)">
+       <RefConfig Comment="Configure LSE Drive Capability" Name="RCC_LSEDRIVE_CONFIG">
+                 <IFCondition Expression="LSEOscillator ">
                     <CallLibMethod Name="HAL_PWR_EnableBkUpAccess" ReturnHAL="false">
                    
         </CallLibMethod>
@@ -16,15 +16,15 @@
     </RefConfig>
 
 	<RefConfig Comment="Configure the Systick interrupt time" Name="RCC_interrupt_Time_SYSTICK_Config">
-            <CallLibMethod Name="HAL_SYSTICK_Config" ReturnHAL="false">
+        <!--CallLibMethod Name="HAL_SYSTICK_Config" ReturnHAL="false">
             <MethodArg Name="TicksNumb" ParameterName="Cortex_DivARG"/>
-        </CallLibMethod>
+        </CallLibMethod-->
     </RefConfig>
 	
     <RefConfig Comment="Configure the Systick" Name="RCC_SYSTICK_CONFIG">
-            <CallLibMethod Name="HAL_SYSTICK_CLKSourceConfig" ReturnHAL="false">
+        <!--CallLibMethod Name="HAL_SYSTICK_CLKSourceConfig" ReturnHAL="false">
             <MethodArg Name="CLKSource" ParameterName="Cortex_Div"/>
-        </CallLibMethod>
+        </CallLibMethod-->
     </RefConfig>
 	
     <RefConfig Comment="Macro to configure the PLL multiplication factor" Name="RCC_PLL_PLLM_CONFIG">
@@ -40,7 +40,7 @@
         </CallLibMethod>
     </RefConfig>
 	
-    <RefConfig Comment="Initializes the CPU, AHB and APB busses clocks" Name="RCC_OSCConfig">
+    <RefConfig Comment="Initializes the RCC Oscillators according to the specified parameters#n#t*  in the RCC_OscInitTypeDef structure." Name="RCC_OSCConfig">
         <CallLibMethod Name="HAL_RCC_OscConfig">
             <MethodArg Name="HSICalibrationValue" ParameterName="HSICalibrationValueARG"/>
             <MethodArg Name="HSEState" ParameterName="HSEStateARG"/>
@@ -56,7 +56,7 @@
             <MethodArg Name="PLLR" ParameterName="PLLRARG"/>
         </CallLibMethod>
     </RefConfig>
-    <RefConfig Comment="Initializes the CPU, AHB and APB busses clocks" Name="RCC_ClockConfig">
+    <RefConfig Comment="Initializes the CPU, AHB and APB buses clocks" Name="RCC_ClockConfig">
         <CallLibMethod Name="HAL_RCC_ClockConfig">
             <MethodArg Name="ClockType" ParameterName="ClockTypeARG"/>
             <MethodArg Name="SYSCLKSource" ParameterName="SYSCLKSourceARG"/>
@@ -145,6 +145,7 @@
                 <Argument AddressOf="false" GenericType="simple" Name="PLLN" OptimizationCondition="equal"/>
                 <Argument AddressOf="false" GenericType="simple" Name="PLLP" OptimizationCondition="equal"/>
                 <Argument AddressOf="false" GenericType="simple" Name="PLLQ" OptimizationCondition="equal"/>
+                <Argument AddressOf="false" GenericType="simple" Name="PLLR" OptimizationCondition="equal"/>
             </Argument>
         </Argument>
     </LibMethod>
@@ -288,5 +289,9 @@
         <File Category="source" Name="Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c.c"/>
         <File Category="header" Name="Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_i2c_ex.h"/>
         <File Category="source" Name="Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_i2c_ex.c"/>
+    </RefComponent>
+    <RefComponent Cclass="HAL" Cgroup="EXTI" Cversion="0.1.0">
+        <File Category="header" Name="Drivers/STM32F7xx_HAL_Driver/Inc/stm32f7xx_hal_exti.h"/>
+        <File Category="source" Name="Drivers/STM32F7xx_HAL_Driver/Src/stm32f7xx_hal_exti.c"/>
     </RefComponent>
 </IP>

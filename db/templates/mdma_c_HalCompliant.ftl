@@ -16,6 +16,11 @@
   [/#list]
 [/#if]
 
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+
 [#function list_contains string_list element]
   [#list string_list?split(" ") as string_element]
     [#if string_element == element]
@@ -47,6 +52,11 @@
   */
 static void MX_${ipName}_Init(void) 
 {
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+ipName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
 [#if LL_Driver]
   /* Init with LL driver */
 [/#if]
@@ -199,12 +209,6 @@ struct_variables=${struct_variables}
                 [#list func_argument.argument as argument1]
                   [#if argument1.genericType != "struct"]
                     [#if argument1.mandatory && argument1.value??]
-                      [#if method_commented && argument1.name=="SrcAddress"]
-                        [#assign start_commenting = true]
-  /* Template to be copied and modified in the user code section below */
-  /* Please give a value to the following parameters set by default to 0 */
-  /*
-                      [/#if]
   ${request}.${argument1.name} = ${argument1.value};
                     [/#if]
                   [#else]
@@ -232,8 +236,7 @@ struct_variables=${struct_variables}
   {
     Error_Handler();
   }
-            [#if start_commenting && method_commented]
-  */
+            [#if method_commented]
   /* USER CODE BEGIN ${configModel.dmaRequestName?lower_case} */
 
   /* USER CODE END ${configModel.dmaRequestName?lower_case} */
@@ -310,7 +313,7 @@ struct_variables=${struct_variables}
         [#if initVector.codeInMspInit]
           #t/* ${initVector.vector} interrupt configuration */
           [#if initVector.usedDriver == "LL"]
-            [#if FamilyName=="STM32L0" || FamilyName=="STM32F0"]
+            [#if !NVICPriorityGroup??]
           #tNVIC_SetPriority(${initVector.vector}, ${initVector.preemptionPriority});
             [#else]
           #tNVIC_SetPriority(${initVector.vector}, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),${initVector.preemptionPriority}, ${initVector.subPriority}));

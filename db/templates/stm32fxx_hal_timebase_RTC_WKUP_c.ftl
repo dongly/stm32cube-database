@@ -4,7 +4,7 @@
   * @file    ${FamilyName?lower_case}_hal_timebase_RTC_WKUP.c 
   * @brief   HAL time base based on the hardware RTC_WKUP.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
 
@@ -38,7 +38,7 @@ void RTC_IRQHandler(void);
   *         Wakeup Time = 1ms = 0,0625 ms  * WakeUpCounter (16) 
   * @note   This function is called  automatically at the beginning of program after
   *         reset by HAL_Init() or at any time when clock is configured, by HAL_RCC_ClockConfig(). 
-  * @param  TickPriority: Tick interrupt priorty.
+  * @param  TickPriority: Tick interrupt priority.
   * @retval HAL status
   */
 HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)

@@ -1,14 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
  ******************************************************************************
   * File Name          : ${name?lower_case}.c
   * Description        : This file provides code for the configuration
   *                      of the ${name?lower_case} instances.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]  
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]  
   ******************************************************************************
   */
-
+/* USER CODE END Header */
 [#-- 'UserCode sections' are indexed dynamically --]
 [#assign userCodeIdx = 0]
 
@@ -52,7 +53,7 @@
 #include "gpio.h"
 [/#if]
 [#if useDma]
-#include "DMA.h"
+#include "dma.h"
 [/#if]
 
 /* USER CODE BEGIN ${userCodeIdx} */
@@ -123,7 +124,7 @@
         [#--[#if halMode!=instName]void ${halMode}_${instName}_Init(void)[#else]void MX_${instName}_Init(void)[/#if] --]
 void MX_${ipName}${instName}_Init(void)
 {
-
+    /***************************************/
 	[#-- MZA je dois remplir la liste des configs, pour l'instant j'utilise la liste des methods --]
 	[#-- assign ipInstanceIndex = instName?replace(name,"")--]
 	[#assign args = ""]

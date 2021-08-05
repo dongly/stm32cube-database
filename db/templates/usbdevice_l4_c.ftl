@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : ${name?lower_case}.c
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : This file implements the USB Device
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#-- Create global variables --]
 [#assign includeDone = 0]
@@ -171,9 +173,11 @@
 [#else]
         [#assign methodList = configModel.libMethod]
 [/#if]
+[#assign USBD_Start=false]
 [#local myInst=inst]
 
         [#list methodList as method]
+            [#-- #if !FREERTOS?? || method.osCall=="PRE_OS"--]
                 [#assign args = ""]
                 [#if method.callBackMethod=="false"]
                 [#if method.status=="OK"]
@@ -214,7 +218,7 @@
                                                 [/#if]
                                                 [#-- [#assign arg = "" + adr + fargument.name] --]
                                                 [#--if (!method.name?contains("Init")&&fargument.context=="global")--]
-                                                [#if (fargument.init=="false")] [#-- MZA add the field init for Argument object, if init is false the intialization of this argument is not done --]
+                                                [#if (fargument.init=="false")] [#-- MZA add the field init for Argument object, if init is false the initialization of this argument is not done --]
                                                         [#-- do Nothing --]
                                                 [#else]
                                                         [#list fargument.argument as argument]
@@ -225,7 +229,7 @@
                                                                                 [#assign AdrMza = ""]
                                                                         [/#if]
                                                                 [/#compress]
-                                                                [#if argument.genericType != "struct"]        tata
+                                                                [#if argument.genericType != "struct"]        
                                                                         [#if argument.mandatory]
                                                                                 [#if instanceIndex??&&fargument.context=="global"]
                                                                                         [#assign argValue=argument.value?replace("$Index",instanceIndex)]
@@ -296,19 +300,13 @@
                                 [/#if]
 
                 [/#list]
-                                [#if method.name == "USBD_Start"]
-                                [#if nTab==2]#t#t[#else]#t[/#if]/* Verify if the Battery Charging Detection mode (BCD) is used : */
-                                [#if nTab==2]#t#t[#else]#t[/#if]/* If yes, the USB device is started in the HAL_PCDEx_BCD_Callback */
-                                [#if nTab==2]#t#t[#else]#t[/#if]/* upon reception of PCD_BCD_DISCOVERY_COMPLETED message. */
-                                [#if nTab==2]#t#t[#else]#t[/#if]/* If no, the USB device is started now. */
-                                [#if nTab==2]#t#t[#else]#t[/#if]if (USBD_LL_BatteryCharging(&hUsbDeviceFS) != USBD_OK) {
-                                [/#if]
-                                [#if nTab==2]#t#t[#else]#t[/#if]${return}${method.name}(${args});
+                                
+                                [#if USBD_Start] #t#t[#else]#t[/#if]if (${return}${method.name}(${args}) != USBD_OK)
+								[#if USBD_Start] #t#t[#else]#t[/#if]{
+								[#if USBD_Start] #t#t#t#t[#else]#t#t[/#if]Error_Handler();
+								[#if USBD_Start] #t#t[#else]#t[/#if]}
                                 [#else]
                     [#if nTab==2]#t#t[#else]#t[/#if]${return}${method.name}();
-                                [/#if]
-                                [#if method.name == "USBD_Start"]
-                                [#if nTab==2]#t#t[#else]#t[/#if]}
                                 [/#if]
                 [/#if]
                 [#if method.status=="KO"]
@@ -371,8 +369,9 @@
             [#else]
             [#if nTab==2]#t#t[#else]#t[/#if]${method.name}()#n;
                         [/#if]
-        [/#if]
+        [#-- /#if --]
 [/#if]
+	[/#if]
     [/#list]
 
 [#assign instanceIndex = ""]
@@ -399,8 +398,6 @@
 [#-- Section2: Create global Variables for each middle ware instance --]
 [#-- Global variables --]
 [#assign handle = ""]
-/* Return USBD_OK if the Battery Charging Detection mode (BCD) is used, else USBD_FAIL. */
-extern USBD_StatusTypeDef USBD_LL_BatteryCharging(USBD_HandleTypeDef *pdev);
 
 /* USB Device Core handle declaration. */
 [#compress]
@@ -417,6 +414,7 @@ extern USBD_StatusTypeDef USBD_LL_BatteryCharging(USBD_HandleTypeDef *pdev);
 [/#if]
 [/#list]
 [/#compress]
+#nextern USBD_DescriptorsTypeDef FS_Desc;
 [#-- Global variables --]
 #n
 /*
@@ -483,49 +481,6 @@ void MX_${name}_Init(void)
 #t/* USER CODE BEGIN ${ipName}_Init_PostTreatment */
 #t
 #t/* USER CODE END ${ipName}_Init_PostTreatment */
-}
-
-/**
-  * @brief  Send BCD message to user layer
-  * @param  hpcd: PCD handle
-  * @param  msg: LPM message
-  * @retval None
-  */
-void HAL_PCDEx_BCD_Callback(PCD_HandleTypeDef *hpcd, PCD_BCD_MsgTypeDef msg)
-{
-  USBD_HandleTypeDef usbdHandle = ${handle};
-
-  /* USER CODE BEGIN 7 */
-  if (hpcd->battery_charging_active == ENABLE)
-  {
-    switch(msg)
-    {
-      case PCD_BCD_CONTACT_DETECTION:
-
-      break;
-
-      case PCD_BCD_STD_DOWNSTREAM_PORT:
-
-      break;
-
-      case PCD_BCD_CHARGING_DOWNSTREAM_PORT:
-
-      break;
-
-      case PCD_BCD_DEDICATED_CHARGING_PORT:
-
-      break;
-
-      case PCD_BCD_DISCOVERY_COMPLETED:
-        USBD_Start(&usbdHandle);
-      break;
-
-      case PCD_BCD_ERROR:
-      default:
-      break;
-    }
-  }
-  /* USER CODE END 7 */
 }
 
 /**

@@ -1,4 +1,10 @@
 [#ftl]
+
+[#assign contextFolder=""]
+[#if cpucore!=""]
+[#assign contextFolder = cpucore?replace("ARM_CORTEX_","C")?replace("+","PLUS")+"/"]
+[/#if]
+
 [#list IPdatas as IP]
 [#assign ipvar = IP]
 [#assign useGpio = false]
@@ -76,7 +82,7 @@
             [/#list]
             [#if !exist]  [#-- if exist --]
               [#if argument.status!="NULL"]
-                    #t${argument.typeName} ${argument.name};
+                    #t${argument.typeName} ${argument.name} = {0};
                 [#if myListOfLocalVariables != ""]
                   [#assign myListOfLocalVariables = myListOfLocalVariables + " " + argument.name]
                 [#else]
@@ -89,7 +95,7 @@
           [/#if][#-- if global --]
         [#else][#-- if context?? --]
           [#if argument.status!="NULL"]
-                #t${argument.typeName} ${argument.name};
+                #t${argument.typeName} ${argument.name} = {0};
           [/#if]
         [/#if][#-- if argument.context?? --]
 
@@ -269,7 +275,7 @@
                         [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                         [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}(${args}) != HAL_OK)
                         [#if nTab==2]#t#t[#else]#t[/#if]{
-                        [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                        [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                         [#if nTab==2]#t#t[#else]#t[/#if]}
                     [/#if]#n
 		  [#else][#--if method.arguments??--]
@@ -280,7 +286,7 @@
                             [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                             [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != HAL_OK)
                             [#if nTab==2]#t#t[#else]#t[/#if]{
-                            [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                            [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                             [#if nTab==2]#t#t[#else]#t[/#if]}
                         [/#if]#n
       [/#if][#--if method.arguments??--]
@@ -362,7 +368,7 @@
                 [#-- [#if nTab==2]#t#t[#else]#t[/#if]${method.name}(${args});#n --]
                 [#if nTab==2]#t#t[#else]#t[/#if]if (${method.name}() != HAL_OK)
                 [#if nTab==2]#t#t[#else]#t[/#if]{
-                [#if nTab==2]#t#t[#else]#t[/#if]#t_Error_Handler(__FILE__, __LINE__);
+                [#if nTab==2]#t#t[#else]#t[/#if]#tError_Handler( );
                 [#if nTab==2]#t#t[#else]#t[/#if]}
             [/#if]#n
       [/#if]
@@ -532,18 +538,34 @@
 [#-- Section1: Create the void MX_<IpInstance>_<HalMode>_init() function for each ip instance --]
 [#compress]
 [#list IP.configModelList as instanceData]
+    [#assign static = true]
+    [#if instanceData.core?? && instanceData.ipInitializerCore??]
+        [#if instanceData.core!=instanceData.ipInitializerCore]
+            [#assign static = false]
+        [/#if]
+    [/#if]
+        
   [#assign instName = instanceData.instanceName]
   [#assign halMode= instanceData.halMode]
 /* ${instName} initialization function */
 [#if instanceData.isMWUsed=="false"]  
 [#if ipvar.ipName=="FMC"||ipvar.ipName=="FSMC"]
 
-static void MX_${instName}_Init(void)
+[#if static]static[/#if] void MX_${instName}_Init(void)
   [#else]
     [#if halMode!=name]void MX_${instName}_${halMode}_Init(void)[#else]void MX_${instName}_Init(void)[/#if]
   [/#if]
 {
 [/#if]
+
+[#if RESMGR_UTILITY??]
+    [@common.optinclude name=contextFolder+mxTmpFolder+"/resmgrutility_"+instName+".tmp"/][#-- ADD RESMGR_UTILITY Code--]
+[/#if]
+
+#n#t/* USER CODE BEGIN ${instName}_Init 0 */
+#n
+#t/* USER CODE END ${instName}_Init 0 */
+#n
   [#assign args = ""]
   [#assign listOfLocalVariables=""]
   [#assign resultList=""]
@@ -551,10 +573,16 @@ static void MX_${instName}_Init(void)
     [@getLocalVariable configModel1=config listOfLocalVariables=listOfLocalVariables resultList=resultList/]
     [#assign listOfLocalVariables=resultList]
   [/#list]
+#n#t/* USER CODE BEGIN ${instName}_Init 1 */
+#n
+#t/* USER CODE END ${instName}_Init 1 */
   [#if listOfLocalVariables!=""]#n[/#if]
   [#list instanceData.configs as config]
     [@generateConfigModelCode configModel=config inst=instName nTab=1/]
   [/#list]
+#t/* USER CODE BEGIN ${instName}_Init 2 */
+#n
+#t/* USER CODE END ${instName}_Init 2 */
 [#if instanceData.isMWUsed=="false"]  
 }
 [/#if]

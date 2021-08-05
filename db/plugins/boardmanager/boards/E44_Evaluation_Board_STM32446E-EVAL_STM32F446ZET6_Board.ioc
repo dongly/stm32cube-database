@@ -1,7 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
 #Thu Feb 26 10:03:36 CET 2015
 File.Version=5
-KeepUserPlacement=true
+KeepUserPlacement=false
 Mcu.Family=STM32F4
 Mcu.IP0=NVIC
 Mcu.IP1=RCC
@@ -692,4 +692,5 @@ SH.S_TIM4_CH1.0=TIM4_CH1
 SH.S_TIM4_CH1.ConfNb=1
 SH.S_TIM4_CH2.0=TIM4_CH2
 SH.S_TIM4_CH2.ConfNb=1
+board=STM32446E-EVAL
 boardIOC=true

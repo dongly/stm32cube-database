@@ -113,7 +113,7 @@
 	    
     <!-- Possible values of DiscontinuousConvMode parameter -->
     <RefParameter Comment="Discontinuous Conversion Mode" DefaultValue="DISABLE" Name="DiscontinuousConvMode" Type="list">
-        <Condition Diagnostic="Continuous and Discontinuous modes could not be used at the same time" Expression="ContinuousMode|ScanConvMode=ADC_SCAN_DISABLE"/>
+        <Condition Diagnostic="Continuous and Discontinuous modes could not be used at the same time" Expression="ContinuousMode"/>
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
     </RefParameter>
     <!--RefParameter Comment="Discontinuous Conversion Mode" DefaultValue="DISABLE" Name="DiscontinuousConvMode" Type="uniqueElementList">
@@ -142,8 +142,13 @@
     <!-- Possible values of DMAContinuousRequests parameter -->
     <RefParameter Comment="DMA Continuous Requests" DefaultValue="DISABLE" Group="ADCgroup" Name="DMAContinuousRequests" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
-        <PossibleValue Comment="Enabled" Semaphore="Semaphore_DMAContinuousRequests_Enable" Value="ENABLE"/>
-        <Description>Enable/Disable DMA Continuous Requests</Description>
+        <PossibleValue Comment="Enabled" Value="ENABLE" Action="Disable" Condition="!DMARequest_$IpInstance" Diagnostic="A DMA Request in Circular Mode must be configured in DMA Settings Tab for this ADC instance" />
+        <Description>This parameter is used only when a DMA Request is configured. Else it is not relevant.&lt;br&gt;
+            When the DMA Request for this ADC instance this parameter specifies whether 
+            the DMA requests are performed in one shot mode (DMA transfer stops when number of conversions is reached)
+            or are performed in continuous mode (DMA transfer unlimited, whatever number of conversions).&lt;br&gt;
+            Note: In continuous mode, DMA must be configured in circular mode. Otherwise an overrun will be triggered when DMA buffer maximum pointer is reached.
+        </Description>
     </RefParameter>
 	    
     <!-- Possible values of EOCSelection parameter -->
@@ -604,7 +609,7 @@
     <RefParameter Comment="Interrupt Mode" DefaultValue="DISABLE" Group="ADCgroup" Name="ITMode" Type="list">
         <PossibleValue Comment="Disabled" Value="DISABLE"/>
         <PossibleValue Comment="Enabled" Value="ENABLE"/>
-        <Description>Specifies whether the analog watchdog is configured is interrupt mode or in polling mode.</Description>
+        <Description>Specifies whether the analog watchdog is configured in interrupt mode or in polling mode.</Description>
     </RefParameter>
 	
     <!-- Not displayed parameters -->
@@ -1632,7 +1637,7 @@
         </Mode> -->
 		
         <!-- Triggers Mode -->
-        <Mode Name="Injected-Conversion-Trigger" UserName="Conversion Trigger">
+        <Mode Name="Injected-Conversion-Trigger" UserName="EXTI Conversion Trigger">
             <ModeLogicOperator Name="XOR">
                 <Mode Name="EXTI15-Injected-Conversion-Trigger" UserName="Injected Trigger">
                     <SignalLogicalOp Name="AND">

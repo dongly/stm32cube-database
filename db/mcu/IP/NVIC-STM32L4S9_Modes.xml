@@ -95,13 +95,13 @@
 		<PossibleValue Comment="USART3 global interrupt" Value="USART3_IRQn:Y:USART3::"/>
 		<PossibleValue Comment="EXTI line[15:10] interrupts" Value="EXTI15_10_IRQn:Y,EXTI:EXTI10,EXTI11,EXTI12,EXTI13,EXTI14,EXTI15:HAL_GPIO_EXTI_IRQHandler:10,15"/>
 		<PossibleValue Comment="RTC alarm interrupt through EXTI line 18" Condition="RTC_ALARM_INTERRUPT" Diagnostic="" Value="RTC_Alarm_IRQn:Y,HAL:RTC:HAL_RTC_AlarmIRQHandler:"/>
-		<PossibleValue Comment="DFSDM1 filter3 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL3_Enable" Diagnostic="" Value="DFSDM1_FLT3_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter3"/>
+		<PossibleValue Comment="DFSDM1 filter3 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL3_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter3 is not configured" Value="DFSDM1_FLT3_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter3"/>
 		<PossibleValue Comment="TIM8 break interrupt" Value="TIM8_BRK_IRQn:Y:TIM8:HAL_TIM_IRQHandler:"/>
 		<PossibleValue Comment="TIM8 update interrupt" Value="TIM8_UP_IRQn:Y:TIM8:HAL_TIM_IRQHandler:"/>
 		<PossibleValue Comment="TIM8 trigger and commutation interrupts" Value="TIM8_TRG_COM_IRQn:Y:TIM8:HAL_TIM_IRQHandler:"/>
 		<PossibleValue Comment="TIM8 capture compare interrupt" Value="TIM8_CC_IRQn:Y:TIM8:HAL_TIM_IRQHandler:"/>
 		<PossibleValue Comment="FMC global interrupt" Value="FMC_IRQn:Y:FMC::"/>
-		<PossibleValue Comment="SDMMC1 global interrupt" Value="SDMMC1_IRQn:Y:SDMMC1:HAL_SD_IRQHandler:"/>
+		<PossibleValue Comment="SDMMC1 global interrupt" Value="SDMMC1_IRQn:Y:SDMMC1::"/>
 		<PossibleValue Comment="TIM5 global interrupt" Value="TIM5_IRQn:Y:TIM5:HAL_TIM_IRQHandler:"/>
 		<PossibleValue Comment="SPI3 global interrupt" Value="SPI3_IRQn:Y:SPI3::"/>
 		<PossibleValue Comment="UART4 global interrupt" Value="UART4_IRQn:Y:UART4::"/>
@@ -113,9 +113,9 @@
 		<PossibleValue Comment="DMA2 channel3 global interrupt" Value="DMA2_Channel3_IRQn:Y,DMAL0:DMA:DMA2:3,3"/>
 		<PossibleValue Comment="DMA2 channel4 global interrupt" Value="DMA2_Channel4_IRQn:Y,DMAL0:DMA:DMA2:4,4"/>
 		<PossibleValue Comment="DMA2 channel5 global interrupt" Value="DMA2_Channel5_IRQn:Y,DMAL0:DMA:DMA2:5,5"/>
-		<PossibleValue Comment="DFSDM1 filter0 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL0_Enable" Diagnostic="" Value="DFSDM1_FLT0_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter0"/>
-		<PossibleValue Comment="DFSDM1 filter1 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL1_Enable" Diagnostic="" Value="DFSDM1_FLT1_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter1"/>
-		<PossibleValue Comment="DFSDM1 filter2 global interrupt" Condition="Semaphore_DFSDM1_Filter_FIL2_Enable" Diagnostic="" Value="DFSDM1_FLT2_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter2"/>
+		<PossibleValue Comment="DFSDM1 filter0 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL0_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter0 is not configured" Value="DFSDM1_FLT0_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter0"/>
+		<PossibleValue Comment="DFSDM1 filter1 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL1_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter1 is not configured" Value="DFSDM1_FLT1_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter1"/>
+		<PossibleValue Comment="DFSDM1 filter2 global interrupt" Condition="reset:(!Semaphore_DFSDM1_Filter_FIL2_Enable)" Diagnostic="reset:is forced to be disabled as DFSDM1 Filter2 is not configured" Value="DFSDM1_FLT2_IRQn:Y,DFSDM:DFSDM1:HAL_DFSDM_IRQHandler:hdfsdm1_filter2"/>
 		<PossibleValue Comment="COMP1 and COMP2 interrupts through EXTI lines 21 and 22" Condition="force:(COMP1_EXTI_IT_ENABLED|COMP2_EXTI_IT_ENABLED);warning:COMP_IRQn&amp;((!COMP1_EXTI_IT_ENABLED&amp;TEMP_COMP1_NVIC_SEM)|(!COMP2_EXTI_IT_ENABLED&amp;TEMP_COMP2_NVIC_SEM))" Diagnostic="set:forced to enabled as the Trigger Mode parameter of at least one comparator is set to Interrupt;reset:forced to disabled as no comparator Trigger Mode parameter is set to Interrupt;warning:interrupt won't be triggered for this comparator as the Trigger Mode parameter is not set to Interrupt" Value="COMP_IRQn:Y,nV:COMP1,COMP2:COMP,COMP:COMP1,COMP2"/>
 		<PossibleValue Comment="LPTIM1 global interrupt" Value="LPTIM1_IRQn:Y:LPTIM1:HAL_LPTIM_IRQHandler:"/>
 		<PossibleValue Comment="LPTIM2 global interrupt" Value="LPTIM2_IRQn:Y:LPTIM2:HAL_LPTIM_IRQHandler:"/>

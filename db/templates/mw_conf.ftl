@@ -1,13 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : ${name}
   * Description        : This file provides code for the configuration
   *                      of the ${name} instances.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 [#assign s = name]
 [#assign toto = s?replace(".","__")]
 [#assign inclusion_protection = toto?upper_case]

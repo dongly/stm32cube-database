@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<IP DBVersion="V3.0" IPType="peripheral" Name="SDMMC" Version="sdmmc2_v1_1_Cube" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd" xmlns="http://mcd.rou.st.com/modules.php?name=mcu">
+<IP
+ xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance"
+ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd"
+ xmlns="http://mcd.rou.st.com/modules.php?name=mcu"
+ DBVersion="V3.0"
+ IPType="peripheral"
+ Name="SDMMC"
+ Version="sdmmc2_v1_1_Cube">
+
   <About>SDMMC: Secure Digital Input/Output interface</About>
 
   <!-- STM32L4R/S -->
@@ -56,8 +64,9 @@
       <PossibleValue Value="SDMMC_HARDWARE_FLOW_CONTROL_ENABLE" Comment="The hardware control flow is enabled"/>
   </RefParameter>
 
-  <RefParameter Name="ClockDiv" Comment="SDMMCCLK clock divide factor" DefaultValue="0" Max="255" Min="0" Type="integer" Group="SDMMC parameters">
-    <Description>SDMMC_CK = SDMMCCLK / [CLKDIV + 2]. The output clock frequency can vary between 187 KHz and 24 MHz. It is advised to keep the default ClockDiv value (0) to have a maximum SDMMC_CK frequency of 24 MHz.</Description>
+  <!-- SDMMC_CLKCR CLKDIV[9:0]: Clock divide factor -->
+  <RefParameter Name="ClockDiv" Comment="SDMMC clock divide factor" DefaultValue="0" Max="1023" Min="0" Type="integer" Group="SDMMC parameters">
+    <Description>These bits can only be written when the CPSM and DPSM are not active (CPSMACT = 0 and DPSMACT = 0).&lt;br&gt;This parameter defines the divide factor between the input clock (sdmmc_ker_ck) and the output clock (SDMMC_CK): SDMMC_CK frequency = sdmmc_ker_ck / [2 * CLKDIV].&lt;br&gt;000: SDMMC_CK frequency = sdmmc_ker_ck / 1 (Does not support DDR)&lt;br&gt;001: SDMMC_CK frequency = sdmmc_ker_ck / 2&lt;br&gt;002: SDMMC_CK frequency = sdmmc_ker_ck / 4&lt;br&gt;0xx: etc&lt;br&gt;080: SDMMC_CK frequency = sdmmc_ker_ck / 256&lt;br&gt;xxx: etc&lt;br&gt;3FF: SDMMC_CK frequency = sdmmc_ker_ck / 2046&lt;br&gt;</Description>
   </RefParameter>
 
   <RefParameter Name="Transceiver" Comment="Specifies whether external transceiver is enabled or disabled" DefaultValue="SDMMC_TRANSCEIVER_ENABLE" Type="list" Group="SDMMC parameters" Visible="false">
@@ -107,6 +116,7 @@
   <!-- RefMode for SD-4-bits-Wide-bus -->
   <RefMode Name="SD_4_bits_Wide_bus" Comment="SD 4 bits Wide bus" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
@@ -117,6 +127,7 @@
 
   <RefMode Name="SD_4_bits_Wide_bus_auto_dir_voltage_converter" Comment="SD 4 bits Wide bus with auto dir voltage converter" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
@@ -127,6 +138,7 @@
 
   <RefMode Name="SD_4_bits_Wide_bus_dir_voltage_converter" Comment="SD 4 bits Wide bus with dir voltage converter" HalMode="SD">
       <ConfigForMode>SD_Init</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
@@ -136,35 +148,35 @@
   </RefMode>
 
   <RefMode Name="mmc_1_bit" Comment="MMC 1 bit" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="Transceiver"/>
   </RefMode>
 
   <RefMode Name="mmc_4_bits_Wide_bus" Comment="MMC 4 bits" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
-      <ConfigForMode>MMC_WideBus_Config</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="Transceiver"/>
   </RefMode>
 
   <RefMode Name="mmc_8_bits_Wide_bus" Comment="MMC 8 bits" HalMode="MMC">
-      <Condition Diagnostic="" Expression="STM32H7"/>
       <ConfigForMode>MMC_Init</ConfigForMode>
-      <ConfigForMode>MMC_WideBus_Config</ConfigForMode>
+      <!-- BZ37917/51299/74240 ConfigForMode>SD_WideBus_Config</ConfigForMode-->
       <Parameter Name="ClockEdge"/>
       <Parameter Name="ClockPowerSave"/>
       <Parameter Name="BusWide"/>
       <Parameter Name="HardwareFlowControl"/>
       <Parameter Name="ClockDiv"/>
+      <Parameter Name="Transceiver"/>
   </RefMode>
 
   <ModeLogicOperator Name="OR">

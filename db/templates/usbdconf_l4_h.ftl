@@ -1,17 +1,20 @@
 [#ftl]
+/* USER CODE BEGIN Header */
+[#assign s = name]
+[#assign titi = s?replace("Target/","")]
+[#assign toto = titi?replace(".","__")]
 /**
   ******************************************************************************
-  * @file           : ${name}
+  * @file           : ${titi}
   * @version        : ${version}
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Header for usbd_conf.c file.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
-[#assign s = name]
-[#assign toto = s?replace(".","__")]
 [#assign inclusion_protection = toto?upper_case]
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __${inclusion_protection}__
@@ -25,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "main.h"
 [#if SWIncludes??]
 [#list SWIncludes as include]
 [#assign includeFile = include]
@@ -87,10 +91,10 @@ extern ${variable.value} ${variable.name};
 /*---------- [#if definition.comments??]${definition.comments} [/#if] -----------*/
 [#-- Tracker 253306 --]
     [#if definition.name="USBD_DFU_APP_DEFAULT_ADD"]
-#define ${definition.name} #t#t${value}
+#define ${definition.name} #t#t${value}U
     [/#if]
     [#if definition.name!="USBD_DFU_APP_DEFAULT_ADD"]
-#define ${definition.name} #t#t${value}
+#define ${definition.name} #t#t${value}U
     [/#if]
 [#-- Tracker 253306 --]
 	[#if definition.description??]${definition.description} [/#if]
@@ -117,17 +121,20 @@ extern ${variable.value} ${variable.name};
 
 /* Memory management macros */
 
+[#--  Ticket 82086 --]
+/* Memory management macros make sure to use static memory allocation */
+
 /** Alias for memory allocation. */
-#define USBD_malloc         (uint32_t *)USBD_static_malloc
+#define USBD_malloc         (void *)USBD_static_malloc
 
 /** Alias for memory release. */
-#define USBD_free           USBD_static_free
+#define USBD_free          USBD_static_free
 
 /** Alias for memory set. */
-#define USBD_memset         /* Not used */
+#define USBD_memset         memset
 
 /** Alias for memory copy. */
-#define USBD_memcpy         /* Not used */
+#define USBD_memcpy         memcpy
 
 /** Alias for delay. */
 #define USBD_Delay          HAL_Delay

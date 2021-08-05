@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V4.0" IncludeFile="stm32f7xx_hal.h" Name="SDIO" Version="STM32Cube_FW_F7_V1.6.0" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Configs.xsd">
+<IP
+ ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Configs.xsd"
+ xmlns="http://mcd.rou.st.com/modules.php?name=mcu"
+ xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance"
+ DBVersion="V4.0"
+ IncludeFile="stm32f7xx_hal.h"
+ Name="SDIO"
+ Version="STM32Cube_FW_F7_V1.6.0">
+
     <RefConfig Name="SD_Init">
         <CallLibMethod Name="HAL_SD_Init" ReturnHAL="HAL_OK">
             <MethodArg Name="BusWide" FValue="SDMMC_BUS_WIDE_1B"/>
@@ -8,6 +16,7 @@
         <ImplementCallBack Name="HAL_SD_MspDeInit"/>
         <Component Name="HAL:SDIO:SD"/>
     </RefConfig>
+      <!-- BZ37917/51299/74240 -->
     <RefConfig Name="SD_WideBus_Config">
         <CallLibMethod Name="HAL_SD_ConfigWideBusOperation" ReturnHAL="HAL_OK">
             <MethodArg Name="WideMode" ParameterName="BusWide"/>
@@ -22,6 +31,7 @@
         <ImplementCallBack Name="HAL_MMC_MspDeInit"/>
         <Component Name="HAL:SDIO:MMC"/>
     </RefConfig>
+      <!-- BZ37917/51299/74240 -->
     <RefConfig Name="MMC_WideBus_Config">
         <CallLibMethod Name="HAL_MMC_ConfigWideBusOperation" ReturnHAL="HAL_OK">
             <MethodArg Name="WideMode" ParameterName="BusWide"/>
@@ -73,7 +83,7 @@
     <LibMethod Comment="" Name="HAL_SD_DeInit">
         <Argument AddressOf="true" Context="global" GenericType="struct" Name="hsd" TypeName="SD_HandleTypeDef">
             <Argument AddressOf="false" GenericType="baseaddress" Name="Instance" TypeName="SD_TypeDef"/>
-            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SDIO_InitTypeDef">
+            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SD_InitTypeDef">
                 <Argument AddressOf="false" GenericType="simple" Name="ClockEdge"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockBypass"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockPowerSave"/>
@@ -100,7 +110,7 @@
     <LibMethod Comment="" Name="HAL_SD_MspInit">
         <Argument AddressOf="true" Context="global" GenericType="struct" Name="hsd" TypeName="SD_HandleTypeDef">
             <Argument AddressOf="false" GenericType="baseaddress" Name="Instance" TypeName="SD_TypeDef"/>
-            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SDIO_InitTypeDef">
+            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SD_InitTypeDef">
                 <Argument AddressOf="false" GenericType="simple" Name="ClockEdge"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockBypass"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockPowerSave"/>
@@ -127,7 +137,7 @@
     <LibMethod Comment="" Name="HAL_SD_MspDeInit">
         <Argument AddressOf="true" Context="global" GenericType="struct" Name="hsd" TypeName="SD_HandleTypeDef">
             <Argument AddressOf="false" GenericType="baseaddress" Name="Instance" TypeName="SD_TypeDef"/>
-            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SDIO_InitTypeDef">
+            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SD_InitTypeDef">
                 <Argument AddressOf="false" GenericType="simple" Name="ClockEdge"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockBypass"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockPowerSave"/>
@@ -154,7 +164,7 @@
     <LibMethod Comment="" Name="HAL_SD_ConfigWideBusOperation">
         <Argument AddressOf="true" Context="global" GenericType="struct" Name="hsd" TypeName="SD_HandleTypeDef">
             <Argument AddressOf="false" GenericType="baseaddress" Name="Instance" TypeName="SD_TypeDef"/>
-            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SDIO_InitTypeDef">
+            <Argument AddressOf="false" GenericType="struct" Name="Init" TypeName="SD_InitTypeDef">
                 <Argument AddressOf="false" GenericType="simple" Name="ClockEdge"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockBypass"/>
                 <Argument AddressOf="false" GenericType="simple" Name="ClockPowerSave"/>

@@ -5,7 +5,7 @@
   * Description        : This file contains all the function prototypes for
   *                      the mdma.c file
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
 [#assign ipName = "MDMA"]
@@ -23,13 +23,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-[#assign includesList = ""]
-[#list includes as include]
-[#if !includesList?contains(include)]
-#include "${include}"
-[#assign includesList = includesList+" "+include]
-[/#if]
-[/#list]
+#include "main.h"
 #n
 /* MDMA transfer handles -----------------------------------------------------*/
 [#if variables?? && variables?size > 0]
@@ -37,7 +31,7 @@
 extern ${variable.value} ${variable.name};
 [/#list]
 [/#if]
-extern void _Error_Handler(char*, int);
+
 #n
 /* USER CODE BEGIN Includes */
 

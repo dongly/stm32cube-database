@@ -109,52 +109,56 @@
 [/#if]   
 [#if serviceName=="gpioA" && service.gpioA?? && (service.gpioA!="")]
  [#assign instanceIndex =""]
-    [@common.generateConfigModelCode configModel=gpioServiceA inst=ipName nTab=tabN index=""/]
+    [@common.generateConfigModelCode configModel=gpioServiceA inst=ipName nTab=tabN index="" mode="type"/]
 [/#if]
 [#if serviceName=="gpioB" && service.gpioB?? && (service.gpioB!="")]
  [#assign instanceIndex =""]
-    [@common.generateConfigModelCode configModel=gpioServiceB inst=ipName nTab=tabN index=""/]
+    [@common.generateConfigModelCode configModel=gpioServiceB inst=ipName nTab=tabN index="" mode="type"/]
 [/#if]
 [#if serviceName=="dmaA" && dmaServiceA??]
  [#assign instanceIndex =""]
     [#list dmaServiceA as dmaconfig] 
-     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode="type"/]
         [#assign dmaCurrentRequest = dmaconfig.dmaRequestName?lower_case]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
-      [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
-        [#assign channel="channel"]
-        [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
-          [#assign channel="stream"]
+        [#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
+            [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
+                [#assign channel="channel"]
+                [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
+                  [#assign channel="stream"]
+                [/#if]
+                #t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
+                #t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
+            [/#if]   [#-- if more than one dma handler--] 
+            [#list dmaconfig.dmaHandel as dmaH]
+                #t#t__HAL_LINKDMA(${instHandler},${dmaH},hdma_${dmaconfig.dmaRequestName?lower_case});
+                #n
+            [/#list]
         [/#if]
-#t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
-#t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
-[/#if]   [#-- if more than one dma handler--] 
-                            [#list dmaconfig.dmaHandel as dmaH]
-#t#t__HAL_LINKDMA(${instHandler},${dmaH},hdma_${dmaconfig.dmaRequestName?lower_case});
-#n
-                            [/#list]
     [/#list] [#-- list dmaService as dmaconfig --]
 #n
 [/#if]
 [#if serviceName=="dmaB" && dmaServiceB??]
  [#assign instanceIndex =""]
     [#list dmaServiceB as dmaconfig] 
-     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index=""/]
+     [@common.generateConfigModelCode configModel=dmaconfig inst=ipName  nTab=tabN index="" mode="type"/]
         [#assign dmaCurrentRequest = dmaconfig.dmaRequestName?lower_case]
         [#assign prefixList = dmaCurrentRequest?split("_")]
         [#list prefixList as p][#assign prefix= p][/#list]
-        [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
-        [#assign channel="channel"]
-        [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
-          [#assign channel="stream"]
+        [#if dmaconfig.dmaVersion?? && dmaconfig.dmaVersion!="DMA3"]
+            [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
+                [#assign channel="channel"]
+                [#if (FamilyName=="STM32F2" || FamilyName=="STM32F4" || FamilyName=="STM32F7")]
+                  [#assign channel="stream"]
+                [/#if]
+                #t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
+                #t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
+            [/#if]   [#-- if more than one dma handler--] 
+            [#list dmaconfig.dmaHandel as dmaH]
+                #t#t__HAL_LINKDMA(${instHandler},${dmaH},hdma_${dmaconfig.dmaRequestName?lower_case});
+            [/#list]
         [/#if]
-#t#t/* Several peripheral DMA handle pointers point to the same DMA handle.
-#t#t   Be aware that there is only one ${channel} to perform all the requested DMAs. */
-  [/#if]   [#-- if more than one dma handler--] 
-                            [#list dmaconfig.dmaHandel as dmaH]
-#t#t__HAL_LINKDMA(${instHandler},${dmaH},hdma_${dmaconfig.dmaRequestName?lower_case});
-                            [/#list]
                       
     [/#list] [#-- list dmaService as dmaconfig --]
 [/#if]
@@ -226,11 +230,33 @@
             [#assign gpioExistB = true]
             [/#if]            
         [/#list]
-        [/#if] 
-[#if gpioExistA]   
+        [/#if]
+[#if gpioExistA]
+
  #t#tif(hsai->Instance==${ipName}_Block_A)  
-#t#t{    
+#t#t{
     [#if serviceType=="Init"]  #t#t/* Peripheral clock enable */
+
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfigA??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfigA] [#--list0--]
+[#assign string_element = pclockConfig.ipName]
+[#if string_element==ipName+"_SAIA"]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=string_element  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
 #t#tif (${ipName}_client == 0)
 #t#t{
            [#if initService.clock??]
@@ -260,17 +286,20 @@
 #t#tif (${ipName}_client == 0)
 #t#t#t{       
         #t#t#t/* Peripheral clock disable */ #n #t#t#t__HAL_RCC_${ipName}_CLK_DISABLE();
-[#if initService.nvic??]
-                [#list initService.nvic as initVector]                   
+[#if initService.nvic??&&initService.nvic?size>0]
+                [#list initService.nvic as initVector]
+#t#t#t/* ${ipName} interrupt DeInit */                    
                     #t#t#tHAL_NVIC_DisableIRQ(${initVector.vector});
                 [/#list]
             [/#if]
 #t#t#t}
     [/#if] 
 
+
+
   
 #t#t[@generateConfigCode ipName=ipName type=serviceType serviceName="gpioA" instHandler=instHandler tabN=tabN/]
-[#if dmaExistA &&  serviceType=="Init"]#n#t#t/* Peripheral DMA init*/
+[#if dmaExistA &&  serviceType=="Init"]#n#t#t#t/* Peripheral DMA init*/
 #t#t[@generateConfigCode ipName=ipName type=serviceType serviceName="dmaA" instHandler=instHandler tabN=tabN/]
 [#else]
     [#if dmaExistA]
@@ -286,8 +315,8 @@
                [#if dmaconfig.dmaHandel??][#assign ipdmahandler = dmaconfig.dmaHandel][#else][#assign ipdmahandler = ipdmahandler1][/#if]
 [#if dmaconfig.dmaHandel?size > 1] [#-- if more than one dma handler--]
                         [/#if]   [#-- if more than one dma handler--]
-
-                            [#list dmaconfig.dmaHandel as dmaH]
+                           #n#t#t/* ${ipName} DMA Deinit */
+                            [#list dmaconfig.dmaHandel as dmaH] 
 [#compress]                              #t#tHAL_DMA_DeInit(${instHandler}->${dmaH});[/#compress]
                             [/#list]
                    
@@ -302,6 +331,27 @@
 #t#tif(hsai->Instance==${ipName}_Block_B)
 #t#t{
     [#if serviceType=="Init"]  #t#t#t/* Peripheral clock enable */
+
+[#list ipvar.configModelList as instanceData]
+[#if instanceData.initServices??]
+    [#if instanceData.initServices.pclockConfigB??]
+[#assign   pclockConfig=instanceData.initServices.pclockConfigB] [#--list0--]
+[#assign string_element = pclockConfig.ipName]
+[#if string_element==ipName+"_SAIB"]
+[#if FamilyName=="STM32MP1"]
+#tif(IS_ENGINEERING_BOOT_MODE())
+#t{
+[/#if]
+[@common.generateConfigModelListCode configModel=pclockConfig inst=string_element  nTab=2 index=""/]#n
+[#if FamilyName=="STM32MP1"]
+#t}
+[/#if]
+[/#if]
+#n
+    [/#if]
+[/#if]
+[/#list]
+
 #t#t#tif (${ipName}_client == 0)
 #t#t#t{
            [#if initService.clock??]
@@ -330,9 +380,10 @@
 #t#t${ipName}_client --;
 #t#t#tif (${ipName}_client == 0)
 #t#t#t{  
-        #t#t#t/* Peripheral clock disable */#n#t#t#t__HAL_RCC_${ipName}_CLK_DISABLE(); 
-[#if initService.nvic??]
-                [#list initService.nvic as initVector]                   
+        #t#t#t/* Peripheral clock disable */#n#t#t#t__HAL_RCC_${ipName}_CLK_DISABLE();
+[#if initService.nvic??&&initService.nvic?size>0] 
+                [#list initService.nvic as initVector]
+#t#t/* ${ipName} interrupt DeInit */                   
                     #t#t#tHAL_NVIC_DisableIRQ(${initVector.vector});
                 [/#list]
             [/#if]
@@ -341,7 +392,7 @@
 
 
 #t#t[@generateConfigCode ipName=ipName type=serviceType serviceName="gpioB" instHandler=instHandler tabN=tabN/]	
-[#if dmaExistB && serviceType=="Init"]#n#t#t/* Peripheral DMA init*/
+[#if dmaExistB && serviceType=="Init"]#n#t#t#t/* Peripheral DMA init*/
 #t#t[@generateConfigCode ipName=ipName type=serviceType serviceName="dmaB" instHandler=instHandler tabN=tabN/]
 [#else]
 [#if dmaExistB]
@@ -355,6 +406,7 @@
         [#assign ipdmahandler1 = "hdma" + prefix]
          [#-- [#if getDmaHandler(ipName)!=""][#assign ipdmahandler = getDmaHandler(ipName)][#else][#assign ipdmahandler = ipdmahandler1][/#if]--]
            [#if dmaconfig.dmaHandel??][#assign ipdmahandler = dmaconfig.dmaHandel][#else][#assign ipdmahandler = ipdmahandler1][/#if]
+#n#t#t/* ${ipName} DMA Deinit */
                             [#list dmaconfig.dmaHandel as dmaH]
 [#compress]                              #t#tHAL_DMA_DeInit(${instHandler}->${dmaH});[/#compress]
                             [/#list]
@@ -417,7 +469,7 @@ static uint32_t ${saiInst}_client =0;
 [#assign words = instanceList]
 [#-- declare Variable GPIO_InitTypeDef once --]
        [#assign v = ""]
-[#list words as inst] [#-- loop on ip instances datas --] 
+[#list words as inst] [#-- loop on ip instances data --] 
  [#assign services = getInitServiceMode(inst)]
  [#if services.gpioA??][#assign service=services.gpioA]
         [#list service.variables as variable] [#-- variables declaration --]
@@ -496,6 +548,76 @@ static uint32_t ${saiInst}_client =0;
   [/#if]
 [/#list]
 [#-- --]
+[#assign listOfLocalVariables = ""]
+[#assign  resultList  = ""]
+
+[#list ipvar.configModelList as instanceData]
+    [#if instanceData.initServices??]
+        [#if instanceData.initServices.pclockConfigA??]
+
+            [#list instanceData.initServices.pclockConfigA.configs as config] [#--list1--]
+                [#assign listOfLocalVariables = getLocalVariableCLK(config)]
+[#if listOfLocalVariables != "" ]
+                [#if resultList == ""]
+                    [#list  listOfLocalVariables?split("/") as variable]
+                        #t${variable} = {0};
+                        [#if resultList == ""]
+                            [#assign resultList = variable]
+                        [#else]
+                            [#assign resultList = resultList + ":"+ variable]
+                        [/#if]
+                    [/#list]
+                [#else]
+                    [#list  listOfLocalVariables?split("/") as variable]                
+                        [#assign  dup  = ""]
+                        [#list  resultList?split(":") as v]
+                            [#if v == variable]
+                                [#assign  dup  = "yes"]
+                            [/#if]
+                        [/#list]
+                        [#if dup != "yes"]
+                            #t${variable} = {0};
+                            [#assign resultList = resultList + ":"+ variable]
+                        [/#if]
+                    [/#list]
+                [/#if]
+[/#if]
+            [/#list]
+        [/#if]
+        [#if instanceData.initServices.pclockConfigB??]
+
+            [#list instanceData.initServices.pclockConfigB.configs as config] [#--list1--]
+                [#assign listOfLocalVariables = getLocalVariableCLK(config)]
+[#if listOfLocalVariables != "" ]
+                [#if resultList == ""]
+                    [#list  listOfLocalVariables?split("/") as variable]
+                        #t${variable} = {0};
+                        [#if resultList == ""]
+                            [#assign resultList = variable]
+                        [#else]
+                            [#assign resultList = resultList + ":"+ variable]
+                        [/#if]
+                    [/#list]
+                [#else]
+                    [#list  listOfLocalVariables?split("/") as variable]                
+                        [#assign  dup  = ""]
+                        [#list  resultList?split(":") as v]
+                            [#if v == variable]
+                               [#assign  dup  = "yes"]
+                            [/#if]
+                        [/#list]
+                        [#if dup != "yes"]
+                            #t${variable} = {0};
+                            [#assign resultList = resultList + ":"+ variable]
+                        [/#if]
+                    [/#list]
+                [/#if]
+[/#if]
+            [/#list]
+        [/#if]
+    [/#if]
+[/#list]
+
 [#list words as sai]
 /* ${sai} */
     [@generateServiceCode ipName=sai serviceType="Init" modeName=mode instHandler=ipHandler tabN=2/] 
@@ -517,8 +639,6 @@ static uint32_t ${saiInst}_client =0;
 #nvoid ${entry.key}(${mode}_HandleTypeDef* h${mode?lower_case})
 [#assign words = instanceList]
 {
-#n
-
 [#list words as sai]
 /* ${sai} */
     [@generateServiceCode ipName=sai serviceType="DeInit" modeName=mode instHandler=ipHandler tabN=2/] 
@@ -529,3 +649,28 @@ static uint32_t ${saiInst}_client =0;
 [/#if]
 [#-- Section3: End --]
 [/#list]
+[#function getLocalVariableCLK configModel1]
+[#if configModel1.methods??] 
+    [#assign methodList1 = configModel1.methods]
+[#else]
+    [#assign methodList1 = configModel1.libMethod]
+[/#if]
+[#assign clkVariables = ""]
+    [#list methodList1 as method][#-- list methodList1 --]
+        [#list method.arguments as argument][#-- list method.arguments --]
+            [#if argument.genericType == "struct"]
+                [#if argument.context??]
+                    [#if argument.context!="global"&&argument.status!="WARNING"&&argument.status!="NULL"] [#-- if !global --]
+                        [#if clkVariables==""]
+                            [#assign clkVariables = argument.typeName + " "+ argument.name]
+                        [#else]
+                            [#assign clkVariables = clkVariables+"/"+ argument.typeName + " "+ argument.name]
+                        [/#if]
+                    [/#if]
+                [/#if]
+            [/#if]
+        [/#list][#-- list method.arguments --]
+    [/#list][#-- list methodList1 --]
+[#return clkVariables]
+[/#function]
+[#-- Function getLocalVariableCLK of a config End--]

@@ -3,32 +3,16 @@
   ******************************************************************************
   * @file    stm32f2xx_hal_conf.h
   * @brief   HAL configuration file. 
-  ******************************************************************************
+ ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) ${year} STMicroelectronics</center></h2>
+  * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
+  * All rights reserved.</center></h2>
   *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
   *
   ******************************************************************************
   */ 
@@ -41,7 +25,7 @@
  extern "C" {
 #endif
 
-#include "main.h"
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
@@ -51,7 +35,7 @@
   */
   
 #define HAL_MODULE_ENABLED  
-[#assign allModules = ["ADC", "AES", "CAN", "CRC", "CRYP", "DAC", "DCMI", "ETH", "NAND", "NOR", "PCCARD", "SRAM", "HASH", "I2C", "I2S", "IWDG", "RNG", "RTC", "SD", "MMC", "SPI", "TIM", "UART", "USART", "IRDA", "SMARTCARD", "WWDG", "PCD", "HCD"]]
+[#assign allModules = ["ADC", "AES", "CAN", "CAN_LEGACY", "CRC", "CRYP", "DAC", "DCMI", "ETH", "NAND", "NOR", "PCCARD", "SRAM", "HASH", "I2C", "I2S", "IWDG", "RNG", "RTC", "SD", "MMC", "SPI", "TIM", "UART", "USART", "IRDA", "SMARTCARD", "WWDG", "PCD", "HCD"]]
   [#list allModules as module]
 	[#if isModuleUsed(module)]
 [#compress]#define HAL_${module?replace("AES","CRYP")}_MODULE_ENABLED[/#compress]
@@ -73,6 +57,7 @@
 #define HAL_DMA_MODULE_ENABLED
 #define HAL_RCC_MODULE_ENABLED
 #define HAL_FLASH_MODULE_ENABLED
+#define HAL_EXTI_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
 #define HAL_CORTEX_MODULE_ENABLED
 
@@ -84,11 +69,11 @@
   *        (when HSE is used as system clock source, directly or through the PLL).  
   */
 #if !defined  (HSE_VALUE) 
-  #define HSE_VALUE    ((uint32_t)[#if hse_value??]${hse_value}[#else]25000000[/#if]U) /*!< Value of the External oscillator in Hz */
+  #define HSE_VALUE    [#if hse_value??]${hse_value}[#else]25000000[/#if]U /*!< Value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
 #if !defined  (HSE_STARTUP_TIMEOUT)
-  #define HSE_STARTUP_TIMEOUT    ((uint32_t)[#if HSE_Timout??]${HSE_Timout}[#if HSE_Timout?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]5000U[/#if])   /*!< Time out for HSE start up, in ms */
+  #define HSE_STARTUP_TIMEOUT    [#if HSE_Timout??]${HSE_Timout}[#if HSE_Timout?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]5000U[/#if]   /*!< Time out for HSE start up, in ms */
 #endif /* HSE_STARTUP_TIMEOUT */
 
 /**
@@ -97,14 +82,14 @@
   *        (when HSI is used as system clock source, directly or through the PLL). 
   */
 #if !defined  (HSI_VALUE)
-  #define HSI_VALUE    ((uint32_t)16000000U) /*!< Value of the Internal oscillator in Hz*/
+  #define HSI_VALUE    16000000U /*!< Value of the Internal oscillator in Hz*/
 #endif /* HSI_VALUE */
 
 /**
   * @brief Internal Low Speed oscillator (LSI) value.
   */
 #if !defined  (LSI_VALUE) 
- #define LSI_VALUE  ((uint32_t)32000U)       /*!< LSI Typical Value in Hz*/
+ #define LSI_VALUE  32000U       /*!< LSI Typical Value in Hz*/
 #endif /* LSI_VALUE */                      /*!< Value of the Internal Low Speed oscillator in Hz
                                              The real value may vary depending on the variations
                                              in voltage and temperature.*/
@@ -113,12 +98,12 @@
 
   */
 #if !defined  (LSE_VALUE)
-  #define LSE_VALUE    ((uint32_t)[#if lse_value??]${lse_value}[#else]32768[/#if]U) /*!< Value of the External oscillator in Hz*/
+  #define LSE_VALUE    [#if lse_value??]${lse_value}[#else]32768[/#if]U /*!< Value of the External oscillator in Hz*/
 #endif /* LSE_VALUE */
 
    
 #if !defined  (LSE_STARTUP_TIMEOUT)
-  #define LSE_STARTUP_TIMEOUT    ((uint32_t)[#if LSE_Timout??]${LSE_Timout}[#if LSE_Timout?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]5000U[/#if])   /*!< Time out for LSE start up, in ms */
+  #define LSE_STARTUP_TIMEOUT    [#if LSE_Timout??]${LSE_Timout}[#if LSE_Timout?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]5000U[/#if]   /*!< Time out for LSE start up, in ms */
 #endif /* LSE_STARTUP_TIMEOUT */
 
 /**
@@ -127,7 +112,7 @@
   *        frequency, this source is inserted directly through I2S_CKIN pad. 
   */
 #if !defined  (EXTERNAL_CLOCK_VALUE)
-  #define EXTERNAL_CLOCK_VALUE    ((uint32_t)[#if external_clock_value??]${external_clock_value}[#else]12288000[/#if]U) /*!< Value of the External audio frequency in Hz*/
+  #define EXTERNAL_CLOCK_VALUE    [#if external_clock_value??]${external_clock_value}[#else]12288000[/#if]U /*!< Value of the External audio frequency in Hz*/
 #endif /* EXTERNAL_CLOCK_VALUE */
 
 /* Tip: To avoid modifying this file each time you need to use different HSE,
@@ -137,12 +122,39 @@
 /**
   * @brief This is the HAL system configuration section
   */     
-#define  VDD_VALUE                    ((uint32_t)[#if vdd_value??]${vdd_value}U)[#else]3300U)[/#if] /*!< Value of VDD in mv */           
-#define  TICK_INT_PRIORITY            ((uint32_t)[#if TICK_INT_PRIORITY??]${TICK_INT_PRIORITY}[#else]0x0F[/#if]U) /*!< tick interrupt priority */
+#define  VDD_VALUE                    [#if vdd_value??]${vdd_value}U[#else]3300U[/#if] /*!< Value of VDD in mv */           
+#define  TICK_INT_PRIORITY            [#if TICK_INT_PRIORITY??]${TICK_INT_PRIORITY}[#else]0x0F[/#if]U /*!< tick interrupt priority */
 #define  USE_RTOS                     [#if advancedSettings?? && advancedSettings.USE_RTOS??]${advancedSettings.USE_RTOS}U[#else]0U[/#if]     
-#define  PREFETCH_ENABLE              [#if PREFETCH_ENABLE??]${PREFETCH_ENABLE}[#else]1[/#if]              
-#define  INSTRUCTION_CACHE_ENABLE     [#if INSTRUCTION_CACHE_ENABLE??]${INSTRUCTION_CACHE_ENABLE}[#else]1[/#if]
+#define  PREFETCH_ENABLE              [#if PREFETCH_ENABLE??]${PREFETCH_ENABLE}[#else]1[/#if]U              
+#define  INSTRUCTION_CACHE_ENABLE     [#if INSTRUCTION_CACHE_ENABLE??]${INSTRUCTION_CACHE_ENABLE}[#else]1[/#if]U
 #define  DATA_CACHE_ENABLE            [#if DATA_CACHE_ENABLE??]${DATA_CACHE_ENABLE}U[#else]1U[/#if]
+
+#define  USE_HAL_ADC_REGISTER_CALLBACKS         0U /* ADC register callback disabled       */
+#define  USE_HAL_CAN_REGISTER_CALLBACKS         0U /* CAN register callback disabled       */
+#define  USE_HAL_CRYP_REGISTER_CALLBACKS        0U /* CRYP register callback disabled      */
+#define  USE_HAL_DAC_REGISTER_CALLBACKS         0U /* DAC register callback disabled       */
+#define  USE_HAL_DCMI_REGISTER_CALLBACKS        0U /* DCMI register callback disabled      */
+#define  USE_HAL_ETH_REGISTER_CALLBACKS         0U /* ETH register callback disabled       */
+#define  USE_HAL_HASH_REGISTER_CALLBACKS        0U /* HASH register callback disabled      */
+#define  USE_HAL_HCD_REGISTER_CALLBACKS         0U /* HCD register callback disabled       */
+#define  USE_HAL_I2C_REGISTER_CALLBACKS         0U /* I2C register callback disabled       */
+#define  USE_HAL_I2S_REGISTER_CALLBACKS         0U /* I2S register callback disabled       */
+#define  USE_HAL_MMC_REGISTER_CALLBACKS         0U /* MMC register callback disabled       */
+#define  USE_HAL_NAND_REGISTER_CALLBACKS        0U /* NAND register callback disabled      */
+#define  USE_HAL_NOR_REGISTER_CALLBACKS         0U /* NOR register callback disabled       */
+#define  USE_HAL_PCCARD_REGISTER_CALLBACKS      0U /* PCCARD register callback disabled    */
+#define  USE_HAL_PCD_REGISTER_CALLBACKS         0U /* PCD register callback disabled       */
+#define  USE_HAL_RTC_REGISTER_CALLBACKS         0U /* RTC register callback disabled       */
+#define  USE_HAL_RNG_REGISTER_CALLBACKS         0U /* RNG register callback disabled       */
+#define  USE_HAL_SD_REGISTER_CALLBACKS          0U /* SD register callback disabled        */
+#define  USE_HAL_SMARTCARD_REGISTER_CALLBACKS   0U /* SMARTCARD register callback disabled */
+#define  USE_HAL_IRDA_REGISTER_CALLBACKS        0U /* IRDA register callback disabled      */
+#define  USE_HAL_SRAM_REGISTER_CALLBACKS        0U /* SRAM register callback disabled      */
+#define  USE_HAL_SPI_REGISTER_CALLBACKS         0U /* SPI register callback disabled       */
+#define  USE_HAL_TIM_REGISTER_CALLBACKS         0U /* TIM register callback disabled       */
+#define  USE_HAL_UART_REGISTER_CALLBACKS        0U /* UART register callback disabled      */
+#define  USE_HAL_USART_REGISTER_CALLBACKS       0U /* USART register callback disabled     */
+#define  USE_HAL_WWDG_REGISTER_CALLBACKS        0U /* WWDG register callback disabled      */
 
 /* ########################## Assert Selection ############################## */
 /**
@@ -166,63 +178,63 @@
 /* Definition of the Ethernet driver buffers size and count */   
 #define ETH_RX_BUF_SIZE                ETH_MAX_PACKET_SIZE /* buffer size for receive               */
 #define ETH_TX_BUF_SIZE                ETH_MAX_PACKET_SIZE /* buffer size for transmit              */
-#define ETH_RXBUFNB                    ((uint32_t)[#if ETH_RXBUFNB??]${ETH_RXBUFNB}[#if ETH_RXBUFNB?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]4U[/#if])       /* 4 Rx buffers of size ETH_RX_BUF_SIZE  */
-#define ETH_TXBUFNB                    ((uint32_t)[#if ETH_TXBUFNB??]${ETH_TXBUFNB}[#if ETH_TXBUFNB?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]4U[/#if])       /* 4 Tx buffers of size ETH_TX_BUF_SIZE  */
+#define ETH_RXBUFNB                    [#if ETH_RXBUFNB??]${ETH_RXBUFNB}[#if ETH_RXBUFNB?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]4U[/#if]       /* 4 Rx buffers of size ETH_RX_BUF_SIZE  */
+#define ETH_TXBUFNB                    [#if ETH_TXBUFNB??]${ETH_TXBUFNB}[#if ETH_TXBUFNB?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]4U[/#if]       /* 4 Tx buffers of size ETH_TX_BUF_SIZE  */
 
 /* Section 2: PHY configuration section */
 
 /* [#if PHY_Name??]${PHY_Name}[#else]DP83848_PHY_ADDRESS[/#if] Address*/ 
 #define [#if PHY_Name??]${PHY_Name}[#else]DP83848_PHY_ADDRESS[/#if]           [#if PHY_Value??]${PHY_Value}[#if PHY_Value?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x01U[/#if]
 /* PHY Reset delay these values are based on a 1 ms Systick interrupt*/ 
-#define PHY_RESET_DELAY                 ((uint32_t)[#if PHY_RESET_DELAY??]${PHY_RESET_DELAY}[#if PHY_RESET_DELAY?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x000000FFU[/#if])
+#define PHY_RESET_DELAY                 [#if PHY_RESET_DELAY??]${PHY_RESET_DELAY}[#if PHY_RESET_DELAY?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x000000FFU[/#if]
 /* PHY Configuration delay */
-#define PHY_CONFIG_DELAY                ((uint32_t)[#if PHY_CONFIG_DELAY??]${PHY_CONFIG_DELAY}[#if PHY_CONFIG_DELAY?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x00000FFFU[/#if])
+#define PHY_CONFIG_DELAY                [#if PHY_CONFIG_DELAY??]${PHY_CONFIG_DELAY}[#if PHY_CONFIG_DELAY?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x00000FFFU[/#if]
 
-#define PHY_READ_TO                     ((uint32_t)[#if PHY_READ_TO??]${PHY_READ_TO}[#if PHY_READ_TO?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000FFFFU[/#if])
-#define PHY_WRITE_TO                    ((uint32_t)[#if PHY_WRITE_TO??]${PHY_WRITE_TO}[#if PHY_WRITE_TO?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000FFFFU[/#if])
+#define PHY_READ_TO                     [#if PHY_READ_TO??]${PHY_READ_TO}[#if PHY_READ_TO?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000FFFFU[/#if]
+#define PHY_WRITE_TO                    [#if PHY_WRITE_TO??]${PHY_WRITE_TO}[#if PHY_WRITE_TO?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000FFFFU[/#if]
 
 /* Section 3: Common PHY Registers */
 
-#define PHY_BCR                         ((uint16_t)[#if PHY_BCR??]${PHY_BCR}[#if PHY_BCR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000U[/#if])    /*!< Transceiver Basic Control Register   */
-#define PHY_BSR                         ((uint16_t)[#if PHY_BSR??]${PHY_BSR}[#if PHY_BSR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0001U[/#if])    /*!< Transceiver Basic Status Register    */
+#define PHY_BCR                         ((uint16_t)[#if PHY_BCR??]${PHY_BCR}[#if PHY_BCR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0000[/#if])    /*!< Transceiver Basic Control Register   */
+#define PHY_BSR                         ((uint16_t)[#if PHY_BSR??]${PHY_BSR}[#if PHY_BSR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0001[/#if])    /*!< Transceiver Basic Status Register    */
  
-#define PHY_RESET                       ((uint16_t)[#if PHY_RESET??]${PHY_RESET}[#if PHY_RESET?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x8000U[/#if])  /*!< PHY Reset */
-#define PHY_LOOPBACK                    ((uint16_t)[#if PHY_LOOPBACK??]${PHY_LOOPBACK}[#if PHY_LOOPBACK?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x4000U[/#if])  /*!< Select loop-back mode */
-#define PHY_FULLDUPLEX_100M             ((uint16_t)[#if PHY_FULLDUPLEX_100M??]${PHY_FULLDUPLEX_100M}[#if PHY_FULLDUPLEX_100M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x2100U[/#if])  /*!< Set the full-duplex mode at 100 Mb/s */
-#define PHY_HALFDUPLEX_100M             ((uint16_t)[#if PHY_HALFDUPLEX_100M??]${PHY_HALFDUPLEX_100M}[#if PHY_HALFDUPLEX_100M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x2000U[/#if])  /*!< Set the half-duplex mode at 100 Mb/s */
-#define PHY_FULLDUPLEX_10M              ((uint16_t)[#if PHY_FULLDUPLEX_10M??]${PHY_FULLDUPLEX_10M}[#if PHY_FULLDUPLEX_10M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0100U[/#if])  /*!< Set the full-duplex mode at 10 Mb/s  */
-#define PHY_HALFDUPLEX_10M              ((uint16_t)[#if PHY_HALFDUPLEX_10M??]${PHY_HALFDUPLEX_10M}[#if PHY_HALFDUPLEX_10M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0000U[/#if])  /*!< Set the half-duplex mode at 10 Mb/s  */
-#define PHY_AUTONEGOTIATION             ((uint16_t)[#if PHY_AUTONEGOTIATION??]${PHY_AUTONEGOTIATION}[#if PHY_AUTONEGOTIATION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x1000U[/#if])  /*!< Enable auto-negotiation function     */
-#define PHY_RESTART_AUTONEGOTIATION     ((uint16_t)[#if PHY_RESTART_AUTONEGOTIATION??]${PHY_RESTART_AUTONEGOTIATION}[#if PHY_RESTART_AUTONEGOTIATION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0200U[/#if])  /*!< Restart auto-negotiation function    */
-#define PHY_POWERDOWN                   ((uint16_t)[#if PHY_POWERDOWN??]${PHY_POWERDOWN}[#if PHY_POWERDOWN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0800U[/#if])  /*!< Select the power down mode           */
-#define PHY_ISOLATE                     ((uint16_t)[#if PHY_ISOLATE??]${PHY_ISOLATE}[#if PHY_ISOLATE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0400U[/#if])  /*!< Isolate PHY from MII                 */
+#define PHY_RESET                       ((uint16_t)[#if PHY_RESET??]${PHY_RESET}[#if PHY_RESET?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x8000[/#if])  /*!< PHY Reset */
+#define PHY_LOOPBACK                    ((uint16_t)[#if PHY_LOOPBACK??]${PHY_LOOPBACK}[#if PHY_LOOPBACK?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x4000[/#if])  /*!< Select loop-back mode */
+#define PHY_FULLDUPLEX_100M             ((uint16_t)[#if PHY_FULLDUPLEX_100M??]${PHY_FULLDUPLEX_100M}[#if PHY_FULLDUPLEX_100M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x2100[/#if])  /*!< Set the full-duplex mode at 100 Mb/s */
+#define PHY_HALFDUPLEX_100M             ((uint16_t)[#if PHY_HALFDUPLEX_100M??]${PHY_HALFDUPLEX_100M}[#if PHY_HALFDUPLEX_100M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x2000[/#if])  /*!< Set the half-duplex mode at 100 Mb/s */
+#define PHY_FULLDUPLEX_10M              ((uint16_t)[#if PHY_FULLDUPLEX_10M??]${PHY_FULLDUPLEX_10M}[#if PHY_FULLDUPLEX_10M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0100[/#if])  /*!< Set the full-duplex mode at 10 Mb/s  */
+#define PHY_HALFDUPLEX_10M              ((uint16_t)[#if PHY_HALFDUPLEX_10M??]${PHY_HALFDUPLEX_10M}[#if PHY_HALFDUPLEX_10M?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0000[/#if])  /*!< Set the half-duplex mode at 10 Mb/s  */
+#define PHY_AUTONEGOTIATION             ((uint16_t)[#if PHY_AUTONEGOTIATION??]${PHY_AUTONEGOTIATION}[#if PHY_AUTONEGOTIATION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x1000[/#if])  /*!< Enable auto-negotiation function     */
+#define PHY_RESTART_AUTONEGOTIATION     ((uint16_t)[#if PHY_RESTART_AUTONEGOTIATION??]${PHY_RESTART_AUTONEGOTIATION}[#if PHY_RESTART_AUTONEGOTIATION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0200[/#if])  /*!< Restart auto-negotiation function    */
+#define PHY_POWERDOWN                   ((uint16_t)[#if PHY_POWERDOWN??]${PHY_POWERDOWN}[#if PHY_POWERDOWN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0800[/#if])  /*!< Select the power down mode           */
+#define PHY_ISOLATE                     ((uint16_t)[#if PHY_ISOLATE??]${PHY_ISOLATE}[#if PHY_ISOLATE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0400[/#if])  /*!< Isolate PHY from MII                 */
 
-#define PHY_AUTONEGO_COMPLETE           ((uint16_t)[#if PHY_AUTONEGO_COMPLETE??]${PHY_AUTONEGO_COMPLETE}[#if PHY_AUTONEGO_COMPLETE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0020U[/#if])  /*!< Auto-Negotiation process completed   */
-#define PHY_LINKED_STATUS               ((uint16_t)[#if PHY_LINKED_STATUS??]${PHY_LINKED_STATUS}[#if PHY_LINKED_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0004U[/#if])  /*!< Valid link established               */
-#define PHY_JABBER_DETECTION            ((uint16_t)[#if PHY_JABBER_DETECTION??]${PHY_JABBER_DETECTION}[#if PHY_JABBER_DETECTION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0002U[/#if])  /*!< Jabber condition detected            */
+#define PHY_AUTONEGO_COMPLETE           ((uint16_t)[#if PHY_AUTONEGO_COMPLETE??]${PHY_AUTONEGO_COMPLETE}[#if PHY_AUTONEGO_COMPLETE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0020[/#if])  /*!< Auto-Negotiation process completed   */
+#define PHY_LINKED_STATUS               ((uint16_t)[#if PHY_LINKED_STATUS??]${PHY_LINKED_STATUS}[#if PHY_LINKED_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0004[/#if])  /*!< Valid link established               */
+#define PHY_JABBER_DETECTION            ((uint16_t)[#if PHY_JABBER_DETECTION??]${PHY_JABBER_DETECTION}[#if PHY_JABBER_DETECTION?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0002[/#if])  /*!< Jabber condition detected            */
   
 /* Section 4: Extended PHY Registers */
 [#--Common define--]
-#define PHY_SR                          ((uint16_t)[#if PHY_SR??]${PHY_SR}[#if PHY_SR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x10U[/#if])    /*!< PHY status register Offset                      */
+#define PHY_SR                          ((uint16_t)[#if PHY_SR??]${PHY_SR}[#if PHY_SR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x10[/#if])    /*!< PHY status register Offset                      */
 [#if PHY_Name?? && (PHY_Name=="DP83848_PHY_ADDRESS"||PHY_Name=="DP83848")] 
-#define PHY_MICR                        ((uint16_t)[#if PHY_MICR??]${PHY_MICR}[#if PHY_MICR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x11U[/#if])    /*!< MII Interrupt Control Register                  */
-#define PHY_MISR                        ((uint16_t)[#if PHY_MISR??]${PHY_MISR}[#if PHY_MISR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x12U[/#if])    /*!< MII Interrupt Status and Misc. Control Register */
-#n#define PHY_LINK_STATUS                 ((uint16_t)[#if PHY_LINK_STATUS??]${PHY_LINK_STATUS}[#if PHY_LINK_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0001U[/#if])  /*!< PHY Link mask                                   */
+#define PHY_MICR                        ((uint16_t)[#if PHY_MICR??]${PHY_MICR}[#if PHY_MICR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x11[/#if])    /*!< MII Interrupt Control Register                  */
+#define PHY_MISR                        ((uint16_t)[#if PHY_MISR??]${PHY_MISR}[#if PHY_MISR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x12[/#if])    /*!< MII Interrupt Status and Misc. Control Register */
+#n#define PHY_LINK_STATUS               ((uint16_t)[#if PHY_LINK_STATUS??]${PHY_LINK_STATUS}[#if PHY_LINK_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0001[/#if])  /*!< PHY Link mask                                   */
 [#else]
 #n
 [/#if]
 [#--Common define--]
-#define PHY_SPEED_STATUS                ((uint16_t)[#if PHY_SPEED_STATUS??]${PHY_SPEED_STATUS}[#if PHY_SPEED_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0002U[/#if])  /*!< PHY Speed mask                                  */
-#define PHY_DUPLEX_STATUS               ((uint16_t)[#if PHY_DUPLEX_STATUS??]${PHY_DUPLEX_STATUS}[#if PHY_DUPLEX_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0004U[/#if])  /*!< PHY Duplex mask                                 */
+#define PHY_SPEED_STATUS                ((uint16_t)[#if PHY_SPEED_STATUS??]${PHY_SPEED_STATUS}[#if PHY_SPEED_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0002[/#if])  /*!< PHY Speed mask                                  */
+#define PHY_DUPLEX_STATUS               ((uint16_t)[#if PHY_DUPLEX_STATUS??]${PHY_DUPLEX_STATUS}[#if PHY_DUPLEX_STATUS?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0004[/#if])  /*!< PHY Duplex mask                                 */
 [#if PHY_Name?? && (PHY_Name=="DP83848_PHY_ADDRESS"||PHY_Name=="DP83848")]
-#n#define PHY_MICR_INT_EN                 ((uint16_t)[#if PHY_MICR_INT_EN??]${PHY_MICR_INT_EN}[#if PHY_MICR_INT_EN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0002U[/#if])  /*!< PHY Enable interrupts                           */
-#define PHY_MICR_INT_OE                 ((uint16_t)[#if PHY_MICR_INT_OE??]${PHY_MICR_INT_OE}[#if PHY_MICR_INT_OE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0001U[/#if])  /*!< PHY Enable output interrupt events              */
-#n#define PHY_MISR_LINK_INT_EN            ((uint16_t)[#if PHY_MISR_LINK_INT_EN??]${PHY_MISR_LINK_INT_EN}[#if PHY_MISR_LINK_INT_EN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0020U[/#if])  /*!< Enable Interrupt on change of link status       */
-#define PHY_LINK_INTERRUPT              ((uint16_t)[#if PHY_LINK_INTERRUPT??]${PHY_LINK_INTERRUPT}[#if PHY_LINK_INTERRUPT?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x2000U[/#if])  /*!< PHY link status interrupt mask                  */
+#n#define PHY_MICR_INT_EN                 ((uint16_t)[#if PHY_MICR_INT_EN??]${PHY_MICR_INT_EN}[#if PHY_MICR_INT_EN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0002[/#if])  /*!< PHY Enable interrupts                           */
+#define PHY_MICR_INT_OE                 ((uint16_t)[#if PHY_MICR_INT_OE??]${PHY_MICR_INT_OE}[#if PHY_MICR_INT_OE?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0001[/#if])  /*!< PHY Enable output interrupt events              */
+#n#define PHY_MISR_LINK_INT_EN            ((uint16_t)[#if PHY_MISR_LINK_INT_EN??]${PHY_MISR_LINK_INT_EN}[#if PHY_MISR_LINK_INT_EN?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0020[/#if])  /*!< Enable Interrupt on change of link status       */
+#define PHY_LINK_INTERRUPT              ((uint16_t)[#if PHY_LINK_INTERRUPT??]${PHY_LINK_INTERRUPT}[#if PHY_LINK_INTERRUPT?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x2000[/#if])  /*!< PHY link status interrupt mask                  */
 [/#if]
 [#if PHY_Name?? && (PHY_Name=="LAN8742A_PHY_ADDRESS")]
-#n#define PHY_ISFR                        ((uint16_t)[#if PHY_ISFR??]${PHY_ISFR}[#if PHY_ISFR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x1DU[/#if])    /*!< PHY Interrupt Source Flag register Offset   */
-#define PHY_ISFR_INT4                   ((uint16_t)[#if PHY_ISFR_INT4??]${PHY_ISFR_INT4}[#if PHY_ISFR_INT4?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")]U[/#if][#else]0x0010U[/#if])  /*!< PHY Link down inturrupt       */  
+#n#define PHY_ISFR                        ((uint16_t)[#if PHY_ISFR??]${PHY_ISFR}[#if PHY_ISFR?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x1D[/#if])    /*!< PHY Interrupt Source Flag register Offset   */
+#define PHY_ISFR_INT4                   ((uint16_t)[#if PHY_ISFR_INT4??]${PHY_ISFR_INT4}[#if PHY_ISFR_INT4?matches("(0x[0-9]*[a-f]*[A-F]*)|([0-9]*)")][/#if][#else]0x0010[/#if])  /*!< PHY Link down inturrupt       */  
 [/#if]
 
 /* ################## SPI peripheral configuration ########################## */
@@ -233,6 +245,7 @@
 */
 
 #define USE_SPI_CRC                     [#if CRC_SPI??]${CRC_SPI}[#else]1U[/#if]
+
 /* Includes ------------------------------------------------------------------*/
 /**
   * @brief Include module's header file 
@@ -245,6 +258,10 @@
 #ifdef HAL_GPIO_MODULE_ENABLED
   #include "stm32f2xx_hal_gpio.h"
 #endif /* HAL_GPIO_MODULE_ENABLED */
+
+#ifdef HAL_EXTI_MODULE_ENABLED
+  #include "stm32f2xx_hal_exti.h"
+#endif /* HAL_EXTI_MODULE_ENABLED */
 
 #ifdef HAL_DMA_MODULE_ENABLED
   #include "stm32f2xx_hal_dma.h"
@@ -261,6 +278,10 @@
 #ifdef HAL_CAN_MODULE_ENABLED
   #include "stm32f2xx_hal_can.h"
 #endif /* HAL_CAN_MODULE_ENABLED */
+
+#ifdef HAL_CAN_LEGACY_MODULE_ENABLED
+  #include "stm32f2xx_hal_can_legacy.h"
+#endif /* HAL_CAN_LEGACY_MODULE_ENABLED */
 
 #ifdef HAL_CRC_MODULE_ENABLED
   #include "stm32f2xx_hal_crc.h"
@@ -334,10 +355,6 @@
  #include "stm32f2xx_hal_sd.h"
 #endif /* HAL_SD_MODULE_ENABLED */
 
-#ifdef HAL_MMC_MODULE_ENABLED
- #include "stm32f2xx_hal_mmc.h"
-#endif /* HAL_MMC_MODULE_ENABLED */
-
 #ifdef HAL_SPI_MODULE_ENABLED
  #include "stm32f2xx_hal_spi.h"
 #endif /* HAL_SPI_MODULE_ENABLED */
@@ -373,12 +390,15 @@
 #ifdef HAL_HCD_MODULE_ENABLED
  #include "stm32f2xx_hal_hcd.h"
 #endif /* HAL_HCD_MODULE_ENABLED */
-   
+
+#ifdef HAL_MMC_MODULE_ENABLED
+ #include "stm32f2xx_hal_mmc.h"
+#endif /* HAL_MMC_MODULE_ENABLED */
 /* Exported macro ------------------------------------------------------------*/
 #ifdef  USE_FULL_ASSERT
 /**
   * @brief  The assert_param macro is used for function's parameters check.
-  * @param  expr: If expr is false, it calls assert_failed function
+  * @param  expr If expr is false, it calls assert_failed function
   *         which reports the name of the source file and the source
   *         line number of the call that failed. 
   *         If expr is true, it returns no value.
@@ -390,6 +410,7 @@
 #else
   #define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */
+
 
 #ifdef __cplusplus
 }

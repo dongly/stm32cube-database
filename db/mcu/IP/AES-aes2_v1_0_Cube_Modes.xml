@@ -8,6 +8,8 @@
     Name="AES"
     Version="aes2_v1_0_Cube">
 
+    <About>AES: Advanced Encryption Standard</About>
+
     <RefParameter Name="Data encryption types list" Comment="Data encryption type" DefaultValue="AESECB" Type="list" Group="Algorithm">
         <Description>AES Data encryption types list</Description>
         <PossibleValue Value="AESECB" Comment="AES ECB" Semaphore="Semaphore_CRYP_Coding_AESECB"/>
@@ -18,11 +20,11 @@
     </RefParameter>
 
     <RefParameter Comment="Data type" DefaultValue="CRYP_DATATYPE_32B" Name="DataType" Type="list" Group="Parameters">
-        <Description>AES Data Type selection: 32-bit data, 16-bit data, 8-bit data or 1-bit string.&lt;br&gt;This parameter can be a value of @ref CRYP_Data_Type.&lt;br&gt;Possible values are:&lt;br&gt; CRYP_DATATYPE_32B&lt;br&gt; CRYP_DATATYPE_16B&lt;br&gt; CRYP_DATATYPE_8B&lt;br&gt; CRYP_DATATYPE_1B</Description>
-        <PossibleValue Comment="32b" Value="CRYP_DATATYPE_32B"/>
-        <PossibleValue Comment="16b" Value="CRYP_DATATYPE_16B"/>
-        <PossibleValue Comment="8b" Value="CRYP_DATATYPE_8B"/>
-        <PossibleValue Comment="1b" Value="CRYP_DATATYPE_1B"/>
+        <Description>AES Data Type selection: 32-bit data, 16-bit data, 8-bit data or 1-bit string.&lt;br&gt;This parameter can be a value of @ref CRYP_Data_Type.&lt;br&gt;Possible values are:&lt;br&gt; CRYP_DATATYPE_32B: 32-bit data type (no swapping)&lt;br&gt; CRYP_DATATYPE_16B: 16-bit data type (half-word swapping)&lt;br&gt; CRYP_DATATYPE_8B: 8-bit data type (byte swapping)&lt;br&gt; CRYP_DATATYPE_1B: 1-bit data type (bit swapping)</Description>
+        <PossibleValue Comment="32b(no swapping)" Value="CRYP_DATATYPE_32B"/>
+        <PossibleValue Comment="16b(half-word swapping)" Value="CRYP_DATATYPE_16B"/>
+        <PossibleValue Comment="8b(byte swapping)" Value="CRYP_DATATYPE_8B"/>
+        <PossibleValue Comment="1b(bit swapping)" Value="CRYP_DATATYPE_1B"/>
     </RefParameter>
 
     <RefParameter Comment="KeySize" DefaultValue="CRYP_KEYSIZE_128B" Name="KeySize" Type="list" Group="Parameters">
@@ -48,15 +50,12 @@
     </RefParameter>
     <RefParameter Comment="Operating Mode" DefaultValue="CRYP_ALGOMODE_ENCRYPT" Name="OperatingMode" Type="list" Group="Parameters">
         <Condition Diagnostic="" Expression="(Semaphore_CRYP_Coding_AES_CMAC)"/>
-        <Description>AESGCM_GMAC operating mode.&lt;br&gt;This parameter can be a value of @ref CRYP_AES_OperatingMode.&lt;br&gt;Possible values are:&lt;br&gt; CRYP_ALGOMODE_ENCRYPT&lt;br&gt; CRYP_ALGOMODE_KEYDERIVATION&lt;br&gt; CRYP_ALGOMODE_DECRYPT&lt;br&gt; CRYP_ALGOMODE_TAG_GENERATION</Description>
-        <PossibleValue Comment="Encryption mode" Value="CRYP_ALGOMODE_ENCRYPT"/>
+        <Description>AESGCM_GMAC operating mode.&lt;br&gt;This parameter can be a value of @ref CRYP_AES_OperatingMode.&lt;br&gt;Possible values are:&lt;br&gt; CRYP_ALGOMODE_ENCRYPT&lt;br&gt; CRYP_ALGOMODE_KEYDERIVATION&lt;br&gt; CRYP_ALGOMODE_KEYDERIVATION_DECRYPT&lt;br&gt; CRYP_ALGOMODE_DECRYPT&lt;br&gt; CRYP_ALGOMODE_TAG_GENERATION</Description>
         <PossibleValue Comment="Key derivation mode" Value="CRYP_ALGOMODE_KEYDERIVATION"/>
-        <PossibleValue Comment="Decryption" Value="CRYP_ALGOMODE_DECRYPT"/>
         <PossibleValue Comment="Key derivation and decryption" Value="CRYP_ALGOMODE_KEYDERIVATION_DECRYPT"/>
-        <PossibleValue Comment="GMAC authentication tag generation" Value="CRYP_ALGOMODE_TAG_GENERATION"/>
     </RefParameter>
     <RefParameter Comment="Operating Mode" DefaultValue="CRYP_ALGOMODE_ENCRYPT" Name="OperatingMode" Type="list" Group="Parameters">
-        <Condition Diagnostic="" Expression="(Semaphore_CRYP_Coding_AESGCM_GMAC)|(Semaphore_CRYP_Coding_AES_CMAC)"/>
+        <Condition Diagnostic="" Expression="(Semaphore_CRYP_Coding_AESGCM_GMAC)"/>
         <Description>AESGCM_GMAC operating mode.&lt;br&gt;This parameter can be a value of @ref CRYP_AES_OperatingMode.&lt;br&gt;Possible values are:&lt;br&gt; CRYP_ALGOMODE_ENCRYPT&lt;br&gt; CRYP_ALGOMODE_KEYDERIVATION&lt;br&gt; CRYP_ALGOMODE_DECRYPT&lt;br&gt; CRYP_ALGOMODE_TAG_GENERATION</Description>
         <PossibleValue Comment="Encryption mode" Value="CRYP_ALGOMODE_ENCRYPT"/>
         <PossibleValue Comment="Key derivation mode" Value="CRYP_ALGOMODE_KEYDERIVATION"/>

@@ -128,7 +128,7 @@
 <Item Name="SDMMC1ClockSelection" NewName="SDMMCxSource" NewValue="LL_RCC_SDMMC1_CLKSOURCE_PLLSAI1" Type="RefParameter" Value="RCC_SDMMC1CLKSOURCE_PLLSAI1"/>
 
 <Item Name="SDMMCClockSelection" NewName="SDMMCxSource" NewValue="LL_RCC_SDMMC1_KERNELCLKSOURCE_PLLP" Type="RefParameter" Value="RCC_SDMMC1CLKSOURCE_PLLP"/>
-<Item Name="SDMMCClockSelection" NewName="SDMMCxSource" NewValue="LL_RCC_SDMMC1_KERNELCLKSOURCE_48CLK" Type="RefParameter" Value="RCC_SDIOCLKSOURCE_CK48"/>
+<Item Name="SDMMCClockSelection" NewName="SDMMCxSource" NewValue="LL_RCC_SDMMC1_KERNELCLKSOURCE_48CLK" Type="RefParameter" Value="RCC_SDIOCLKSOURCE_CLK48"/>
 
 <Item NewName="Clock" NewValue="LL_RCC_STOP_WAKEUPCLOCK_HSI" Type="RefParameter" Value="RCC_STOP_WAKEUPCLOCK_HSI"/>
 <Item NewName="Clock" NewValue="LL_RCC_STOP_WAKEUPCLOCK_MSI" Type="RefParameter" Value="RCC_STOP_WAKEUPCLOCK_MSI"/>
@@ -573,6 +573,7 @@
 <Item Name="DAC" NewName="DAC" NewValue="LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_DAC1)" Type="CLK_ENABLE" Value="__HAL_RCC_DAC_CLK_ENABLE"/>
 <Item Name="LCD" NewName="LCD" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_LCD)" Type="CLK_ENABLE" Value="__HAL_RCC_LCD_CLK_ENABLE"/>
 <Item Name="RTCAPB" NewName="RTCAPB" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB)" Type="CLK_ENABLE" Value="__HAL_RCC_RTCAPB_CLK_ENABLE"/>
+<Item Name="RTC" NewName="RTC" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_RTCAPB)" Type="CLK_ENABLE" Value="__HAL_RCC_RTCAPB_CLK_ENABLE"/>
 <Item Name="CRS" NewName="CRS" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_CRS)" Type="CLK_ENABLE" Value="__HAL_RCC_CRS_CRS_ENABLE"/>
 <Item Name="CAN2" NewName="CAN2" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_CAN2)" Type="CLK_ENABLE" Value="__HAL_RCC_CAN2_CRS_ENABLE"/>
 <Item Name="USB" NewName="USB" NewValue="LL_APB2_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_USB)" Type="CLK_ENABLE" Value="__HAL_RCC_CAN2_USB_ENABLE"/>

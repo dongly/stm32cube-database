@@ -26,23 +26,39 @@
 		<Description>Maximum size of string descriptors</Description>
 	</RefParameter>
 	
-	<!-- Tracker 312690 -->
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
-		<Condition Expression="VirtualModeFS=Dfu_FS|VirtualModeHS=Dfu_HS" Diagnostic=""/>
+	<!-- Tracker 312690 and 42620 -->
+	<!-- BZ 87073
+	<RefParameter Name="USBD_SUPPORT_USER_STRING_DESC" Comment="USBD_SUPPORT_USER_STRING_DESC (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">		
+		<Condition Expression="(VirtualMode=Dfu) &amp; (DIE411 | DIE450 | DIE480 | DIE483 | DIE451 | DIE449 | DIE452 )" Diagnostic=""/>
 		<PossibleValue Comment="Enabled" Value="1"/>
-		<Description>Enable User string support</Description>
-	</RefParameter>
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
-		<Condition Expression="VirtualModeFS=Custom_Hid_FS | VirtualModeHS=Custom_Hid_HS" Diagnostic=""/>
-		<PossibleValue Comment="Enabled" Value="1"/>
-		<Description>Enable User string support</Description>
-	</RefParameter>
-	<!-- Tracker 42620 -->
-	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters">		
 		<PossibleValue Comment="Disabled" Value="0"/>
-		<!--<PossibleValue Comment="Enabled" Value="1"/>-->
 		<Description>Enable User string support</Description>
 	</RefParameter>
+		
+	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">
+		<Condition Expression="((VirtualModeFS=Dfu_FS &amp; !DEVICE_HIGH_SPEED$context) | (VirtualModeHS=Dfu_HS &amp; !DEVICE_FULL_SPEED$context)) &amp; !(DIE411  | DIE450 | DIE480 | DIE483  | DIE451 | DIE449 | DIE452)" Diagnostic=""/>
+		<PossibleValue Comment="Enabled" Value="1"/>
+		<PossibleValue Comment="Disabled" Value="0"/>
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	-->
+	<RefParameter Name="USBD_SUPPORT_USER_STRING_DESC" Comment="USBD_SUPPORT_USER_STRING_DESC (Enable user string descriptor)" DefaultValue="1"  Type="list" Group="Basic Parameters">		
+		<Condition Expression="(VirtualMode=Dfu)" Diagnostic=""/>
+		<PossibleValue Comment="Enabled" Value="1"/>
+		<PossibleValue Comment="Disabled" Value="0"/>
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	
+	<!-- Tracker 42620 -->	
+	<RefParameter Name="USBD_SUPPORT_USER_STRING" Comment="USBD_SUPPORT_USER_STRING (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters" >		
+		<PossibleValue Comment="Disabled" Value="0"/>		
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	<RefParameter Name="USBD_SUPPORT_USER_STRING_DESC" Comment="USBD_SUPPORT_USER_STRING_DESC (Enable user string descriptor)" DefaultValue="0"  Type="list" Group="Basic Parameters">		
+		<PossibleValue Comment="Disabled" Value="0"/>		
+		<Description>Enable User string support</Description>
+	</RefParameter>
+	
 	
 	<RefParameter Name="USBD_SELF_POWERED" Comment="USBD_SELF_POWERED (Enabled self power)" DefaultValue="1" Type="list" Group="Basic Parameters">
 		<PossibleValue Comment="Enabled" Value="1"/>	
@@ -86,6 +102,7 @@
 		<PossibleValue Comment="CustomHid" Value="CustomHid"/>
 		<PossibleValue Comment="Msc" Value="Msc"/>							
 		<PossibleValue Comment="Mtp" Value="Mtp"/>
+		<PossibleValue Comment="BillBoard" Value="BillBoard"/>
 	</RefParameter>
 	<RefParameter Comment="VirtualModeHS" DefaultValue="Audio" Name="VirtualModeHS" Type="list" Visible="false" Group="Basic Parameters" >
 		<PossibleValue Comment="" Value="Audio_HS"/>
@@ -96,6 +113,7 @@
 		<PossibleValue Comment="" Value="Custom_Hid_HS"/>
 		<PossibleValue Comment="" Value="Msc_HS"/>							
 		<PossibleValue Comment="" Value="Mtp_HS"/>
+		<PossibleValue Comment="" Value="BillBoard_HS"/>
 	</RefParameter>
 	<RefParameter Comment="VirtualModeFS" DefaultValue="Audio" Name="VirtualModeFS" Type="list" Visible="false" Group="Basic Parameters" >
 		<PossibleValue Comment="" Value="Audio_FS"/>
@@ -106,6 +124,7 @@
 		<PossibleValue Comment="" Value="Custom_Hid_FS"/>
 		<PossibleValue Comment="" Value="Msc_FS"/>							
 		<PossibleValue Comment="" Value="Mtp_FS"/>
+		<PossibleValue Comment="" Value="BillBoard_FS"/>
 	</RefParameter>
 	<!-- Device Descriptors Configuration -->
 	<RefParameter Name="VID" Comment="VID (Vendor IDentifier)" DefaultValue="1155" Type="integer" Min="0" Max="65535" Group="Device Descriptor" TabName="Device Descriptor">
@@ -152,6 +171,9 @@
 	<RefParameter Name="PID_CUSTOMHID_HS" Comment="PID (Product IDentifier)" DefaultValue="22352 " Type="integer" Min="0" Max="65535" Group="Device Descriptor HS" TabName="Device Descriptor">
 		<Description>The Product Identfier value present on the Device Descriptor</Description>
 	</RefParameter>	
+	<RefParameter Name="PID_BILLBOARD_HS" Comment="PID (Product IDentifier)" DefaultValue="22352 " Type="integer" Min="0" Max="65535" Group="Device Descriptor FS" TabName="Device Descriptor">
+		<Description>The Product Identfier value present on the Device Descriptor</Description>
+	</RefParameter>	
 	<RefParameter Name="PID_HS" Comment="PID (Product IDentifier)" DefaultValue="0" Type="integer" Min="0" Max="65535" Group="Device Descriptor HS" TabName="Device Descriptor">
 		<Description>The Product Identfier value present on the Device Descriptor</Description>		
 	</RefParameter>	
@@ -182,6 +204,9 @@
 		<Description>The Product Identfier value present on the Device Descriptor</Description>
 	</RefParameter>	
 	<RefParameter Name="PID_CUSTOMHID_FS" Comment="PID (Product IDentifier)" DefaultValue="22352 " Type="integer" Min="0" Max="65535" Group="Device Descriptor FS" TabName="Device Descriptor">
+		<Description>The Product Identfier value present on the Device Descriptor</Description>
+	</RefParameter>	
+	<RefParameter Name="PID_BILLBOARD_FS" Comment="PID (Product IDentifier)" DefaultValue="22352 " Type="integer" Min="0" Max="65535" Group="Device Descriptor FS" TabName="Device Descriptor">
 		<Description>The Product Identfier value present on the Device Descriptor</Description>
 	</RefParameter>	
 	<RefParameter Name="PID_FS" Comment="PID (Product IDentifier)" DefaultValue="1" Type="integer" Min="0" Max="65535" Group="Device Descriptor FS" TabName="Device Descriptor">
@@ -406,6 +431,33 @@
 	<RefParameter Name="INTERFACE_STRING_MTP_FS" Comment="INTERFACE_STRING (Interface Identifier)" DefaultValue="MTP Interface" Type="stringRW" Group="Device Descriptor FS" TabName="Device Descriptor">
 		<Description>The interface identifier</Description>
 	</RefParameter>
+	<!-- Ticket 78428 New USB Classes> -->
+	<!-- BILLBOARD Class -->
+	<RefParameter Name="PRODUCT_STRING_BILLBOARD_HS" Comment="PRODUCT_STRING (Product Identifier)" DefaultValue="STM32 BillBoard Class" Type="stringRW" Group="Device Descriptor HS" TabName="Device Descriptor">	
+		<Description>The product identifier</Description>
+	</RefParameter>	
+	<RefParameter Name="SERIALNUMBER_STRING_BILLBOARD_HS" Comment="SERIALNUMBER_STRING (Serial number)" DefaultValue="00000000001A" Type="stringRW" Group="Device Descriptor HS" TabName="Device Descriptor">	
+		<Description>The serial number identifier</Description>
+	</RefParameter>	
+	<RefParameter Name="CONFIGURATION_STRING_BILLBOARD_HS" Comment="CONFIGURATION_STRING (Configuration Identifier)" DefaultValue="BillBoard Config" Type="stringRW" Group="Device Descriptor HS" TabName="Device Descriptor">
+		<Description>The configuration identifier</Description>
+	</RefParameter>
+	<RefParameter Name="INTERFACE_STRING_BILLBOARD_HS" Comment="INTERFACE_STRING (Interface Identifier)" DefaultValue="BillBoard Interface" Type="stringRW" Group="Device Descriptor HS" TabName="Device Descriptor">
+		<Description>The interface identifier</Description>
+	</RefParameter>
+	
+	<RefParameter Name="PRODUCT_STRING_BILLBOARD_FS" Comment="PRODUCT_STRING (Product Identifier)" DefaultValue="STM32 BillBoard Class" Type="stringRW" Group="Device Descriptor FS" TabName="Device Descriptor">	
+		<Description>The product identifier</Description>
+	</RefParameter>	
+	<RefParameter Name="SERIALNUMBER_STRING_BILLBOARD_FS" Comment="SERIALNUMBER_STRING (Serial number)" DefaultValue="00000000001A" Type="stringRW" Group="Device Descriptor FS" TabName="Device Descriptor">	
+		<Description>The serial number identifier</Description>
+	</RefParameter>	
+	<RefParameter Name="CONFIGURATION_STRING_BILLBOARD_FS" Comment="CONFIGURATION_STRING (Configuration Identifier)" DefaultValue="BillBoard Config" Type="stringRW" Group="Device Descriptor FS" TabName="Device Descriptor">
+		<Description>The configuration identifier</Description>
+	</RefParameter>
+	<RefParameter Name="INTERFACE_STRING_BILLBOARD_FS" Comment="INTERFACE_STRING (Interface Identifier)" DefaultValue="BillBoard Interface" Type="stringRW" Group="Device Descriptor FS" TabName="Device Descriptor">
+		<Description>The interface identifier</Description>
+	</RefParameter>
 	
 	<!-- User Class -->
 	<RefParameter Name="PRODUCT_STRING_HS" Comment="PRODUCT_STRING (Product Identifier)" DefaultValue="" Type="stringRW" Group="Device Descriptor HS" TabName="Device Descriptor">
@@ -437,6 +489,21 @@
 	
     <RefParameter Name="MCU_RAM_SIZE" Comment="MCU_RAM_SIZE" DefaultValue="=$RamSize" Type="integer" Visible="false"/>
     <!-- Specific Class Parameters -->
+	<!-- Bug 68511  New #define-->
+	<RefParameter Name="HID_FS_BINTERVAL" Comment="HID_FS_BINTERVAL" DefaultValue="0xA" Max="0xFF" Min="0x1"  Type="hex" Group="Class Parameters" Visible="true">
+		<Condition Expression="VirtualModeFS = Hid_FS" Diagnostic=""/>
+	</RefParameter>
+	<RefParameter Name="HID_HS_BINTERVAL" Comment="HID_HS_BINTERVAL" DefaultValue="0x7" Max="0xFF" Min="0x1"  Type="hex" Group="Class Parameters" Visible="true">
+		<Condition Expression="VirtualModeHS = Hid_HS" Diagnostic=""/>
+	</RefParameter>
+	
+	<RefParameter Name="CUSTOM_HID_FS_BINTERVAL" Comment="CUSTOM_HID_FS_BINTERVAL" DefaultValue="0x5" Max="0xFF" Min="1"  Type="hex" Group="Class Parameters" Visible="true">	
+		<Condition Expression="VirtualModeFS = Custom_Hid_FS" Diagnostic=""/>		
+	</RefParameter>		
+	<RefParameter Name="CUSTOM_HID_HS_BINTERVAL" Comment="CUSTOM_HID_HS_BINTERVAL" DefaultValue="0x5" Max="0xFF" Min="1"  Type="hex" Group="Class Parameters" Visible="true">
+		<Condition Expression="VirtualModeHS = Custom_Hid_HS" Diagnostic=""/>
+	</RefParameter>
+	
     <RefParameter Name="APP_RX_DATA_SIZE" Comment="USB CDC Rx Buffer Size" DefaultValue="2048"  Min="4" Max="2048" Type="integer" Group="Class Parameters" Unit="Bytes">
         <Condition Expression="VirtualMode = Cdc &amp; MCU_RAM_SIZE&gt;64" Diagnostic=""/>
         <Description>Number of bytes for the receive buffer</Description>
@@ -692,31 +759,7 @@
 	</RefParameter>
 	<RefParameter Name="FS_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="FS_Desc"/>	
-	</RefParameter>
-		
-	<!--
-	<RefParameter Name="HID_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="HID_Desc"/>	
-	</RefParameter>
-	<RefParameter Name="MSC_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="MSC_Desc"/>	
-	</RefParameter>
-	<RefParameter Name="CDC_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="CDC_Desc"/>
-	</RefParameter>
-	<RefParameter Name="AUDIO_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="AUDIO_Desc"/>	
-	</RefParameter>	
-	<RefParameter Name="CCID_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="CCID_Desc"/>	
-	</RefParameter>
-	<RefParameter Name="DFU_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="DFU_Desc"/>	
-	</RefParameter>
-	<RefParameter Name="MTP_Desc" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
-		<PossibleValue Comment="" Value="MTP_Desc"/>	
-	</RefParameter>
-	-->
+	</RefParameter>		
 	
 	<!-- For the class -->
 	<RefParameter Name="USBD_CLASS" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
@@ -746,6 +789,9 @@
 	</RefParameter>
 	<RefParameter Name="USBD_MTP" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
 		<PossibleValue Comment="" Value="USBD_MTP"/>	
+	</RefParameter>
+	<RefParameter Name="USBD_BILLBOARD" Comment="" DefaultValue="0" Max="10" Min="0"  Type="integer" Visible="false">
+		<PossibleValue Comment="" Value="USBD_BB"/>	
 	</RefParameter>
 	
 	<!-- For the Callback -->
@@ -808,43 +854,41 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->		
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
+		
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
+		
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->			
 		<Parameter Name="PID_AUDIO_HS"/>		
-		<Parameter Name="PRODUCT_STRING_AUDIO_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_AUDIO_HS"/>
+		<Parameter Name="PRODUCT_STRING_AUDIO_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_AUDIO_HS"/>
 		<Parameter Name="INTERFACE_STRING_AUDIO_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -852,7 +896,7 @@
 			<PossibleValue>AUDIO</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_AUDIO_FREQ">
-			<Condition Expression="(AUDIO_HS) | (AUDIO_FS)" Diagnostic=""/>
+			<Condition Expression="(AUDIO_HS$context) | (AUDIO_FS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	<RefMode Name="AUDIO_FS" Abstract="false">
@@ -865,43 +909,41 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->		
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
+		
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
+	
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>
 		<!-- Parameters for Device Descriptors -->
 		<Parameter Name="PID_AUDIO_FS"/>
-		<Parameter Name="PRODUCT_STRING_AUDIO_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_AUDIO_FS"/>
+		<Parameter Name="PRODUCT_STRING_AUDIO_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_AUDIO_FS"/>
 		<Parameter Name="INTERFACE_STRING_AUDIO_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -909,7 +951,7 @@
 			<PossibleValue>AUDIO</PossibleValue>
 		</Parameter>	
 		<Parameter Name="USBD_AUDIO_FREQ">
-			<Condition Expression="(AUDIO_FS) &amp; (!AUDIO_HS)" Diagnostic=""/>
+			<Condition Expression="(AUDIO_FS$context) &amp; (!AUDIO_HS$context)" Diagnostic=""/>
 		</Parameter>	
 	</RefMode>
 	
@@ -924,42 +966,38 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->		
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_CCID_HS"/>			
-		<Parameter Name="PRODUCT_STRING_CCID_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CCID_HS"/>
+		<Parameter Name="PRODUCT_STRING_CCID_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_CCID_HS"/>
 		<Parameter Name="INTERFACE_STRING_CCID_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -967,10 +1005,12 @@
 			<PossibleValue>CCID</PossibleValue>
 		</Parameter>
 		<Parameter Name="CCID_BULK_EP_MAX_PACKET">
-			<Condition Expression="(CCID_HS) | (CCID_FS)" Diagnostic=""/>
+			<Condition Expression="(CCID_HS$context) | (CCID_FS$context)" Diagnostic=""/>
 		</Parameter>
-		<Parameter Name="CCID_INTR_EP_MAX_PACKET"/>	
-	</RefMode>
+		<Parameter Name="CCID_INTR_EP_MAX_PACKET">
+			<Condition Expression="(CCID_HS$context) | (CCID_FS$context)" Diagnostic=""/>
+		</Parameter>	
+	</RefMode>	
 	<RefMode Name="CCID_FS" Abstract="false">
 		<ConfigForMode>USB_DEVICE_CCID_FS</ConfigForMode>
 		<Parameter Name="VirtualMode">		
@@ -981,43 +1021,39 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>		
 		<!-- Parameters for Device Descriptors -->			
 		<Parameter Name="PID_CCID_FS"/>		
-		<Parameter Name="PRODUCT_STRING_CCID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CCID_FS"/>
+		<Parameter Name="PRODUCT_STRING_CCID_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_CCID_FS"/>
 		<Parameter Name="INTERFACE_STRING_CCID_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1025,10 +1061,10 @@
 			<PossibleValue>CCID</PossibleValue>
 		</Parameter>
 		<Parameter Name="CCID_BULK_EP_MAX_PACKET">
-			<Condition Expression="(CCID_FS) &amp; (!CCID_HS)" Diagnostic=""/>
+			<Condition Expression="(CCID_FS$context) &amp; (!CCID_HS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="CCID_INTR_EP_MAX_PACKET">
-			<Condition Expression="(CCID_FS) &amp; (!CCID_HS)" Diagnostic=""/>
+			<Condition Expression="(CCID_FS$context) &amp; (!CCID_HS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	
@@ -1043,42 +1079,38 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>	
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_CDC_HS"/>			
-		<Parameter Name="PRODUCT_STRING_CDC_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CDC_HS"/>
+		<Parameter Name="PRODUCT_STRING_CDC_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_CDC_HS"/>
 		<Parameter Name="INTERFACE_STRING_CDC_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>					
@@ -1087,12 +1119,11 @@
 		</Parameter>
 		
 		<Parameter Name="APP_RX_DATA_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="APP_TX_DATA_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 	</RefMode>
 	<RefMode Name="CDC_FS" Abstract="false">
 		<ConfigForMode>USB_DEVICE_CDC_FS</ConfigForMode>
@@ -1104,43 +1135,39 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->				
 		<Parameter Name="PID_CDC_FS"/>			
-		<Parameter Name="PRODUCT_STRING_CDC_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CDC_FS"/>
+		<Parameter Name="PRODUCT_STRING_CDC_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_CDC_FS"/>
 		<Parameter Name="INTERFACE_STRING_CDC_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>					
@@ -1149,12 +1176,11 @@
 		</Parameter>
 		
 		<Parameter Name="APP_RX_DATA_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="APP_TX_DATA_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 	</RefMode>
 	
 	<!-- RefMode for USB DEVICE : Support DFU Class-->
@@ -1168,43 +1194,41 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">			
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
-		</Parameter>
+		<Parameter Name="USBD_SUPPORT_USER_STRING_DESC">			
+			<Condition Expression="((USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context))" Diagnostic=""/>			
+		</Parameter>						
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_DFU_HS"/>		
-		<Parameter Name="PRODUCT_STRING_DFU_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_DFU_HS"/>
+		<Parameter Name="PRODUCT_STRING_DFU_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_DFU_HS"/>
 		<Parameter Name="INTERFACE_STRING_DFU_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -1212,16 +1236,16 @@
 			<PossibleValue>DFU</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_DFU_MAX_ITF_NUM">
-			<Condition Expression="(DFU_HS) | (DFU_FS)" Diagnostic=""/>
+			<Condition Expression="(DFU_HS$context) | (DFU_FS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DFU_XFER_SIZE">
-			<Condition Expression="(DFU_HS) | (DFU_FS)" Diagnostic=""/>
+			<Condition Expression="(DFU_HS$context) | (DFU_FS$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="USBD_DFU_APP_DEFAULT_ADD">
-			<Condition Expression="(DFU_HS) | (DFU_FS)" Diagnostic=""/>
+			<Condition Expression="(DFU_HS$context) | (DFU_FS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DFU_MEDIA">
-			<Condition Expression="(DFU_HS) | (DFU_FS)" Diagnostic=""/>
+			<Condition Expression="(DFU_HS$context) | (DFU_FS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	<RefMode Name="DFU_FS" Abstract="false">
@@ -1234,44 +1258,42 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
-		</Parameter>
+		<Parameter Name="USBD_SUPPORT_USER_STRING_DESC">			
+			<Condition Expression="((USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context))" Diagnostic=""/>			
+		</Parameter>					
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->				
 		<Parameter Name="PID_DFU_FS"/>			
-		<Parameter Name="PRODUCT_STRING_DFU_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_DFU_FS"/>
+		<Parameter Name="PRODUCT_STRING_DFU_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_DFU_FS"/>
 		<Parameter Name="INTERFACE_STRING_DFU_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1279,16 +1301,16 @@
 			<PossibleValue>DFU</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_DFU_MAX_ITF_NUM">
-			<Condition Expression="(DFU_FS) &amp; (!DFU_HS)" Diagnostic=""/>
+			<Condition Expression="(DFU_FS$context) &amp; (!DFU_HS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DFU_XFER_SIZE">
-			<Condition Expression="(DFU_FS) &amp; (!DFU_HS)" Diagnostic=""/>
+			<Condition Expression="(DFU_FS$context) &amp; (!DFU_HS$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="USBD_DFU_APP_DEFAULT_ADD">
-			<Condition Expression="(DFU_FS) &amp; (!DFU_HS)" Diagnostic=""/>
+			<Condition Expression="(DFU_FS$context) &amp; (!DFU_HS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DFU_MEDIA">
-			<Condition Expression="(DFU_FS) &amp; (!DFU_HS)" Diagnostic=""/>
+			<Condition Expression="(DFU_FS$context) &amp; (!DFU_HS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	
@@ -1301,44 +1323,42 @@
 		<Parameter Name="VirtualModeHS">		
 			<PossibleValue>Hid_HS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="HID_HS_BINTERVAL"/>					
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_HID_HS"/>	
-		<Parameter Name="PRODUCT_STRING_HID_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_HID_HS"/>
+		<Parameter Name="PRODUCT_STRING_HID_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_HID_HS"/>
 		<Parameter Name="INTERFACE_STRING_HID_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -1354,45 +1374,44 @@
 		<Parameter Name="VirtualModeFS">		
 			<PossibleValue>Hid_FS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="HID_FS_BINTERVAL"/>			
+		
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_HID_FS"/>	
-		<Parameter Name="PRODUCT_STRING_HID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_HID_FS"/>
+		<Parameter Name="PRODUCT_STRING_HID_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_HID_FS"/>
 		<Parameter Name="INTERFACE_STRING_HID_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1410,56 +1429,54 @@
 		<Parameter Name="VirtualModeHS">		
 			<PossibleValue>Custom_Hid_HS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="CUSTOM_HID_HS_BINTERVAL"/>			
+		
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_CUSTOMHID_HS"/>		
-		<Parameter Name="PRODUCT_STRING_CUSTOMHID_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CUSTOMHID_HS"/>
+		<Parameter Name="PRODUCT_STRING_CUSTOMHID_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_CUSTOMHID_HS"/>
 		<Parameter Name="INTERFACE_STRING_CUSTOMHID_HS"/>				
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
 		<Parameter Name="CLASS_NAME_HS">
-			<PossibleValue>CUSTOMHID</PossibleValue>
+			<PossibleValue>CUSTOM_HID</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_CUSTOM_HID_REPORT_DESC_SIZE">
-			<Condition Expression="(CUSTOM_HID_HS) | (CUSTOM_HID_FS)" Diagnostic=""/>
+			<Condition Expression="(CUSTOM_HID_HS$context) | (CUSTOM_HID_FS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_CUSTOMHID_OUTREPORT_BUF_SIZE">
-			<Condition Expression="(CUSTOM_HID_HS) | (CUSTOM_HID_FS)" Diagnostic=""/>
+			<Condition Expression="(CUSTOM_HID_HS$context) | (CUSTOM_HID_FS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	<RefMode Name="CUSTOM_HID_FS" Abstract="false">
@@ -1470,57 +1487,55 @@
 		<Parameter Name="VirtualModeFS">		
 			<PossibleValue>Custom_Hid_FS</PossibleValue>
 		</Parameter>
+		<!-- Bug 68511  New #define-->
+		<Parameter Name="CUSTOM_HID_FS_BINTERVAL"/>
+		
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-			<PossibleValue>1</PossibleValue>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>		
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_CUSTOMHID_FS"/>		
-		<Parameter Name="PRODUCT_STRING_CUSTOMHID_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_CUSTOMHID_FS"/>
+		<Parameter Name="PRODUCT_STRING_CUSTOMHID_FS"/>	
 		<Parameter Name="CONFIGURATION_STRING_CUSTOMHID_FS"/>
 		<Parameter Name="INTERFACE_STRING_CUSTOMHID_FS"/>				
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
 		<Parameter Name="CLASS_NAME_FS">
-			<PossibleValue>CUSTOMHID</PossibleValue>
+			<PossibleValue>CUSTOM_HID</PossibleValue>
 		</Parameter>
 		<Parameter Name="USBD_CUSTOM_HID_REPORT_DESC_SIZE">
-			<Condition Expression="(CUSTOM_HID_FS) &amp; (!CUSTOM_HID_HS)" Diagnostic=""/>
+			<Condition Expression="(CUSTOM_HID_FS$context) &amp; (!CUSTOM_HID_HS$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_CUSTOMHID_OUTREPORT_BUF_SIZE">
-			<Condition Expression="(CUSTOM_HID_FS) &amp; (!CUSTOM_HID_HS)" Diagnostic=""/>
+			<Condition Expression="(CUSTOM_HID_FS$context) &amp; (!CUSTOM_HID_HS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	
@@ -1535,42 +1550,38 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MSC_HS"/>		
-		<Parameter Name="PRODUCT_STRING_MSC_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MSC_HS"/>
+		<Parameter Name="PRODUCT_STRING_MSC_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_MSC_HS"/>
 		<Parameter Name="INTERFACE_STRING_MSC_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -1578,7 +1589,7 @@
 			<PossibleValue>MSC</PossibleValue>
 		</Parameter>
 		<Parameter Name="MSC_MEDIA_PACKET">
-			<Condition Expression="(MSC_HS) | (MSC_FS)" Diagnostic=""/>
+			<Condition Expression="(MSC_HS$context) | (MSC_FS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	<RefMode Name="MSC_FS" Abstract="false">
@@ -1591,43 +1602,39 @@
 		</Parameter>		
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MSC_FS"/>		
-		<Parameter Name="PRODUCT_STRING_MSC_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MSC_FS"/>
+		<Parameter Name="PRODUCT_STRING_MSC_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_MSC_FS"/>
 		<Parameter Name="INTERFACE_STRING_MSC_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
@@ -1635,7 +1642,7 @@
 			<PossibleValue>MSC</PossibleValue>
 		</Parameter>
 		<Parameter Name="MSC_MEDIA_PACKET">
-			<Condition Expression="(MSC_FS) &amp; (!MSC_HS)" Diagnostic=""/>
+			<Condition Expression="(MSC_FS$context) &amp; (!MSC_HS$context)" Diagnostic=""/>
 		</Parameter>
 	</RefMode>
 	
@@ -1650,42 +1657,38 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>					
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_HS_CLASSES) | (USB_DEVICE_FS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>						
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MTP_HS"/>		
-		<Parameter Name="PRODUCT_STRING_MTP_HS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MTP_HS"/>
+		<Parameter Name="PRODUCT_STRING_MTP_HS"/>		
 		<Parameter Name="CONFIGURATION_STRING_MTP_HS"/>
 		<Parameter Name="INTERFACE_STRING_MTP_HS"/>		
 		<Parameter Name="USBD_HandleTypeDef_HS"/>			
@@ -1703,48 +1706,147 @@
 		</Parameter>
 		<!-- Parameters for Function and Buffer Configurations -->
 		<Parameter Name="USBD_MAX_NUM_INTERFACES">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
-		<Parameter Name="USBD_SUPPORT_USER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
-		</Parameter>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
 		<Parameter Name="USBD_SELF_POWERED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="USBD_DEBUG_LEVEL">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>	
 		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="VID">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>			
 		<Parameter Name="LANGID_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<Parameter Name="MANUFACTURER_STRING">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
 		</Parameter>
 		<!-- Parameters for Link Power Management -->
 		<Parameter Name="USBD_LPM_ENABLED">
-			<Condition Expression="(USB_DEVICE_FS_CLASSES) &amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic=""/>			
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
 		</Parameter>				
 		<!-- Parameters for Device Descriptors -->		
 		<Parameter Name="PID_MTP_FS"/>		
-		<Parameter Name="PRODUCT_STRING_MTP_FS"/>
-		<Parameter Name="SERIALNUMBER_STRING_MTP_FS"/>
+		<Parameter Name="PRODUCT_STRING_MTP_FS"/>		
 		<Parameter Name="CONFIGURATION_STRING_MTP_FS"/>
 		<Parameter Name="INTERFACE_STRING_MTP_FS"/>		
 		<Parameter Name="USBD_HandleTypeDef_FS"/>			
 		<Parameter Name="CLASS_NAME_FS">
 			<PossibleValue>MTP</PossibleValue>
+		</Parameter>
+	</RefMode>
+	<!-- Ticket 78428 New USB Classes> -->
+	<!-- BILLBOARD Class -->
+	<RefMode Name="BILLBOARD_HS" Abstract="false">
+		<ConfigForMode>USB_DEVICE_BILLBOARD_HS</ConfigForMode>
+		<Parameter Name="VirtualMode">		
+			<PossibleValue>BillBoard</PossibleValue>
+		</Parameter>
+		<Parameter Name="VirtualModeHS">		
+			<PossibleValue>BiilBoard_HS</PossibleValue>
+		</Parameter>
+		<!-- Parameters for Function and Buffer Configurations -->
+		<!-- Parameters for Function and Buffer Configurations -->
+		<Parameter Name="USBD_MAX_NUM_INTERFACES">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
+		<Parameter Name="USBD_SELF_POWERED">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_DEBUG_LEVEL">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>			
+		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>					
+		<Parameter Name="VID">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>	
+		<Parameter Name="LANGID_STRING">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="MANUFACTURER_STRING">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_LPM_ENABLED">
+			<Condition Expression="(USB_DEVICE_HS_CLASSES$context) | (USB_DEVICE_FS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>	
+		
+		<!-- Parameters for Device Descriptors -->		
+		<Parameter Name="PID_BILLBOARD_HS"/>		
+		<Parameter Name="PRODUCT_STRING_BILLBOARD_HS"/>		
+		<Parameter Name="CONFIGURATION_STRING_BILLBOARD_HS"/>
+		<Parameter Name="INTERFACE_STRING_BILLBOARD_HS"/>		
+		<Parameter Name="USBD_HandleTypeDef_HS"/>			
+		<Parameter Name="CLASS_NAME_HS">
+			<PossibleValue>BILLBOARD</PossibleValue>
+		</Parameter>
+	</RefMode>
+	<RefMode Name="BILLBOARD_FS" Abstract="false">
+		<ConfigForMode>USB_DEVICE_BILLBOARD_FS</ConfigForMode>
+		<Parameter Name="VirtualMode">		
+			<PossibleValue>BillBoard</PossibleValue>
+		</Parameter>
+		<Parameter Name="VirtualModeFS">		
+			<PossibleValue>BiilBoard_FS</PossibleValue>
+		</Parameter>
+		<!-- Parameters for Function and Buffer Configurations -->
+		<Parameter Name="USBD_MAX_NUM_INTERFACES">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_MAX_NUM_CONFIGURATION">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_MAX_STR_DESC_SIZ">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>		
+		<Parameter Name="USBD_SELF_POWERED">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="USBD_DEBUG_LEVEL">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>	
+		<Parameter Name="MAX_STATIC_ALLOC_SIZE">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>			
+		<Parameter Name="VID">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>			
+		<Parameter Name="LANGID_STRING">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<Parameter Name="MANUFACTURER_STRING">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>
+		</Parameter>
+		<!-- Parameters for Link Power Management -->
+		<Parameter Name="USBD_LPM_ENABLED">
+			<Condition Expression="(USB_DEVICE_FS_CLASSES$context) &amp; (!USB_DEVICE_HS_CLASSES$context)" Diagnostic=""/>			
+		</Parameter>				
+		<!-- Parameters for Device Descriptors -->		
+		<Parameter Name="PID_BILLBOARD_FS"/>		
+		<Parameter Name="PRODUCT_STRING_BILLBOARD_FS"/>		
+		<Parameter Name="CONFIGURATION_STRING_BILLBOARD_FS"/>
+		<Parameter Name="INTERFACE_STRING_BILLBOARD_FS"/>		
+		<Parameter Name="USBD_HandleTypeDef_FS"/>			
+		<Parameter Name="CLASS_NAME_FS">
+			<PossibleValue>BILLBOARD</PossibleValue>
 		</Parameter>
 	</RefMode>
 	
@@ -1757,48 +1859,39 @@
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_AUDIO_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>AUDIO_HS</Semaphore>
-					<Condition Expression="!AUDIO_FS" Diagnostic="The USB AUDIO class share the same audio frequency"/>										
-				</Mode>
-				<!--
-				<Mode Name="CCID_HS" UserName="CCID_HS">
-					<SignalLogicalOp Name="AND">
-						<Signal IOMode="" Name="VS_USB_DEVICE_CCID_HS"/>
-					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>CCID_HS</Semaphore>
-				</Mode>	
-				-->
+					<Semaphore>DEVICE_HIGH_SPEED$context</Semaphore>
+					<Semaphore>AUDIO_HS$context</Semaphore>
+					<Condition Expression="!AUDIO_FS$context" Diagnostic="The USB AUDIO class share the same audio frequency"/>										
+				</Mode>				
 				<Mode Name="CDC_HS" UserName="Communication Device Class (Virtual Port Com)">
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_CDC_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>CDC_HS</Semaphore>
+					<Semaphore>DEVICE_HIGH_SPEED$context</Semaphore>
+					<Semaphore>CDC_HS$context</Semaphore>
 				</Mode>	
 				<Mode Name="DFU_HS" UserName="Download Firmware Update Class (DFU)">
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_DFU_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>DFU_HS</Semaphore>
+					<Semaphore>DEVICE_HIGH_SPEED$context</Semaphore>
+					<Semaphore>DFU_HS$context</Semaphore>
 					<Condition Expression="!DFU_FS" Diagnostic="The USB DFU class cannot share the same memory address"/>
 				</Mode>	
 				<Mode Name="HID_HS" UserName="Human Interface Device Class (HID)">				
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_HID_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>HID_HS</Semaphore>
+					<Semaphore>DEVICE_HIGH_SPEED$context</Semaphore>
+					<Semaphore>HID_HS$context</Semaphore>
 				</Mode>	
 				<!-- Add Custom HID Class -->
 				<Mode Name="CUSTOM_HID_HS" UserName="Custom Human Interface Device Class (HID)">
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_CUSTOM_HID_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>CUSTOM_HID_HS</Semaphore>
+					<Semaphore>DEVICE_HIGH_SPEED$context</Semaphore>
+					<Semaphore>CUSTOM_HID_HS$context</Semaphore>
 					<!-- Bug 302986 to be removed when STM32F2 FW has fixed the issue-->
 					<!--<Condition Diagnostic="Not available for STM32F2" Expression="!STM32F2"/>-->
 				</Mode>					
@@ -1807,70 +1900,64 @@
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_MSC_HS"/>
 					</SignalLogicalOp>
-					<Semaphore>USB_DEVICE_MSC</Semaphore>
-					<Semaphore>MSC_HS</Semaphore>
-				</Mode>
-				<!--<Mode Name="MTP_HS" UserName="MTP_HS">				
-					<SignalLogicalOp Name="AND">
-						<Signal IOMode="" Name="VS_USB_DEVICE_MTP_HS"/>
-					</SignalLogicalOp>
-					<Semaphore>DEVICE_HIGH_SPEED</Semaphore>
-					<Semaphore>MTP_HS</Semaphore>
+					<Semaphore>USB_DEVICE_MSC$context</Semaphore>
+					<Semaphore>MSC_HS$context</Semaphore>
 				</Mode>	
+				<!-- Ticket 78428 New USB Classes Must wait -->
+				<!--
+				<Mode Name="BILLBOARD_HS" UserName="Bill Board Class" RemoveCondition="!(DIE419 | DIE421 | DIE434 | DIE413 | DIE423 | DIE463 | DIE441 | DIE431)">
+					<SignalLogicalOp Name="AND">
+						<Signal IOMode="" Name="VS_USB_DEVICE_BILLBOARD_HS"/>
+					</SignalLogicalOp>
+					<Semaphore>USB_DEVICE_BILLBOARD$context</Semaphore>
+					<Semaphore>MSC_BILLBOARD_HS$context</Semaphore>
+				</Mode>
 				-->
 			</ModeLogicOperator>
-			<Semaphore>USB_DEVICE_HS_CLASSES</Semaphore>
+			<Semaphore>USB_DEVICE_HS_CLASSES$context</Semaphore>
 			<!--<Condition Expression="(MW_USB_OTG_HS_MW_DEVICE | MW_USB_OTG_HS_MW_FS_DEVICE) &amp; (!USB_DEVICE_FS_CLASSES)" Diagnostic="Active only when USB_OTG_HS IP is configured in Device mode"/>-->
 			<!-- Tracker 306857 -->			
-			<Condition Expression="(MW_USB_OTG_HS_MW_DEVICE | MW_USB_OTG_HS_MW_FS_DEVICE)" Diagnostic="Active only when USB_OTG_HS IP is configured in Device mode"/>
+			<Condition Expression="(MW_USB_OTG_HS_MW_DEVICE | MW_USB_OTG_HS_MW_FS_DEVICE) &amp; (!S_AzureRTOS$context)" Diagnostic="Active only when USB_OTG_HS IP is configured in Device mode and no AzureRTOS MW activated"/>
 		</Mode>
-		<Mode Name="Class For FS IP">
+		<Mode Name="Class For FS IP" RemoveCondition="DIE483">
 			<ModeLogicOperator Name="XOR">
 				<Mode Name="AUDIO_FS" UserName="Audio Device Class">				
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_AUDIO_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>AUDIO_FS</Semaphore>
-					<Condition Expression="!AUDIO_HS" Diagnostic="The USB AUDIO share the same audio frequency"/>					
-				</Mode>
-				<!--<Mode Name="CCID_FS" UserName="CCID_FS">
-					<SignalLogicalOp Name="AND">
-						<Signal IOMode="" Name="VS_USB_DEVICE_CCID_FS"/>
-					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>CCID_FS</Semaphore>
-				</Mode>
-				-->
+					<Semaphore>DEVICE_FULL_SPEED$context</Semaphore>
+					<Semaphore>AUDIO_FS$context</Semaphore>
+					<Condition Expression="!AUDIO_HS$context" Diagnostic="The USB AUDIO share the same audio frequency"/>					
+				</Mode>				
 				<Mode Name="CDC_FS" UserName="Communication Device Class (Virtual Port Com)">
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_CDC_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>CDC_FS</Semaphore>
+					<Semaphore>DEVICE_FULL_SPEED$context</Semaphore>
+					<Semaphore>CDC_FS$context</Semaphore>
 				</Mode>	
 				<Mode Name="DFU_FS" UserName="Download Firmware Update Class (DFU)">
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_DFU_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>DFU_FS</Semaphore>
+					<Semaphore>DEVICE_FULL_SPEED$context</Semaphore>
+					<Semaphore>DFU_FS$context</Semaphore>
 					<Condition Expression="!DFU_HS" Diagnostic="The USB DFU class cannot share the same memory address"/>
 				</Mode>					
 				<Mode Name="HID_FS" UserName="Human Interface Device Class (HID)">				
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_HID_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>HID_FS</Semaphore>
+					<Semaphore>DEVICE_FULL_SPEED$context</Semaphore>
+					<Semaphore>HID_FS$context</Semaphore>
 				</Mode>	
 				<!-- Add Custom HID Class -->
 				<Mode Name="CUSTOM_HID_FS" UserName="Custom Human Interface Device Class (HID)">				
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_CUSTOM_HID_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>CUSTOM_HID_FS</Semaphore>
+					<Semaphore>DEVICE_FULL_SPEED$context</Semaphore>
+					<Semaphore>CUSTOM_HID_FS$context</Semaphore>
 					<!-- Bug 302986 to be removed when STM32F2 FW has fixed the issue-->
 					<!--<Condition Diagnostic="Not available for STM32F2" Expression="!STM32F2"/>-->
 				</Mode>	
@@ -1878,22 +1965,24 @@
 					<SignalLogicalOp Name="AND">
 						<Signal IOMode="" Name="VS_USB_DEVICE_MSC_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>USB_DEVICE_MSC</Semaphore>
-					<Semaphore>MSC_FS</Semaphore>
-				</Mode>
-				<!--<Mode Name="MTP_FS" UserName="MTP_FS">				
+					<Semaphore>USB_DEVICE_MSC$context</Semaphore>
+					<Semaphore>MSC_FS$context</Semaphore>
+				</Mode>	
+				<!-- Ticket 78428 New USB Classes : Must wait -->
+				<!-- 
+				<Mode Name="BILLBOARD_FS" UserName="Bill Board Class" RemoveCondition="!(DIE419 | DIE421 | DIE434 | DIE413 | DIE423 | DIE463 | DIE441 | DIE431)">
 					<SignalLogicalOp Name="AND">
-						<Signal IOMode="" Name="VS_USB_DEVICE_MTP_FS"/>
+						<Signal IOMode="" Name="VS_USB_DEVICE_BILLBOARD_FS"/>
 					</SignalLogicalOp>
-					<Semaphore>DEVICE_FULL_SPEED</Semaphore>
-					<Semaphore>MTP_FS</Semaphore>
+					<Semaphore>USB_DEVICE_BILLBOARD$context</Semaphore>
+					<Semaphore>MSC_BILLBOARD_FS$context</Semaphore>
 				</Mode>	
 				-->
 			</ModeLogicOperator>	
-			<Semaphore>USB_DEVICE_FS_CLASSES</Semaphore>
+			<Semaphore>USB_DEVICE_FS_CLASSES$context</Semaphore>
 			<!--<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE)&amp; (!USB_DEVICE_HS_CLASSES)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode"/>-->
-			<!-- Trqacker 306857 -->
-			<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode"/>			
+			<!-- Tracker 306857 -->
+			<Condition Expression="(MW_USB_OTG_FS_MW_DEVICE | MW_USB_MW_DEVICE) &amp; (!S_AzureRTOS$context)" Diagnostic="Active only when USB_OTG_FS IP is configured in Device mode and no AzureRTOS MW activated"/>			
 		</Mode>
 	</ModeLogicOperator>
 	
@@ -1906,6 +1995,7 @@
 	<RefSignal Name="VS_USB_DEVICE_MSC_FS" Virtual="true"/>
 	<RefSignal Name="VS_USB_DEVICE_DFU_FS" Virtual="true"/>
 	<RefSignal Name="VS_USB_DEVICE_MTP_FS" Virtual="true"/>
+	<RefSignal Name="VS_USB_DEVICE_BILLBOARD_FS" Virtual="true"/>
 	
 	<RefSignal Name="VS_USB_DEVICE_CCID_HS" Virtual="true"/>
 	<RefSignal Name="VS_USB_DEVICE_CDC_HS" Virtual="true"/>
@@ -1915,4 +2005,5 @@
 	<RefSignal Name="VS_USB_DEVICE_MSC_HS" Virtual="true"/>
 	<RefSignal Name="VS_USB_DEVICE_DFU_HS" Virtual="true"/>
 	<RefSignal Name="VS_USB_DEVICE_MTP_HS" Virtual="true"/>
+	<RefSignal Name="VS_USB_DEVICE_BILLBOARD_HS" Virtual="true"/>
 </IP>

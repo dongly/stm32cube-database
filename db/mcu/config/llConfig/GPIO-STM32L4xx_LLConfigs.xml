@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" DBVersion="V4.0"   IncludeFile="stm32l4xx.h;stm32l4xx_ll_system.h;stm32l4xx_ll_gpio.h;stm32l4xx_ll_exti.h" Name="GPIO" Version="STM32Cube_FW_L4_V1.5.0"
+<IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" DBVersion="V4.0"   IncludeFile="stm32l4xx_ll_system.h;stm32l4xx_ll_gpio.h;stm32l4xx_ll_exti.h" Name="GPIO" Version="STM32Cube_FW_L4_V1.5.0"
         xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../../doc/V4/Development/Specifications/db/IP_Configs.xsd">
     
     <RefConfig Name="GPIO">
@@ -80,12 +80,37 @@
             <MethodArg Name="Parametre" ParameterName="GPIO_FMA9"/>
         </CallLibMethod>
     </RefConfig>
+    <RefConfig Name="AlternateFunctionNoPullOrPullUp">
+        <CallLibMethod Name="LL_GPIO_Init" >
+            <MethodArg Name="Pin" ParameterName="GPIO_Pin"/>
+            <MethodArg Name="Mode" ParameterName="GPIO_Mode"/>
+            <MethodArg Name="Speed" ParameterName="GPIO_Speed"/>
+            <MethodArg Name="OutputType" ParameterName="GPIO_Mode"/>
+            <MethodArg Name="Pull" ParameterName="GPIO_Pu"/>
+            <MethodArg Name="Alternate" ParameterName="GPIO_AF"/>
+        </CallLibMethod>
+        <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
+            <MethodArg Name="Parametre" ParameterName="GPIO_FM9"/>
+        </CallLibMethod>
+        <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
+            <MethodArg Name="Parametre" ParameterName="GPIO_FM8"/>
+        </CallLibMethod>
+        <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
+            <MethodArg Name="Parametre" ParameterName="GPIO_FM7"/>
+        </CallLibMethod>
+        <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
+            <MethodArg Name="Parametre" ParameterName="GPIO_FM6"/>
+        </CallLibMethod>
+        <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
+            <MethodArg Name="Parametre" ParameterName="GPIO_FMA9"/>
+        </CallLibMethod>
+    </RefConfig>
     <RefConfig Name="AlternateFunctionHighSpeedDefault">
         <CallLibMethod Name="LL_GPIO_Init" >
             <MethodArg Name="Pin" ParameterName="GPIO_Pin"/>
             <MethodArg Name="Mode" ParameterName="GPIO_Mode"/>
            <MethodArg Name="OutputType" ParameterName="GPIO_Mode"/>
-            <MethodArg Name="Speed" ParameterName="GPIO_Speed"/>
+            <MethodArg Name="Speed" ParameterName="GPIO_Speed_High_Default"/>
             <MethodArg Name="Pull" ParameterName="GPIO_PuPd"/>
             <MethodArg Name="Alternate" ParameterName="GPIO_AF"/>
         </CallLibMethod>
@@ -176,7 +201,7 @@
             <MethodArg Name="Mode" ParameterName="GPIO_ModeDefaultOD"/>
             <MethodArg Name="Speed" ParameterName="GPIO_Speed"/>
             <MethodArg Name="OutputType" ParameterName="GPIO_ModeDefaultOD"/>
-            <MethodArg Name="Pull" ParameterName="GPIO_PuPd"/>
+            <MethodArg Name="Pull" ParameterName="GPIO_PuPdOD"/>
             <MethodArg Name="Alternate" ParameterName="GPIO_AF"/>
         </CallLibMethod>
         <CallLibMethod Name="LL_SYSCFG_EnableFastModePlus" >
@@ -417,8 +442,6 @@
     <RefComponent Cclass="HAL" Cgroup="GPIO__LL" Cversion="1.5.0">
         <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_gpio.h" />
         <File Category="source" Name="Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_gpio.c" />
-        <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_exti.h" />
-        <File Category="source" Name="Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_ll_exti.c" />
         <File Category="header" Name="Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_ll_system.h" /> 
     </RefComponent>
     

@@ -1,4 +1,5 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : usbd_cdc_if.c
@@ -6,9 +7,10 @@
 [#--  * @packageVersion : ${fwVersion} --]
   * @brief          : Usb device for Virtual Com Port.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 [#assign handleNameFS = ""]
 [#assign handleNameHS = ""]
@@ -33,12 +35,11 @@
 [#assign TX_DATA_SIZE = 4]
 [#compress]
 [#if SWIP.defines??]
-	[#list SWIP.defines as definition]
-	[#assign value = definition.value]
-    [#if definition.name="APP_RX_DATA_SIZE"]
+	[#list SWIP.defines as definition]		
+    [#if definition.name?contains("APP_RX_DATA_SIZE")]	
 [#assign RX_DATA_SIZE = definition.value]
     [/#if]
-	[#if definition.name="APP_TX_DATA_SIZE"]
+	[#if definition.name?contains("APP_TX_DATA_SIZE")]
 [#assign TX_DATA_SIZE = definition.value]
     [/#if]
 	[/#list]
@@ -94,10 +95,12 @@
   */
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
+[#-- 
 /* Define size for the receive and transmit buffer over CDC */
 /* It's up to user to redefine and/or remove those define */
 #define APP_RX_DATA_SIZE  ${RX_DATA_SIZE}
 #define APP_TX_DATA_SIZE  ${TX_DATA_SIZE}
+--]
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -324,10 +327,11 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   *         through this function.
   *
   *         @note
-  *         This function will block any OUT packet reception on USB endpoint
-  *         untill exiting this function. If you exit this function before transfer
-  *         is complete on CDC interface (ie. using DMA controller) it will result
-  *         in receiving more data while previous ones are still not sent.
+  *         This function will issue a NAK packet on any OUT packet received on
+  *         USB endpoint until exiting this function. If you exit this function
+  *         before transfer is complete on CDC interface (ie. using DMA controller)
+  *         it will result in receiving more data while previous ones are still
+  *         not sent.
   *
   * @param  Buf: Buffer of data to be received
   * @param  Len: Number of data received (in bytes)
@@ -473,14 +477,15 @@ static int8_t CDC_Control_HS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   *         through this function.
   *
   *         @note
-  *         This function will block any OUT packet reception on USB endpoint
-  *         untill exiting this function. If you exit this function before transfer
-  *         is complete on CDC interface (ie. using DMA controller) it will result
-  *         in receiving more data while previous ones are still not sent.
+  *         This function will issue a NAK packet on any OUT packet received on
+  *         USB endpoint until exiting this function. If you exit this function
+  *         before transfer is complete on CDC interface (ie. using DMA controller)
+  *         it will result in receiving more data while previous ones are still
+  *         not sent.
   *
   * @param  Buf: Buffer of data to be received
   * @param  Len: Number of data received (in bytes)
-  * @retval USBD_OK if all operations are OK else USBD_FAIL
+  * @retval Result of the operation: USBD_OK if all operations are OK else USBD_FAIL
   */
 static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
 {

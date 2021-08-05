@@ -10,6 +10,9 @@
         <Datasheet DocId="029809" Rev="3" InternetId="DM00330507" DS="11854">
             <!-- STM32F732xx STM32F733xx -->
         </Datasheet>
+        <Datasheet DocId="031726" Rev="1" InternetId="DM00493485" DS="12536">
+            <!-- STM32F730x8 -->
+        </Datasheet>
     </Datasheets>
     <MaxCurrent Value="300000000"/>
     <!-- Sum(IVDD) Total current into sum of all VDD_x power lines (source) / Maximum current into each VDD_x power line (source)(1): IDD(pin)=100mA -->
@@ -279,6 +282,15 @@
                     <Consumption Range="Scale1-High" ConsumptionByMHz="54400"/>
                     <Consumption Range="Scale2-Medium" ConsumptionByMHz="53200"/>
                     <Consumption Range="Scale3-Low" ConsumptionByMHz="44600"/>
+                </PowerModes>
+            </PeripheralConsumption>
+        </Peripheral>
+        <Peripheral Name="AES" ImpactPinout="Yes:AES" Type="Digital" Prescaler="AHB1">
+            <PeripheralConsumption Vdd="3.3" Temperature="25">
+                <PowerModes PowerModesList="RUN,SLEEP">
+                    <Consumption Range="Scale1-High" ConsumptionByMHz="0"/>
+                    <Consumption Range="Scale2-Medium" ConsumptionByMHz="0"/>
+                    <Consumption Range="Scale3-Low" ConsumptionByMHz="0"/>
                 </PowerModes>
             </PeripheralConsumption>
         </Peripheral>

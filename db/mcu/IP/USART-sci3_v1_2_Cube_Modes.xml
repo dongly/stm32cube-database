@@ -45,6 +45,9 @@
     <RefParameter Comment="Baud Rate" DefaultValue="115200" Group="Basic Parameters" Max="115200" Min="115200" Name="BaudRate" Type="integer" Unit="Bits/s" Visible="false">
         <Condition Diagnostic="" Expression="$IpInstance_UART_AutoBaudRate_Enable"/>
     </RefParameter>
+    <RefParameter Comment="Baud Rate" DefaultValue="921600" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s">
+        <Condition Diagnostic="" Expression="TRACEREMB_$IpInstance"/>
+    </RefParameter>
     <RefParameter Comment="Baud Rate" DefaultValue="115200" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s" Visible="true"/>
    
 	
@@ -53,14 +56,14 @@
 	
     <!-- Word Length Parameters for Synchronous, IrDa, SmartCard and Others (based on Asynchronous). -->
 	
-    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_7B" Group="Basic Parameters" Name="WordLength" Type="list">
+    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC)"/>
         <PossibleValue Comment="7 Bits (including Parity)" Semaphore="$IpInstance_Usart_7B" Value="WORDLENGTH_7B"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
         <PossibleValue Comment="9 Bits (including Parity)" Value="WORDLENGTH_9B"/>
     </RefParameter>
 	
-    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_7B" Group="Basic Parameters" Name="WordLength" Type="list">
+    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
         <Condition Diagnostic="" Expression="VirtualMode = VM_IRDA"/>
         <PossibleValue Comment="7 Bits (including Parity)" Semaphore="$IpInstance_Irda_7B" Value="WORDLENGTH_7B"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
@@ -79,7 +82,7 @@
         <Condition Diagnostic="" Expression="VirtualMode = VM_LIN"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
     </RefParameter>
-    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_7B" Group="Basic Parameters" Name="WordLength" Type="list">
+    <RefParameter Comment="Word Length" DefaultValue="WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
         <PossibleValue Comment="7 Bits (including Parity)" Semaphore="$IpInstance_Uart_7B" Value="WORDLENGTH_7B"/>
         <PossibleValue Comment="8 Bits (including Parity)" Value="WORDLENGTH_8B"/>
         <PossibleValue Comment="9 Bits (including Parity)" Value="WORDLENGTH_9B"/>
@@ -150,6 +153,7 @@
     <RefParameter Comment="Stop Bits" DefaultValue="STOPBITS_1_5" Group="Basic Parameters" Name="StopBits" Type="list">
         <Condition Diagnostic="" Expression="VirtualMode = VM_SMARTCARD"/>
         <PossibleValue Comment="1.5" Value="STOPBITS_1_5"/>
+        <PossibleValue Comment="0.5" Value="STOPBITS_0_5"/>
     </RefParameter>
 
     <RefParameter Comment="Stop Bits" DefaultValue="STOPBITS_1" Group="Basic Parameters" Name="StopBits" Type="list">
@@ -322,7 +326,7 @@
         <PossibleValue Comment="16 Samples" Value="UART_OVERSAMPLING_16"/>
         <PossibleValue Comment="8 Samples" Value="UART_OVERSAMPLING_8"/>
     </RefParameter>
-    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="list">
+    <RefParameter Comment="Over Sampling" DefaultValue="UART_OVERSAMPLING_16" Group="Advanced Parameters" Name="OverSampling" Type="uniqueElementList">
         <Condition Diagnostic="" Expression="VirtualMode = VM_LIN"/>
         <PossibleValue Comment="16 Samples" Value="UART_OVERSAMPLING_16"/>
     </RefParameter>
@@ -392,219 +396,219 @@
     
     <RefParameter Comment="ClockPrescaler" DefaultValue="PRESCALER_DIV1" Group="Advanced Parameters" Name="ClockPrescaler" Type="list">
         <Condition Expression="!((VirtualMode = VM_SMARTCARD) &amp; !(VirtualClockMode = VM_SMARTCARD))" Diagnostic=""/>
-        <PossibleValue Comment="clock /1 " Value="PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /2 " Value="PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /4 " Value="PRESCALER_DIV4"/>
-        <PossibleValue Comment="clock /6 " Value="PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /8 " Value="PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /10 " Value="PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /12 " Value="PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /16 " Value="PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /32 " Value="PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /64 " Value="PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /128 " Value="PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /256 " Value="PRESCALER_DIV256"/>
+        <PossibleValue Comment="1" Value="PRESCALER_DIV1"/>
+        <PossibleValue Comment="2" Value="PRESCALER_DIV2"/>
+        <PossibleValue Comment="4" Value="PRESCALER_DIV4"/>
+        <PossibleValue Comment="6" Value="PRESCALER_DIV6"/>
+        <PossibleValue Comment="8" Value="PRESCALER_DIV8"/>
+        <PossibleValue Comment="10" Value="PRESCALER_DIV10"/>
+        <PossibleValue Comment="12" Value="PRESCALER_DIV12"/>
+        <PossibleValue Comment="16" Value="PRESCALER_DIV16"/>
+        <PossibleValue Comment="32" Value="PRESCALER_DIV32"/>
+        <PossibleValue Comment="64" Value="PRESCALER_DIV64"/>
+        <PossibleValue Comment="128" Value="PRESCALER_DIV128"/>
+        <PossibleValue Comment="256" Value="PRESCALER_DIV256"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="null" Group="Advanced Parameters" Name="ClockPrescaler" Type="list" Visible="false"/>
 
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV1" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /1 " Value="USART_PRESCALER_DIV1"/>
+        <PossibleValue Comment="1 " Value="USART_PRESCALER_DIV1"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV2" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /2 " Value="USART_PRESCALER_DIV2"/>
+        <PossibleValue Comment="2 " Value="USART_PRESCALER_DIV2"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV4" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV4"/>            
-        <PossibleValue Comment="clock /4 " Value="USART_PRESCALER_DIV4"/>
+        <PossibleValue Comment="4 " Value="USART_PRESCALER_DIV4"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV6" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /6 " Value="USART_PRESCALER_DIV6"/>
+        <PossibleValue Comment="6 " Value="USART_PRESCALER_DIV6"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV8" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /8 " Value="USART_PRESCALER_DIV8"/>
+        <PossibleValue Comment="8 " Value="USART_PRESCALER_DIV8"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV10" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /10 " Value="USART_PRESCALER_DIV10"/>
+        <PossibleValue Comment="10 " Value="USART_PRESCALER_DIV10"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV12" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /12 " Value="USART_PRESCALER_DIV12"/>
+        <PossibleValue Comment="12 " Value="USART_PRESCALER_DIV12"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV16" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /16 " Value="USART_PRESCALER_DIV16"/>
+        <PossibleValue Comment="16 " Value="USART_PRESCALER_DIV16"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV32" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /32 " Value="USART_PRESCALER_DIV32"/>
+        <PossibleValue Comment="32 " Value="USART_PRESCALER_DIV32"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV64" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /64 " Value="USART_PRESCALER_DIV64"/>
+        <PossibleValue Comment="64 " Value="USART_PRESCALER_DIV64"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV128" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /128 " Value="USART_PRESCALER_DIV128"/>
+        <PossibleValue Comment="128 " Value="USART_PRESCALER_DIV128"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="USART_PRESCALER_DIV256" Group="Advanced Parameters" Name="UsartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SYNC) &amp; ClockPrescaler=PRESCALER_DIV256"/>
-        <PossibleValue Comment="clock /256 " Value="USART_PRESCALER_DIV256"/>
+        <PossibleValue Comment="256 " Value="USART_PRESCALER_DIV256"/>
     </RefParameter>
     
  
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV1" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /1 " Value="IRDA_PRESCALER_DIV1"/>
+        <PossibleValue Comment="1" Value="IRDA_PRESCALER_DIV1"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV2" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /2 " Value="IRDA_PRESCALER_DIV2"/>
+        <PossibleValue Comment="2" Value="IRDA_PRESCALER_DIV2"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV4" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV4"/>            
-        <PossibleValue Comment="clock /4 " Value="IRDA_PRESCALER_DIV4"/>
+        <PossibleValue Comment="4" Value="IRDA_PRESCALER_DIV4"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV6" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /6 " Value="IRDA_PRESCALER_DIV6"/>
+        <PossibleValue Comment="6" Value="IRDA_PRESCALER_DIV6"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV8" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /8 " Value="IRDA_PRESCALER_DIV8"/>
+        <PossibleValue Comment="8" Value="IRDA_PRESCALER_DIV8"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV10" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /10 " Value="IRDA_PRESCALER_DIV10"/>
+        <PossibleValue Comment="10" Value="IRDA_PRESCALER_DIV10"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV12" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /12 " Value="IRDA_PRESCALER_DIV12"/>
+        <PossibleValue Comment="12" Value="IRDA_PRESCALER_DIV12"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV16" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /16 " Value="IRDA_PRESCALER_DIV16"/>
+        <PossibleValue Comment="16" Value="IRDA_PRESCALER_DIV16"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV32" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /32 " Value="IRDA_PRESCALER_DIV32"/>
+        <PossibleValue Comment="32" Value="IRDA_PRESCALER_DIV32"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV64" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /64 " Value="IRDA_PRESCALER_DIV64"/>
+        <PossibleValue Comment="64" Value="IRDA_PRESCALER_DIV64"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV128" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /128 " Value="IRDA_PRESCALER_DIV128"/>
+        <PossibleValue Comment="128" Value="IRDA_PRESCALER_DIV128"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="IRDA_PRESCALER_DIV256" Group="Advanced Parameters" Name="IrdaPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_IRDA) &amp; ClockPrescaler=PRESCALER_DIV256"/>
-        <PossibleValue Comment="clock /256 " Value="IRDA_PRESCALER_DIV256"/>
+        <PossibleValue Comment="256" Value="IRDA_PRESCALER_DIV256"/>
     </RefParameter>
     
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV1" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /1 " Value="SMARTCARD_PRESCALER_DIV1"/>
+        <PossibleValue Comment="1 " Value="SMARTCARD_PRESCALER_DIV1"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV2" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /2 " Value="SMARTCARD_PRESCALER_DIV2"/>
+        <PossibleValue Comment="2 " Value="SMARTCARD_PRESCALER_DIV2"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV4" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV4"/>            
-        <PossibleValue Comment="clock /4 " Value="SMARTCARD_PRESCALER_DIV4"/>
+        <PossibleValue Comment="4 " Value="SMARTCARD_PRESCALER_DIV4"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV6" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /6 " Value="SMARTCARD_PRESCALER_DIV6"/>
+        <PossibleValue Comment="6 " Value="SMARTCARD_PRESCALER_DIV6"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV8" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /8 " Value="SMARTCARD_PRESCALER_DIV8"/>
+        <PossibleValue Comment="8 " Value="SMARTCARD_PRESCALER_DIV8"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV10" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /10 " Value="SMARTCARD_PRESCALER_DIV10"/>
+        <PossibleValue Comment="10 " Value="SMARTCARD_PRESCALER_DIV10"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV12" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /12 " Value="SMARTCARD_PRESCALER_DIV12"/>
+        <PossibleValue Comment="12 " Value="SMARTCARD_PRESCALER_DIV12"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV16" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /16 " Value="SMARTCARD_PRESCALER_DIV16"/>
+        <PossibleValue Comment="16 " Value="SMARTCARD_PRESCALER_DIV16"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV32" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /32 " Value="SMARTCARD_PRESCALER_DIV32"/>
+        <PossibleValue Comment="32 " Value="SMARTCARD_PRESCALER_DIV32"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV64" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /64 " Value="SMARTCARD_PRESCALER_DIV64"/>
+        <PossibleValue Comment="64 " Value="SMARTCARD_PRESCALER_DIV64"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV128" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /128 " Value="SMARTCARD_PRESCALER_DIV128"/>
+        <PossibleValue Comment="128 " Value="SMARTCARD_PRESCALER_DIV128"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="SMARTCARD_PRESCALER_DIV256" Group="Advanced Parameters" Name="SmartCardPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_SMARTCARD) &amp; ClockPrescaler=PRESCALER_DIV256"/>
-        <PossibleValue Comment="clock /256 " Value="SMARTCARD_PRESCALER_DIV256"/>
+        <PossibleValue Comment="256 " Value="SMARTCARD_PRESCALER_DIV256"/>
     </RefParameter>
         
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV1" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV1"/>
-        <PossibleValue Comment="clock /1 " Value="UART_PRESCALER_DIV1"/>
+        <PossibleValue Comment="1" Value="UART_PRESCALER_DIV1"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV2" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV2"/>
-        <PossibleValue Comment="clock /2 " Value="UART_PRESCALER_DIV2"/>
+        <PossibleValue Comment="2" Value="UART_PRESCALER_DIV2"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV4" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV4"/>            
-        <PossibleValue Comment="clock /4 " Value="UART_PRESCALER_DIV4"/>
+        <PossibleValue Comment="4" Value="UART_PRESCALER_DIV4"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV6" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV6"/>
-        <PossibleValue Comment="clock /6 " Value="UART_PRESCALER_DIV6"/>
+        <PossibleValue Comment="6" Value="UART_PRESCALER_DIV6"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV8" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV8"/>
-        <PossibleValue Comment="clock /8 " Value="UART_PRESCALER_DIV8"/>
+        <PossibleValue Comment="8" Value="UART_PRESCALER_DIV8"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV10" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV10"/>
-        <PossibleValue Comment="clock /10 " Value="UART_PRESCALER_DIV10"/>
+        <PossibleValue Comment="10" Value="UART_PRESCALER_DIV10"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV12" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV12"/>
-        <PossibleValue Comment="clock /12 " Value="UART_PRESCALER_DIV12"/>
+        <PossibleValue Comment="12" Value="UART_PRESCALER_DIV12"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV16" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV16"/>
-        <PossibleValue Comment="clock /16 " Value="UART_PRESCALER_DIV16"/>
+        <PossibleValue Comment="16" Value="UART_PRESCALER_DIV16"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV32" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV32"/>
-        <PossibleValue Comment="clock /32 " Value="USART_PRESCALER_DIV32"/>
+        <PossibleValue Comment="32" Value="UART_PRESCALER_DIV32"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV64" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV64"/>
-        <PossibleValue Comment="clock /64 " Value="UART_PRESCALER_DIV64"/>
+        <PossibleValue Comment="64" Value="UART_PRESCALER_DIV64"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV128" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV128"/>
-        <PossibleValue Comment="clock /128 " Value="UART_PRESCALER_DIV128"/>
+        <PossibleValue Comment="128" Value="UART_PRESCALER_DIV128"/>
     </RefParameter>
     <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV256" Group="Advanced Parameters" Name="UartPrescaler" Type="list">
         <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; ClockPrescaler=PRESCALER_DIV256"/>
-        <PossibleValue Comment="clock /256 " Value="UART_PRESCALER_DIV256"/>
+        <PossibleValue Comment="256" Value="UART_PRESCALER_DIV256"/>
     </RefParameter>	
     <!-- Calculate Speed, based on Prescaler Value on SmartCard Mode -->
-    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="4000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
+    <RefParameter Comment="SmartCard Clock Frequency" DefaultValue="5000000" Group="Clock Parameters" Name="CalculateSpeed" Type="string"/>
 	
     <!-- Specifics RefParameters for SmartCard Mode Only -->
     <RefParameter Comment="NACK If Parity Error" DefaultValue="SMARTCARD_NACK_DISABLE" Group="Advanced Parameters" Name="NACKState" Type="list">
@@ -632,10 +636,26 @@
     </RefParameter>
 	
     <!-- Address for MultiProcessor --> 
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="63" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="127" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_8B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="255" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=WORDLENGTH_9B"/>
+    </RefParameter>
     <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
         <Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
     </RefParameter>
     <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+    
+    <RefParameter Comment="Wake-Up Method" DefaultValue="UART_ADDRESS_DETECT_4B" Group="Advanced Parameters" Name="AddressLength" Type="list">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <PossibleValue Comment="4 Bits" Value="UART_ADDRESS_DETECT_4B"/>
+        <PossibleValue Comment="7 Bits" Value="UART_ADDRESS_DETECT_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Method" DefaultValue="null" Group="Advanced Parameters" Name="AddressLength" Type="list" Visible="false"/>
 	
 	
 	
@@ -720,11 +740,11 @@
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_SC_TxPinLevelInvertENABLE" Value="SMARTCARD_ADVFEATURE_TXINV_ENABLE"/>
     </RefParameter>   
     <RefParameter Comment="TX Pin Active Level Inversion" DefaultValue="UART_ADVFEATURE_TXINV_DISABLE" Group="Advanced Features" Name="UartTxPinLevelInvertParam" Type="list">
-        <Condition Diagnostic="" Expression="(TxPinLevelInvertParam=ADVFEATURE_TXINV_DISABLE)"/>
+        <Condition Diagnostic="" Expression="(TxPinLevelInvertParam=ADVFEATURE_TXINV_DISABLE) &amp; !(VirtualClockMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Disable" Value="UART_ADVFEATURE_TXINV_DISABLE"/>
     </RefParameter>
     <RefParameter Comment="TX Pin Active Level Inversion" DefaultValue="UART_ADVFEATURE_TXINV_DISABLE" Group="Advanced Features" Name="UartTxPinLevelInvertParam" Type="list">
-        <Condition Diagnostic="" Expression="(TxPinLevelInvertParam=ADVFEATURE_TXINV_ENABLE)"/>
+        <Condition Diagnostic="" Expression="(TxPinLevelInvertParam=ADVFEATURE_TXINV_ENABLE) &amp; !(VirtualClockMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_TxPinLevelInvertENABLE" Value="UART_ADVFEATURE_TXINV_ENABLE"/>
     </RefParameter>
 	
@@ -782,7 +802,7 @@
     </RefParameter>
 
     <RefParameter Comment="RX Pin Active Level Inversion" DefaultValue="UART_ADVFEATURE_RXINV_ENABLE" Group="Advanced Features" Name="UartRxPinLevelInvertParam" Type="list">
-        <Condition Diagnostic="" Expression="(RxPinLevelInvertParam=ADVFEATURE_RXINV_ENABLE)"/>
+        <Condition Diagnostic="" Expression="(RxPinLevelInvertParam=ADVFEATURE_RXINV_ENABLE) &amp; !(VirtualClockMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_RxPinLevelInvertENABLE" Value="UART_ADVFEATURE_RXINV_ENABLE"/>
     </RefParameter>
 	
@@ -841,7 +861,7 @@
     </RefParameter>
 
     <RefParameter Comment="Data Inversion" DefaultValue="UART_ADVFEATURE_DATAINV_ENABLE" Group="Advanced Features" Name="UartDataInvertParam" Type="list">
-        <Condition Diagnostic="" Expression="(DataInvertParam = ADVFEATURE_DATAINV_ENABLE)"/>
+        <Condition Diagnostic="" Expression="(DataInvertParam = ADVFEATURE_DATAINV_ENABLE) &amp; !(VirtualClockMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_DataInvertENABLE" Value="UART_ADVFEATURE_DATAINV_ENABLE"/>
     </RefParameter>
 	
@@ -899,7 +919,7 @@
     </RefParameter>
 
     <RefParameter Comment="TX and RX Pins Swapping" DefaultValue="UART_ADVFEATURE_SWAP_ENABLE" Group="Advanced Features" Name="UartSwapParam" Type="list">
-        <Condition Diagnostic="" Expression="(SwapParam=ADVFEATURE_SWAP_ENABLE)"/>
+        <Condition Diagnostic="" Expression="(SwapParam=ADVFEATURE_SWAP_ENABLE) &amp; !(VirtualMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_SwapENABLE" Value="UART_ADVFEATURE_SWAP_ENABLE"/>
     </RefParameter>
 	
@@ -959,7 +979,7 @@
     </RefParameter>
     
     <RefParameter Comment="Overrun" DefaultValue="UART_ADVFEATURE_OVERRUN_DISABLE" Group="Advanced Features" Name="UartOverrunDisableParam" Type="list">
-        <Condition Diagnostic="" Expression="(OverrunDisableParam=ADVFEATURE_OVERRUN_DISABLE)"/>
+        <Condition Diagnostic="" Expression="(OverrunDisableParam=ADVFEATURE_OVERRUN_DISABLE) &amp; !(VirtualClockMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Disable" Semaphore="$IpInstance_OverrunDisableENABLE" Value="UART_ADVFEATURE_OVERRUN_DISABLE"/>
     </RefParameter>
 	
@@ -1020,7 +1040,7 @@
         <PossibleValue Comment="Disable" Value="SMARTCARD_ADVFEATURE_DMA_DISABLEONRXERROR"/>
     </RefParameter>
     <RefParameter Comment="DMA on RX Error" DefaultValue="UART_ADVFEATURE_DMA_DISABLEONRXERROR" Group="Advanced Features" Name="UartDMADisableonRxErrorParam" Type="list">
-        <Condition Diagnostic="" Expression="(DMADisableonRxErrorParam=ADVFEATURE_DMA_DISABLEONRXERROR)"/>
+        <Condition Diagnostic="" Expression="(DMADisableonRxErrorParam=ADVFEATURE_DMA_DISABLEONRXERROR)  &amp; !(VirtualMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Disable" Semaphore="$IpInstance_DMADisableonRxErrorENABLE" Value="UART_ADVFEATURE_DMA_DISABLEONRXERROR"/>
     </RefParameter>
 	
@@ -1075,7 +1095,7 @@
         <PossibleValue Comment="Enable" Value="SMARTCARD_ADVFEATURE_MSBFIRST_ENABLE"/>
     </RefParameter>
     <RefParameter Comment="MSB First" DefaultValue="UART_ADVFEATURE_MSBFIRST_ENABLE" Group="Advanced Features" Name="UartMSBFirstParam" Type="list">
-        <Condition Diagnostic="" Expression="(MSBFirstParam=ADVFEATURE_MSBFIRST_ENABLE)"/>
+        <Condition Diagnostic="" Expression="(MSBFirstParam=ADVFEATURE_MSBFIRST_ENABLE) &amp; !(VirtualMode = VM_SMARTCARD)"/>
         <PossibleValue Comment="Enable" Semaphore="$IpInstance_MSBFirstENABLE" Value="UART_ADVFEATURE_MSBFIRST_ENABLE"/>
     </RefParameter>
 	
@@ -1109,11 +1129,11 @@
     </RefParameter>
     <RefParameter Comment="Auto Baudrate Mode" DefaultValue="null" Group="Advanced Features" Name="AutoBaudRateMode" Type="list" Visible="false"/>
 
-    <RefParameter Comment="NSSConfig" DefaultValue="USART_NSS_HARD" Group="Advanced Parameters" Name="NSSConfig" Type="list" Visible="false">
+    <RefParameter Comment="NSSConfig" DefaultValue="USART_NSS_HARD" Group="Advanced Parameters" Name="NSSConfig" Type="list" Visible="true">
         <Condition Diagnostic="" Expression="$IpInstance_Hardware_Management &amp; $IpInstance_Synchronous_Slave"/>
         <PossibleValue Comment="Hardware management" Value="USART_NSS_HARD"/>
     </RefParameter>
-    <RefParameter Comment="NSSConfig" DefaultValue="USART_NSS_SOFT" Group="Advanced Parameters" Name="NSSConfig" Type="list" Visible="false">
+    <RefParameter Comment="NSSConfig" DefaultValue="USART_NSS_SOFT" Group="Advanced Parameters" Name="NSSConfig" Type="list" Visible="true">
         <Condition Diagnostic="" Expression="$IpInstance_Software_Management &amp; $IpInstance_Synchronous_Slave"/>
         <PossibleValue Comment="Software management" Value="USART_NSS_SOFT"/>
     </RefParameter>
@@ -1123,9 +1143,9 @@
         <Condition Diagnostic="" Expression="$IpInstance_Synchronous_Slave"/>
         <PossibleValue Comment="Enable" Value="USART_SLAVEMODE_ENABLE"/>
     </RefParameter>
-    <RefParameter Comment="Slave Mode" DefaultValue="USART_SLAVEMODE_ENABLE" Group="Advanced Parameters" Name="SlaveMode" Type="list">
+    <RefParameter Comment="Slave Mode" DefaultValue="USART_SLAVEMODE_DISABLE" Group="Advanced Parameters" Name="SlaveMode" Type="list">
         <Condition Diagnostic="" Expression="$IpInstance_Synchronous_Master"/>        
-        <PossibleValue Comment="Disable " Value="USART_SLAVEMODE_ENABLE"/>
+        <PossibleValue Comment="Disable " Value="USART_SLAVEMODE_DISABLE"/>
     </RefParameter>
     
 	
@@ -1306,7 +1326,7 @@
         <PossibleValue Comment="RXFIFO threshold 1 eighth full configuration " Value="UART_RXFIFO_THRESHOLD_1_8"/>
     </RefParameter>
     <RefParameter Comment="Rxfifo Threshold" DefaultValue="UART_RXFIFO_THRESHOLD_1_4" Group="Advanced Parameters" Name="UartRXFIFOThreshold" Type="list">
-        <Condition Diagnostic="" Expression="(VVirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; RXFIFOThreshold=RXFIFO_THRESHOLD_1QUARTERFULL"/>
+        <Condition Diagnostic="" Expression="(VirtualMode = VM_ASYNC | VirtualMode = VM_LIN) &amp; RXFIFOThreshold=RXFIFO_THRESHOLD_1QUARTERFULL"/>
         <PossibleValue Comment="RXFIFO threshold 1 quart full configuration " Value="UART_RXFIFO_THRESHOLD_1_4"/>
     </RefParameter>
     <RefParameter Comment="Rxfifo Threshold" DefaultValue="UART_RXFIFO_THRESHOLD_1_2" Group="Advanced Parameters" Name="UartRXFIFOThreshold" Type="list">
@@ -1474,6 +1494,7 @@
 		
     <!-- RefMode for 'MultiProcessor Communication' UART -->
     <RefMode BaseMode="usartBasic" HalMode="UART" Name="Multiprocessor_communication">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_IDLELINE"/>
         <ConfigForMode>Uart_MultiProcessor_Init</ConfigForMode>
         <Parameter Name="VirtualMode">
             <PossibleValue>VM_ASYNC</PossibleValue>
@@ -1489,6 +1510,43 @@
         <Parameter Name="OneBitSampling"/>
         <Parameter Name="WakeUpMethod"/>
         <Parameter Name="Address"/>
+        <Parameter Name="AddressLength"/>
+        
+        <Parameter Name="ClockPrescaler"/>
+        <Parameter Name="FIFOMode"/>
+        <Parameter Name="TXFIFOThreshold"/>
+        <Parameter Name="RXFIFOThreshold"/>
+		
+        <!-- Advanced Features -->
+        <Parameter Name="AutoBaudRateEnableParam"/>
+        <Parameter Name="AutoBaudRateMode"/>
+        <Parameter Name="TxPinLevelInvertParam"/>
+        <Parameter Name="RxPinLevelInvertParam"/>
+        <Parameter Name="DataInvertParam"/>
+        <Parameter Name="SwapParam"/>
+        <Parameter Name="OverrunDisableParam"/>
+        <Parameter Name="DMADisableonRxErrorParam"/>
+        <Parameter Name="MSBFirstParam"/>
+    </RefMode>
+    
+    <RefMode BaseMode="usartBasic" HalMode="UART" Name="Multiprocessor_communication">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <ConfigForMode>Uart_MultiProcessor_Ex_Init</ConfigForMode>
+        <Parameter Name="VirtualMode">
+            <PossibleValue>VM_ASYNC</PossibleValue>
+        </Parameter>
+        <!-- Basic Parameters -->
+		
+        <Parameter Name="WordLength"/>
+        <Parameter Name="Parity"/>
+        <Parameter Name="StopBits"/>
+        <!--  Advanced Parameters -->
+        <Parameter Name="Mode"/>
+        <Parameter Name="OverSampling"/>
+        <Parameter Name="OneBitSampling"/>
+        <Parameter Name="WakeUpMethod"/>
+        <Parameter Name="Address"/>
+        <Parameter Name="AddressLength"/>
         
         <Parameter Name="ClockPrescaler"/>
         <Parameter Name="FIFOMode"/>

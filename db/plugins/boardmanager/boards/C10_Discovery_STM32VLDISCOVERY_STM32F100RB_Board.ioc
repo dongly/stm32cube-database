@@ -1,6 +1,6 @@
 #MicroXplorer Configuration settings - do not modify
 File.Version=6
-KeepUserPlacement=true
+KeepUserPlacement=false
 Mcu.Family=STM32F1
 Mcu.IP0=NVIC
 Mcu.IP1=RCC
@@ -74,4 +74,5 @@ VP_SYS_VS_ND.Mode=No_Debug
 VP_SYS_VS_ND.Signal=SYS_VS_ND
 VP_SYS_VS_Systick.Mode=SysTick
 VP_SYS_VS_Systick.Signal=SYS_VS_Systick
+board=STM32VLDISCOVERY
 boardIOC=true

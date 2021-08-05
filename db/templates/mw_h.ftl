@@ -1,13 +1,15 @@
 [#ftl]
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * File Name          : ${name?lower_case}.h
   * Description        : This file provides code for the configuration
   *                      of the ${name?lower_case} instances.
   ******************************************************************************
-[@common.optinclude name=sourceDir+"Src/license.tmp"/][#--include License text --]
+[@common.optinclude name=mxTmpFolder+"/license.tmp"/][#--include License text --]
   ******************************************************************************
-  */#n
+  */
+/* USER CODE END Header */
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __${name?lower_case}_H
 #define __${name?lower_case}_H
@@ -21,7 +23,9 @@
 /* Includes ------------------------------------------------------------------*/
 [#if includes??]
 [#list includes as include]
+[#if include != ""]
 #include "${include}"
+[/#if]
 [/#list]
 [/#if]
 

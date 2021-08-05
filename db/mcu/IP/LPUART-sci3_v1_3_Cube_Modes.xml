@@ -1,14 +1,26 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V3.0" IPType="peripheral" Name="LPUART" Version="sci3_v1_3_Cube" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../db/IP_Modes_V3_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><IP xmlns="http://mcd.rou.st.com/modules.php?name=mcu" xmlns:ns0="http://www.w3.org/2001/XMLSchema-instance" DBVersion="V3.0" IPType="peripheral" Name="LPUART" Version="sci3_v1_3_Cube" ns0:schemaLocation="http://mcd.rou.st.com/modules.php?name=mcu ../../../../../../../doc/V4/Development/Specifications/db/IP_Modes.xsd">
 	<About>LPUART: Low Power Universal Asynchronous Receiver Transmitter</About>
 	<!-- Generic RefParameters for USART/UART/IrDA/SmartCard Modes -->
 	<RefParameter Comment="Instance" DefaultValue="LPUART$Index" Name="Instance" Type="" Visible="false"/>
 	<!-- LPUART Parameters. -->
 	<!-- WordLength Parameters for Asynchronous. -->
-	<RefParameter Comment="Word Length" DefaultValue="UART_WORDLENGTH_7B" Group="Basic Parameters" Name="WordLength" Type="list">
+	<RefParameter Comment="Word Length" DefaultValue="UART_WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
+        <Condition Diagnostic="" Expression="Semaphore_DBG_TRACE_UART_CFG_hw_lpuart1 | Semaphore_CFG_CONSOLE_MENU_hw_lpuart1 | Semaphore_CFG_UART_CLI_hw_lpuart1 | Semaphore_CFG_UART_GUI_hw_lpuart1"/>
 		<PossibleValue Comment="7 Bits (including Parity)" Value="UART_WORDLENGTH_7B"/>
 		<PossibleValue Comment="8 Bits (including Parity)" Value="UART_WORDLENGTH_8B"/>
 		<PossibleValue Comment="9 Bits (including Parity)" Value="UART_WORDLENGTH_9B"/>
 	</RefParameter>
+	<RefParameter Comment="Word Length" DefaultValue="UART_WORDLENGTH_8B" Group="Basic Parameters" Name="WordLength" Type="list">
+		<PossibleValue Comment="7 Bits (including Parity)" Value="UART_WORDLENGTH_7B"/>
+		<PossibleValue Comment="8 Bits (including Parity)" Value="UART_WORDLENGTH_8B"/>
+		<PossibleValue Comment="9 Bits (including Parity)" Value="UART_WORDLENGTH_9B"/>
+	</RefParameter>
+    <RefParameter Comment="Baud Rate" DefaultValue="921600" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s">
+        <Condition Diagnostic="" Expression="TRACEREMB_$IpInstance"/>
+    </RefParameter>
+    <RefParameter Comment="Baud Rate" DefaultValue="115200" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s">
+        <Condition Diagnostic="" Expression="Semaphore_DBG_TRACE_UART_CFG_hw_lpuart1 | Semaphore_CFG_CONSOLE_MENU_hw_lpuart1 | Semaphore_CFG_UART_CLI_hw_lpuart1 | Semaphore_CFG_UART_GUI_hw_lpuart1"/>
+    </RefParameter>
 	
 	<RefParameter Comment="Baud Rate" DefaultValue="209700" Group="Basic Parameters" Max="10500000" Min="110" Name="BaudRate" Type="integer" Unit="Bits/s"/>
 	<!-- StopBits Parameters for Asynchronous. -->
@@ -62,10 +74,27 @@
 		<PossibleValue Comment="Address Mark" Value="UART_WAKEUPMETHOD_ADDRESSMARK"/>
 	</RefParameter>
 	<!-- Address for MultiProcessor -->
-	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
-		<Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
-	</RefParameter>
-	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+	<RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="63" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="127" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_8B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="255" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK &amp; AddressLength = UART_ADDRESS_DETECT_7B &amp; WordLength=UART_WORDLENGTH_9B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="15" Min="0" Name="Address" Type="integer">
+        <Condition Diagnostic="" Expression="WakeUpMethod = UART_WAKEUPMETHOD_ADDRESSMARK"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Address" DefaultValue="0" Group="Advanced Parameters" Max="0" Min="0" Name="Address" Type="integer" Visible="false"/>
+
+    <!-- Specifics RefParameters for MultiProcessor Only. Adress length -->
+    <RefParameter Comment="Wake-Up Method" DefaultValue="UART_ADDRESS_DETECT_4B" Group="Advanced Parameters" Name="AddressLength" Type="list">
+        <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+        <PossibleValue Comment="4 Bits" Value="UART_ADDRESS_DETECT_4B"/>
+        <PossibleValue Comment="7 Bits" Value="UART_ADDRESS_DETECT_7B"/>
+    </RefParameter>
+    <RefParameter Comment="Wake-Up Method" DefaultValue="null" Group="Advanced Parameters" Name="AddressLength" Type="list" Visible="false"/>
 	
 	<!-- Advanceds features -->
 	
@@ -208,19 +237,19 @@
 	</RefParameter>
 	<RefParameter Comment="Auto Baudrate Rate" DefaultValue="null" Group="Advanced Features" Name="AutoBaudRateMode" Type="list" Visible="false"/>
 
-        <RefParameter Comment="Prescaler" DefaultValue="UART_PRESCALER_DIV1" Group="Advanced Parameters" Name="Prescaler" Type="list">
-            <PossibleValue Comment="clock /1 " Value="UART_PRESCALER_DIV1"/>
-            <PossibleValue Comment="clock /2 " Value="UART_PRESCALER_DIV2"/>
-            <PossibleValue Comment="clock /4 " Value="UART_PRESCALER_DIV4"/>
-            <PossibleValue Comment="clock /6 " Value="UART_PRESCALER_DIV6"/>
-            <PossibleValue Comment="clock /8 " Value="UART_PRESCALER_DIV8"/>
-            <PossibleValue Comment="clock /10 " Value="UART_PRESCALER_DIV10"/>
-            <PossibleValue Comment="clock /12 " Value="UART_PRESCALER_DIV12"/>
-            <PossibleValue Comment="clock /16 " Value="UART_PRESCALER_DIV16"/>
-            <PossibleValue Comment="clock /32 " Value="UART_PRESCALER_DIV32"/>
-            <PossibleValue Comment="clock /64 " Value="UART_PRESCALER_DIV64"/>
-            <PossibleValue Comment="clock /128 " Value="UART_PRESCALER_DIV128"/>
-            <PossibleValue Comment="clock /256 " Value="UART_PRESCALER_DIV256"/>
+        <RefParameter Comment="ClockPrescaler" DefaultValue="UART_PRESCALER_DIV1" Group="Advanced Parameters" Name="ClockPrescaler" Type="list">
+            <PossibleValue Comment="1" Value="UART_PRESCALER_DIV1"/>
+            <PossibleValue Comment="2" Value="UART_PRESCALER_DIV2"/>
+            <PossibleValue Comment="4" Value="UART_PRESCALER_DIV4"/>
+            <PossibleValue Comment="6" Value="UART_PRESCALER_DIV6"/>
+            <PossibleValue Comment="8" Value="UART_PRESCALER_DIV8"/>
+            <PossibleValue Comment="10" Value="UART_PRESCALER_DIV10"/>
+            <PossibleValue Comment="12" Value="UART_PRESCALER_DIV12"/>
+            <PossibleValue Comment="16" Value="UART_PRESCALER_DIV16"/>
+            <PossibleValue Comment="32" Value="UART_PRESCALER_DIV32"/>
+            <PossibleValue Comment="64" Value="UART_PRESCALER_DIV64"/>
+            <PossibleValue Comment="128" Value="UART_PRESCALER_DIV128"/>
+            <PossibleValue Comment="256" Value="UART_PRESCALER_DIV256"/>
         </RefParameter>
 
         <RefParameter Comment="Fifo Mode" DefaultValue="UART_FIFOMODE_DISABLE" Group="Advanced Parameters" Name="FIFOMode" Type="list">
@@ -245,6 +274,70 @@
             <PossibleValue Comment="7 eighth full configuration " Value="UART_RXFIFO_THRESHOLD_7_8"/>
             <PossibleValue Comment="Full " Value="UART_RXFIFO_THRESHOLD_8_8"/>
         </RefParameter>
+        
+        <!-- Autonomous Mode with Parameters __begin -->
+        <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_DISABLE" Group="Advanced Parameters" Name="AutonomousMode" Type="list">
+            <Condition Diagnostic="" Expression="STM32U5 &amp; $IpInstance_Asynchronous &amp; !$IpInstance_FlowControl"/>
+            <PossibleValue Comment="Disable " Value="AUTONOMOUS_MODE_DISABLE"/>
+            <PossibleValue Comment="Enable " Value="AUTONOMOUS_MODE_ENABLE"/>
+        </RefParameter>
+        <RefParameter Comment="Autonomous Mode" DefaultValue="null" Group="Advanced Parameters" Name="AutonomousMode" Type="list" Visible="false">
+            <Condition Diagnostic="" Expression="!STM32U5"/>
+        </RefParameter>
+        
+        <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_DISABLE" Group="Advanced Parameters" Name="AutonomousModeState" Type="list">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+            <PossibleValue Comment="Enable " Value="UART_AUTONOMOUS_MODE_ENABLE"/>
+        </RefParameter>        
+        <RefParameter Comment="Autonomous Mode" DefaultValue="AUTONOMOUS_MODE_DISABLE" Name="AutonomousModeState" Type="list" Visible="false">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_DISABLE"/>
+            <PossibleValue Comment="Disable " Value="UART_AUTONOMOUS_MODE_DISABLE"/>
+        </RefParameter>
+
+        <RefParameter Comment="     Trigger Polarity" DefaultValue="null" Group="Advanced Parameters" Name="TriggerPolarity" Type="list" Visible="false">
+            <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+        </RefParameter>
+        <RefParameter Comment="     Trigger Polarity" DefaultValue="UART_TRIG_POLARITY_RISING" Group="Advanced Parameters" Name="TriggerPolarity" Type="list">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+            <PossibleValue Comment="RISING" Value="UART_TRIG_POLARITY_RISING"/>
+            <PossibleValue Comment="FALLING" Value="UART_TRIG_POLARITY_FALLING"/>
+        </RefParameter>
+        
+        <RefParameter Comment="     Trigger Selection" DefaultValue="null" Group="Advanced Parameters" Name="TriggerSelection" Type="list" Visible="false">
+            <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+        </RefParameter>
+        <RefParameter Comment="     Trigger Selection" DefaultValue="UART_GPDMA1_CH0_TCF_TRG" Group="Advanced Parameters" Name="TriggerSelection" Type="list">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+            <PossibleValue Comment="LPUART LPDMA1 channel0" Value="LPUART_LPDMA1_CH0_TCF_TRG"/>
+            <PossibleValue Comment="LPUART LPDMA1 channel1" Value="LPUART_LPDMA1_CH1_TCF_TRG"/>
+            <PossibleValue Comment="LPUART LPDMA1 channel2" Value="LPUART_LPDMA1_CH2_TCF_TRG"/>
+            <PossibleValue Comment="LPUART LPDMA1 channel3" Value="LPUART_LPDMA1_CH3_TCF_TRG"/>
+            <PossibleValue Comment="LPUART EXTI line 6" Value="LPUART_EXTI_LINE6_TRG"/>
+            <PossibleValue Comment="LPUART EXTI line 8" Value="LPUART_EXTI_LINE8_TRG"/>
+            <PossibleValue Comment="LPUART LPTIM1 out" Value="LPUART_LPTIM1_OUT_TRG"/>
+            <PossibleValue Comment="LPUART LPTIM3 out" Value="LPUART_LPTIM3_OUT_TRG"/>
+            <PossibleValue Comment="LPUART COMP1 out" Value="LPUART_COMP1_OUT_TRG"/>
+            <PossibleValue Comment="LPUART COMP2 out" Value="LPUART_COMP2_OUT_TRG"/>
+            <PossibleValue Comment="LPUART RTC alarm" Value="LPUART_RTC_ALRA_TRG"/>
+            <PossibleValue Comment="LPUART RTC wakeup" Value="LPUART_RTC_WUT_TRG"/>
+        </RefParameter>
+        
+        <RefParameter Comment="     Data Size" DefaultValue="null" Group="Advanced Parameters" Name="DataSize" Type="integer" Visible="false">
+            <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+        </RefParameter>
+        <RefParameter Comment="     Data Size" DefaultValue="0" Group="Advanced Parameters" Name="DataSize" Min="0" Type="integer">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+        </RefParameter>
+        
+        <RefParameter Comment="     Idle Frame" DefaultValue="null" Group="Advanced Parameters" Name="IdleFrame" Type="list" Visible="false">
+            <Condition Diagnostic="" Expression="!STM32U5 | (AutonomousMode = AUTONOMOUS_MODE_DISABLE)"/>
+        </RefParameter>
+        <RefParameter Comment="     Idle Frame" DefaultValue="UART_IDLE_FRAME_DISABLE" Group="Advanced Parameters" Name="IdleFrame" Type="list">
+            <Condition Diagnostic="" Expression="AutonomousMode = AUTONOMOUS_MODE_ENABLE"/>
+            <PossibleValue Comment="Enable" Value="UART_IDLE_FRAME_ENABLE"/>
+            <PossibleValue Comment="Disable" Value="UART_IDLE_FRAME_DISABLE"/>
+        </RefParameter>
+        <!-- Autonomous Mode  __end. -->
 
 	<!-- RefMode for Asynchronous UART -->
 	<RefMode HalMode="UART" Name="Asynchronous">
@@ -259,7 +352,7 @@
 		<!-- Advanced Parameters -->
 		<Parameter Name="Mode"/>
 		<Parameter Name="OneBitSampling"/>
-                <Parameter Name="Prescaler"/>
+                <Parameter Name="ClockPrescaler"/>
                 <Parameter Name="FIFOMode"/>
                 <Parameter Name="TXFIFOThreshold"/>
                 <Parameter Name="RXFIFOThreshold"/>
@@ -287,10 +380,17 @@
 		<!-- Advanced Parameters -->
 		<Parameter Name="Mode"/>
 		<Parameter Name="OneBitSampling"/>
-                <Parameter Name="Prescaler"/>
+                <Parameter Name="ClockPrescaler"/>
                 <Parameter Name="FIFOMode"/>
                 <Parameter Name="TXFIFOThreshold"/>
                 <Parameter Name="RXFIFOThreshold"/>
+                <!--Autonomous Mode-->
+                <Parameter Name="AutonomousMode"/>
+                <Parameter Name="TriggerPolarity"/>
+                <Parameter Name="TriggerSelection"/>
+                <Parameter Name="DataSize"/>
+                <Parameter Name="IdleFrame"/>
+
 		<!-- Advanced Features -->
 		<Parameter Name="TxPinLevelInvertParam"/>
 		<Parameter Name="RxPinLevelInvertParam"/>
@@ -312,7 +412,7 @@
 		<!--  Advanced Parameters -->
 		<Parameter Name="Mode"/>
 		<Parameter Name="OneBitSampling"/>
-                <Parameter Name="Prescaler"/>
+                <Parameter Name="ClockPrescaler"/>
                 <Parameter Name="FIFOMode"/>
                 <Parameter Name="TXFIFOThreshold"/>
                 <Parameter Name="RXFIFOThreshold"/>
@@ -328,6 +428,7 @@
 	</RefMode>
 	<!-- RefMode for 'MultiProcessor Communication' UART -->
 	<RefMode HalMode="UART" Name="Multiprocessor_communication">
+            <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_IDLELINE"/>
 		<ConfigForMode>Lpuart_MultiProcessor_Init</ConfigForMode>
 		<!-- Basic Parameters -->
 		<Parameter Name="BaudRate"/>
@@ -339,7 +440,37 @@
 		<Parameter Name="OneBitSampling"/>
 		<Parameter Name="WakeUpMethod"/>
 		<Parameter Name="Address"/>
-                <Parameter Name="Prescaler"/>
+                <Parameter Name="AddressLength"/>
+                <Parameter Name="ClockPrescaler"/>
+                <Parameter Name="FIFOMode"/>
+                <Parameter Name="TXFIFOThreshold"/>
+                <Parameter Name="RXFIFOThreshold"/>
+		
+		<!-- Advanced Features -->
+                <Parameter Name="TxPinLevelInvertParam"/>
+		<Parameter Name="RxPinLevelInvertParam"/>
+		<Parameter Name="DataInvertParam"/>
+		<Parameter Name="SwapParam"/>
+		<Parameter Name="OverrunDisableParam"/>
+		<Parameter Name="DMADisableonRxErrorParam"/>
+		<Parameter Name="AutoBaudRateMode"/>
+		<Parameter Name="MSBFirstParam"/>
+	</RefMode>
+        <RefMode HalMode="UART" Name="Multiprocessor_communication">
+            <Condition Diagnostic="" Expression="WakeUpMethod=UART_WAKEUPMETHOD_ADDRESSMARK"/>
+		<ConfigForMode>Lpuart_MultiProcessor_Ex_Init</ConfigForMode>
+		<!-- Basic Parameters -->
+		<Parameter Name="BaudRate"/>
+		<Parameter Name="WordLength"/>
+		<Parameter Name="Parity"/>
+		<Parameter Name="StopBits"/>
+		<!--  Advanced Parameters -->
+		<Parameter Name="Mode"/>
+		<Parameter Name="OneBitSampling"/>
+		<Parameter Name="WakeUpMethod"/>
+		<Parameter Name="Address"/>
+                <Parameter Name="AddressLength"/>
+                <Parameter Name="ClockPrescaler"/>
                 <Parameter Name="FIFOMode"/>
                 <Parameter Name="TXFIFOThreshold"/>
                 <Parameter Name="RXFIFOThreshold"/>
@@ -406,6 +537,7 @@
 					</SignalLogicalOp>
 				</Mode>			
 			</ModeLogicOperator>
+                        <Semaphore>S_LPUART</Semaphore>
 		</Mode>
 		<Mode Name="Hardware Flow Control (RS232)">
 			<ModeLogicOperator Name="XOR">
@@ -431,6 +563,7 @@
 			</ModeLogicOperator>
 			<Condition Diagnostic="Active only with Asynchronous Mode" Expression="$IpInstance_Asynchronous &amp; !$IpInstance_HardwareControl"/>
 			<Semaphore>$IpInstance_FlowControl</Semaphore>
+                        <Semaphore>S_LPUART</Semaphore>
 		</Mode>
 		<Mode Name="Hardware Flow Control (RS485)">
 		    <ModeLogicOperator Name="XOR">
@@ -442,6 +575,7 @@
 		    </ModeLogicOperator>
 		<Condition Diagnostic="Active only with Asynchronous Mode" Expression="!$IpInstance_FlowControl &amp; $IpInstance_Asynchronous"/>
 		<Semaphore>$IpInstance_HardwareControl</Semaphore>
+                <Semaphore>S_LPUART</Semaphore>
 		</Mode>
 	</ModeLogicOperator>
 	<!-- RefSignal for LPUART -->
@@ -450,5 +584,5 @@
 	<RefSignal IOMode="AlternateFunctionPushPull" Name="DE"/>
 	<RefSignal IOMode="AlternateFunctionPushPullUp" Name="RX"/>
 	<RefSignal IOMode="AlternateFunctionPushPullUp" Name="TX"/>
-	<Semaphore>LPUARTUsed_ForRCC</Semaphore>
+	<Semaphore>LPUARTUsed_ForRCC</Semaphore>    
 </IP>
